@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 object ProjectConfig {
@@ -56,6 +57,10 @@ android {
         jvmTarget = "19"
     }
 
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -74,14 +79,20 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.text.google.fonts)
     implementation(libs.compose.ui.tooling.preview)
+
     implementation(libs.coroutines)
+
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.room.runtime)
+    testImplementation(libs.room.testing)
 
     implementation(libs.hilt.navigation)
     implementation(libs.lifecycle.compose.runtime)
     implementation(libs.lifecycle.compose.viewmodel)
 
-    implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.hilt.android)
 
     detektPlugins(libs.detekt.twitter.compose.rules)
     detektPlugins(libs.detekt.formatting)

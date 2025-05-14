@@ -1,0 +1,29 @@
+package io.track.habit.domain.model.database
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.util.Date
+
+/**
+ * Represents a habit log which has been reset by the user
+ *
+ * @property logId Unique identifier for the log
+ * @property habitId The ID of the habit associated with the log
+ * @property createdAt The date and time when the log was created
+ * @property trigger The trigger that caused the log to be created
+ * @property notes Any additional notes associated with the log
+ * @property updatedAt The date and time when the log was last updated
+ * @property streakDuration The duration of the streak in days
+ *
+ * @see Habit
+ */
+@Entity(tableName = "habit_logs")
+data class HabitLog(
+    @PrimaryKey(autoGenerate = true) val logId: Int = 0,
+    val habitId: Int,
+    val streakDuration: Int,
+    val createdAt: Date = Date(),
+    val updatedAt: Date = Date(),
+    val trigger: String? = null,
+    val notes: String? = null,
+)

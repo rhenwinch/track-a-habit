@@ -4,10 +4,10 @@ androidxCompose = "1.10.1"
 androidxTest = "1.6.2"
 androidxTestExt = "1.2.1"
 appcompat = "1.7.0"
-compose = "1.8.0"
-composeBom = "2025.04.01"
+compose = "1.8.1"
+composeBom = "2025.05.00"
 constraintLayout = "2.2.1"
-core-ktx = "1.16.0"
+coreKtx = "1.16.0"
 coroutines = "1.10.2"
 desugar = "2.1.5"
 detekt = "1.23.8"
@@ -17,16 +17,24 @@ hiltNavigation = "1.2.0"
 junit = "4.13.2"
 kotlin = "2.1.20"
 ksp = "2.1.20-2.0.1"
-lifecycle = "2.8.7"
+lifecycle = "2.9.0"
 material = "1.12.0"
 mockk = "1.14.2"
 versions = "0.52.0"
-googleFonts = "1.8.0"
+googleFonts = "1.8.1"
+room = "2.7.1"
+junitJupiter = "5.8.1"
 
 
 [libraries]
 # Coroutines
 coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+# Room
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 
 ## Testing
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExt" }
@@ -42,7 +50,7 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxCompose" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraint-layout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintLayout" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core.ktx" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 compose-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
 compose-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout" }
 compose-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation" }
@@ -91,8 +99,9 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "room" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
