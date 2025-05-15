@@ -59,9 +59,12 @@ class HabitDaoTest {
     @Throws(Exception::class)
     fun updateHabit() = runBlocking {
         val habit = Habit(name = "Exercise")
-        habitDao.insertHabit(habit)
+        val habitId = habitDao.insertHabit(habit)
 
-        val updatedHabit = habit.copy(name = "Go for a run")
+        val updatedHabit = habit.copy(
+            habitId = habitId,
+            name = "Go for a run"
+        )
         habitDao.updateHabit(updatedHabit)
 
         val allHabits = habitDao.getAllHabits().first()
@@ -74,10 +77,14 @@ class HabitDaoTest {
     fun deleteHabit() = runBlocking {
         val habit1 = Habit(name = "Read")
         val habit2 = Habit(name = "Meditate")
-        habitDao.insertHabit(habit1)
+        val habitId1 = habitDao.insertHabit(habit1)
         habitDao.insertHabit(habit2)
 
-        habitDao.deleteHabit(habit1)
+        val retrievedHabit1 = habitDao.getHabitById(habitId1)
+
+        retrievedHabit1?.let { habitToDelete ->
+            habitDao.deleteHabit(habitToDelete)
+        }
 
         val allHabits = habitDao.getAllHabits().first()
         assertEquals(allHabits.size, 1)
@@ -113,8 +120,8 @@ class HabitDaoTest {
     @Throws(Exception::class)
     fun setHabitInactive() = runBlocking {
         val habit = Habit(name = "Write journal", isActive = true)
-        habitDao.insertHabit(habit)
-        habitDao.setHabitInactive(habit.habitId)
+        val habitId = habitDao.insertHabit(habit)
+        habitDao.setHabitInactive(habitId)
 
         val allHabits = habitDao.getAllHabits().first()
         assertEquals(allHabits.size, 1)

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface HabitDao {
     @Insert
-    suspend fun insertHabit(habit: Habit)
+    suspend fun insertHabit(habit: Habit): Long
 
     @Delete
     suspend fun deleteHabit(habit: Habit)
@@ -24,14 +24,14 @@ interface HabitDao {
     fun getAllHabits(): Flow<List<Habit>>
 
     @Query("SELECT * FROM habits WHERE habitId = :habitId")
-    suspend fun getHabitById(habitId: Int): Habit?
+    suspend fun getHabitById(habitId: Long): Habit?
 
     @Query("SELECT * FROM habits WHERE habitId = :habitId")
-    fun getHabitByIdFlow(habitId: Int): Flow<Habit?>
+    fun getHabitByIdFlow(habitId: Long): Flow<Habit?>
 
     @Query("SELECT * FROM habits WHERE isActive = 1")
     fun getActiveHabits(): Flow<List<Habit>>
 
     @Query("UPDATE habits SET isActive = 0 WHERE habitId = :habitId")
-    suspend fun setHabitInactive(habitId: Int)
+    suspend fun setHabitInactive(habitId: Long)
 }

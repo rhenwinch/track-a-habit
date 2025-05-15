@@ -17,7 +17,7 @@ import java.util.Date
  */
 @Entity(tableName = "habits")
 data class Habit(
-    @PrimaryKey(autoGenerate = true) val habitId: Int = 0,
+    @PrimaryKey(autoGenerate = true) val habitId: Long = 0,
     val name: String,
     val isActive: Boolean = true,
     val createdAt: Date = Date(),
