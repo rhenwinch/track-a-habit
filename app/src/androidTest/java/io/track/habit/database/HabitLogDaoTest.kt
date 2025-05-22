@@ -1,9 +1,10 @@
-package io.track.habit.data.database
+package io.track.habit.database
 
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.track.habit.data.database.AppDatabase
 import io.track.habit.data.database.dao.HabitLogDao
 import io.track.habit.domain.model.database.HabitLog
 import kotlinx.coroutines.flow.first
