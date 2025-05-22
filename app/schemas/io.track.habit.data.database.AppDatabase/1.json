@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c8aa3dc4119be007bb358b51ebdfd06d",
+    "identityHash": "8581ab8e3e9c0847aa61549d1789f2f7",
     "entities": [
       {
         "tableName": "habits",
@@ -44,7 +44,18 @@
           "columnNames": [
             "habitId"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_habits_name",
+            "unique": true,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_habits_name` ON `${TABLE_NAME}` (`name`)"
+          }
+        ]
       },
       {
         "tableName": "habit_logs",
@@ -101,7 +112,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c8aa3dc4119be007bb358b51ebdfd06d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8581ab8e3e9c0847aa61549d1789f2f7')"
     ]
   }
 }

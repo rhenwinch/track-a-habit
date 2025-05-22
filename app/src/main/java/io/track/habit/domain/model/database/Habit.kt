@@ -1,6 +1,7 @@
 package io.track.habit.domain.model.database
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.Date
 
@@ -15,7 +16,10 @@ import java.util.Date
  *
  * @see HabitLog
  */
-@Entity(tableName = "habits")
+@Entity(
+    tableName = "habits",
+    indices = [Index(value = ["name"], unique = true)]
+)
 data class Habit(
     @PrimaryKey(autoGenerate = true) val habitId: Long = 0,
     val name: String,
