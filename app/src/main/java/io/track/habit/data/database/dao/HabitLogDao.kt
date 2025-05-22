@@ -11,13 +11,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface HabitLogDao {
     @Query("SELECT * FROM habit_logs WHERE logId = :logId")
-    suspend fun getHabitLogById(logId: Int): HabitLog?
+    suspend fun getHabitLogById(logId: Long): HabitLog?
 
     @Query("SELECT * FROM habit_logs WHERE habitId = :habitId")
-    fun getHabitLogsByHabitId(habitId: Int): Flow<List<HabitLog>>
+    fun getHabitLogsByHabitId(habitId: Long): Flow<List<HabitLog>>
 
     @Query("SELECT * FROM habit_logs WHERE habitId = :habitId ORDER BY streakDuration DESC LIMIT 1")
-    fun getLongestStreakForHabit(habitId: Int): Flow<HabitLog?>
+    fun getLongestStreakForHabit(habitId: Long): Flow<HabitLog?>
 
     @Insert
     suspend fun insertHabitLog(habitLog: HabitLog)

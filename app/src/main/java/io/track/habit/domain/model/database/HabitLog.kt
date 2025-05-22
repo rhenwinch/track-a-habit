@@ -19,8 +19,8 @@ import java.util.Date
  */
 @Entity(tableName = "habit_logs")
 data class HabitLog(
-    @PrimaryKey(autoGenerate = true) val logId: Int = 0,
-    val habitId: Int,
+    @PrimaryKey(autoGenerate = true) val logId: Long = 0,
+    val habitId: Long,
     val streakDuration: Int,
     val createdAt: Date = Date(),
     val updatedAt: Date = Date(),

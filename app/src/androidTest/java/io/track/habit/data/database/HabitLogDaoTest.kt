@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.track.habit.data.database.dao.HabitLogDao
 import io.track.habit.domain.model.database.HabitLog
-import io.track.habit.data.database.dao.HabitLogDao // Assuming your DAO is in this package
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -14,8 +16,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.util.Date
-import kotlinx.coroutines.flow.first // To collect the first value from the Flow
-import kotlinx.coroutines.runBlocking
 
 /**
  * Instrumented test for HabitLogDao.
@@ -73,8 +73,8 @@ class HabitLogDaoTest {
     @Test
     @Throws(Exception::class)
     fun getHabitLogsByHabitId_MultipleLogs() = runBlocking {
-        val habitId1 = 1
-        val habitId2 = 2
+        val habitId1 = 1L
+        val habitId2 = 2L
 
         val habitLog1 = HabitLog(habitId = habitId1, streakDuration = 1)
         val habitLog2 = HabitLog(habitId = habitId1, streakDuration = 2)
@@ -95,7 +95,7 @@ class HabitLogDaoTest {
     @Test
     @Throws(Exception::class)
     fun updateHabitLog() = runBlocking {
-        val habitId = 20
+        val habitId = 20L
         val initialLog = HabitLog(habitId = habitId, streakDuration = 5, notes = "Initial notes")
         habitLogDao.insertHabitLog(initialLog)
 
@@ -139,7 +139,7 @@ class HabitLogDaoTest {
     @Test
     @Throws(Exception::class)
     fun getHabitWithLongestStreak() = runBlocking {
-        val habitId = 1
+        val habitId = 1L
         for (i in 1..5) {
             habitLogDao.insertHabitLog(HabitLog(habitId = habitId, streakDuration = i * 10))
         }
