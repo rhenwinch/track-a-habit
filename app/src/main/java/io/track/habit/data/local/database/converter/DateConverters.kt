@@ -1,4 +1,4 @@
-package io.track.habit.data.database.converter
+package io.track.habit.data.local.database.converter
 
 import androidx.room.TypeConverter
 import java.util.Date

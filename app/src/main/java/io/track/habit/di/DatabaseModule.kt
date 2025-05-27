@@ -7,10 +7,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.track.habit.data.database.AppDatabase
-import io.track.habit.data.database.AppDatabase.Companion.APP_DATABASE_NAME
-import io.track.habit.data.database.dao.HabitDao
-import io.track.habit.data.database.dao.HabitLogDao
+import io.track.habit.data.local.database.AppDatabase
+import io.track.habit.data.local.database.AppDatabase.Companion.APP_DATABASE_NAME
+import io.track.habit.data.local.database.dao.HabitDao
+import io.track.habit.data.local.database.dao.HabitLogDao
 import javax.inject.Singleton
 
 @Module

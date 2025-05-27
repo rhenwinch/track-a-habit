@@ -1,6 +1,6 @@
 package io.track.habit.domain.repository
 
-import io.track.habit.domain.model.database.Habit
+import io.track.habit.data.local.database.entities.Habit
 import kotlinx.coroutines.flow.Flow
 
 interface HabitRepository {

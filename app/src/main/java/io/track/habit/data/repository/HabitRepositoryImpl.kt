@@ -1,7 +1,7 @@
 package io.track.habit.data.repository
 
-import io.track.habit.data.database.dao.HabitDao
-import io.track.habit.domain.model.database.Habit
+import io.track.habit.data.local.database.dao.HabitDao
+import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.repository.HabitRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject // If using Hilt for Dependency Injection

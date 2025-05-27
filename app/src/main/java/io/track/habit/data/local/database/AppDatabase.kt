@@ -1,15 +1,15 @@
-package io.track.habit.data.database
+package io.track.habit.data.local.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import io.track.habit.data.database.converter.DateConverters
-import io.track.habit.data.database.dao.HabitDao
-import io.track.habit.data.database.dao.HabitLogDao
-import io.track.habit.domain.model.database.Habit
-import io.track.habit.domain.model.database.HabitLog
+import io.track.habit.data.local.database.converter.DateConverters
+import io.track.habit.data.local.database.dao.HabitDao
+import io.track.habit.data.local.database.dao.HabitLogDao
+import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.local.database.entities.HabitLog
 
 @Database(
     entities = [Habit::class, HabitLog::class],

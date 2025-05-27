@@ -1,10 +1,10 @@
-package io.track.habit.data.database.dao
+package io.track.habit.data.local.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import io.track.habit.domain.model.database.HabitLog
+import io.track.habit.data.local.database.entities.HabitLog
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -1,11 +1,11 @@
-package io.track.habit.data.database.dao
+package io.track.habit.data.local.database.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import io.track.habit.domain.model.database.Habit
+import io.track.habit.data.local.database.entities.Habit
 import kotlinx.coroutines.flow.Flow
 
 @Dao
