@@ -8,8 +8,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import io.track.habit.data.local.database.AppDatabase
 import io.track.habit.data.local.database.dao.HabitDao
-import io.track.habit.data.repository.HabitRepositoryImpl
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.repository.HabitRepositoryImpl
 import io.track.habit.domain.repository.HabitRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

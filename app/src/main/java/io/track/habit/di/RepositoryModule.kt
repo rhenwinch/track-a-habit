@@ -8,9 +8,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.track.habit.data.local.assets.AndroidAssetReader
 import io.track.habit.data.local.database.dao.HabitDao
+import io.track.habit.data.local.database.dao.HabitLogDao
+import io.track.habit.data.repository.HabitLogsRepositoryImpl
 import io.track.habit.data.repository.HabitRepositoryImpl
 import io.track.habit.data.repository.StreakRepositoryImpl
 import io.track.habit.domain.repository.AssetReader
+import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.repository.StreakRepository
 import javax.inject.Singleton
@@ -22,6 +25,12 @@ object RepositoryModule {
     @Provides
     fun provideHabitRepository(habitDao: HabitDao): HabitRepository {
         return HabitRepositoryImpl(habitDao)
+    }
+
+    @Singleton
+    @Provides
+    fun provideHabitLogsRepository(habitLogsDao: HabitLogDao): HabitLogsRepository {
+        return HabitLogsRepositoryImpl(habitLogsDao)
     }
 
     @Singleton
