@@ -1,12 +1,18 @@
 package io.track.habit.di
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.track.habit.data.local.assets.AndroidAssetReader
 import io.track.habit.data.local.database.dao.HabitDao
 import io.track.habit.data.repository.HabitRepositoryImpl
+import io.track.habit.data.repository.StreakRepositoryImpl
+import io.track.habit.domain.repository.AssetReader
 import io.track.habit.domain.repository.HabitRepository
+import io.track.habit.domain.repository.StreakRepository
 import javax.inject.Singleton
 
 @Module
@@ -16,5 +22,19 @@ object RepositoryModule {
     @Provides
     fun provideHabitRepository(habitDao: HabitDao): HabitRepository {
         return HabitRepositoryImpl(habitDao)
+    }
+
+    @Singleton
+    @Provides
+    fun provideAndroidAssetReader(
+        @ApplicationContext context: Context,
+    ): AssetReader {
+        return AndroidAssetReader(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideStreakRepository(assetReader: AssetReader): StreakRepository {
+        return StreakRepositoryImpl(assetReader)
     }
 }
