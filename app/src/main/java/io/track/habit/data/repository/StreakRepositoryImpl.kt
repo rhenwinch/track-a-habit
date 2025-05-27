@@ -7,7 +7,7 @@ import io.track.habit.domain.repository.AssetReader
 import io.track.habit.domain.repository.StreakRepository
 import javax.inject.Inject
 
-private const val STREAKS_FILE_NAME = "streaks.json"
+const val STREAKS_FILE_NAME = "streaks.json"
 
 class StreakRepositoryImpl
     @Inject
@@ -24,7 +24,7 @@ class StreakRepositoryImpl
         }
 
         override suspend fun getStreakByDaysRequired(days: Int): Streak {
-            return getAllStreaks().find { it.daysRequired == days }
+            return getAllStreaks().find { days >= it.minDaysRequired && days <= it.maxDaysRequired }
                 ?: throw IllegalArgumentException("No streak found for $days days")
         }
 
