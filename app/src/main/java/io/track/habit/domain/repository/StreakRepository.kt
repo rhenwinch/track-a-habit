@@ -5,5 +5,5 @@ import io.track.habit.domain.model.Streak
 interface StreakRepository {
     suspend fun getAllStreaks(): List<Streak>
 
-    suspend fun getStreakByDaysRequired(days: Int): Streak?
+    suspend fun getStreakByDaysRequired(days: Int): Streak
 }
