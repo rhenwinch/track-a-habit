@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
 
     implementation(libs.coroutines)
+    implementation(libs.gson)
 
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
