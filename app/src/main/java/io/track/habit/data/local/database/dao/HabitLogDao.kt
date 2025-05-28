@@ -25,7 +25,7 @@ interface HabitLogDao {
     fun getHabitWithLogsFlow(habitId: Long): Flow<HabitWithLogs?>
 
     @Insert
-    suspend fun insertHabitLog(habitLog: HabitLog)
+    suspend fun insertHabitLog(habitLog: HabitLog): Long
 
     @Update
     suspend fun updateHabitLog(habitLog: HabitLog)

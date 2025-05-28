@@ -13,7 +13,7 @@ interface HabitLogsRepository {
 
     suspend fun getHabitLogById(logId: Long): HabitLog?
 
-    suspend fun insertHabitLog(habitLog: HabitLog)
+    suspend fun insertHabitLog(habitLog: HabitLog): Long
 
     suspend fun updateHabitLog(habitLog: HabitLog)
 }
