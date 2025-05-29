@@ -5,7 +5,6 @@ import io.track.habit.data.local.database.entities.HabitLog
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.repository.fake.FakeHabitLogsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -193,8 +192,13 @@ class HabitLogsRepositoryTest {
             val log1 = createTestHabitLog(habitId = habitId, streakDuration = 2, notes = "Morning pages")
             repository.insertHabitLog(log1)
 
-            delay(300) // Add delay so tests will pass
-            val log2 = createTestHabitLog(habitId = habitId, streakDuration = 4, notes = "Evening reflection")
+            val log2 =
+                createTestHabitLog(
+                    habitId = habitId,
+                    streakDuration = 4,
+                    notes = "Evening reflection",
+                    createdAt = Date(System.currentTimeMillis() + 300),
+                )
             repository.insertHabitLog(log2)
 
             repository.getHabitWithLogs(habitId).test {
@@ -254,8 +258,12 @@ class HabitLogsRepositoryTest {
                 assertEquals(1, logsAfterFirst[0].streakDuration)
 
                 // Add second log
-                delay(300) // Add delay so tests will pass
-                val log2 = createTestHabitLog(habitId = habitId, streakDuration = 2)
+                val log2 =
+                    createTestHabitLog(
+                        habitId = habitId,
+                        streakDuration = 2,
+                        createdAt = Date(System.currentTimeMillis() + 300),
+                    )
                 repository.insertHabitLog(log2)
 
                 val logsAfterSecond = awaitItem()
@@ -312,8 +320,12 @@ class HabitLogsRepositoryTest {
             val log1ForHabit2 = createTestHabitLog(habitId = habit2Id, streakDuration = 8)
             repository.insertHabitLog(log1ForHabit2)
 
-            delay(1000) // Add delay so tests will pass
-            val log2ForHabit1 = createTestHabitLog(habitId = habit1Id, streakDuration = 3)
+            val log2ForHabit1 =
+                createTestHabitLog(
+                    habitId = habit1Id,
+                    streakDuration = 3,
+                    createdAt = Date(System.currentTimeMillis() + 4000),
+                )
             repository.insertHabitLog(log2ForHabit1)
 
             repository.getHabitLogsByHabitId(habit1Id).test {
