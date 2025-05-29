@@ -67,7 +67,7 @@ jobs:
           script: ./gradlew connectedDebugAndroidTest
 
       - name: Upload test reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: instrumented-test-results-${{ matrix.api-level }}
@@ -76,7 +76,7 @@ jobs:
             **/build/outputs/androidTest-results/
 
       - name: Generate test report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         if: success() || failure()
         with:
           name: Instrumented Test Results (API ${{ matrix.api-level }})
