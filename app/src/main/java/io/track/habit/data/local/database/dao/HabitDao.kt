@@ -27,10 +27,4 @@ interface HabitDao {
 
     @Query("SELECT * FROM habits WHERE habitId = :habitId")
     fun getHabitByIdFlow(habitId: Long): Flow<Habit?>
-
-    @Query("SELECT * FROM habits WHERE isActive = 1")
-    fun getActiveHabits(): Flow<List<Habit>>
-
-    @Query("UPDATE habits SET isActive = 0 WHERE habitId = :habitId")
-    suspend fun setHabitInactive(habitId: Long)
 }

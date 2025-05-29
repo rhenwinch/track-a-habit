@@ -15,8 +15,4 @@ interface HabitRepository {
     suspend fun getHabitById(habitId: Long): Habit?
 
     fun getHabitByIdFlow(habitId: Long): Flow<Habit?>
-
-    fun getActiveHabits(): Flow<List<Habit>>
-
-    suspend fun setHabitInactive(habitId: Long)
 }

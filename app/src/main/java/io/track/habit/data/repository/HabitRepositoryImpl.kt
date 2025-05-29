@@ -34,12 +34,4 @@ class HabitRepositoryImpl
         override fun getHabitByIdFlow(habitId: Long): Flow<Habit?> {
             return habitDao.getHabitByIdFlow(habitId)
         }
-
-        override fun getActiveHabits(): Flow<List<Habit>> {
-            return habitDao.getActiveHabits()
-        }
-
-        override suspend fun setHabitInactive(habitId: Long) {
-            habitDao.setHabitInactive(habitId)
-        }
     }

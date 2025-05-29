@@ -11,7 +11,6 @@ import java.util.Date
  * @property habitId Unique identifier for the habit
  * @property name The name of the habit
  * @property createdAt The date when the habit was first started
- * @property isActive Whether the habit is currently active
  * @property updatedAt The date when the habit was last updated
  *
  * @see HabitLog
@@ -23,7 +22,6 @@ import java.util.Date
 data class Habit(
     @PrimaryKey(autoGenerate = true) val habitId: Long = 0,
     val name: String,
-    val isActive: Boolean = true,
     val createdAt: Date = Date(),
     val updatedAt: Date = Date(),
 )

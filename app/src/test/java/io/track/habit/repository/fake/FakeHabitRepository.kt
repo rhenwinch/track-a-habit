@@ -65,18 +65,6 @@ class FakeHabitRepository : HabitRepository {
         return allHabitsFlow.map { habits[habitId] }
     }
 
-    override fun getActiveHabits(): Flow<List<Habit>> {
-        return allHabitsFlow.map { list -> list.filter { it.isActive } }
-    }
-
-    override suspend fun setHabitInactive(habitId: Long) {
-        val habit = habits[habitId]
-        if (habit != null) {
-            habits[habitId] = habit.copy(isActive = false, updatedAt = Date())
-            updateAllHabitsFlow()
-        }
-    }
-
     private fun updateAllHabitsFlow() {
         allHabitsFlow.value = habits.values.toList()
     }

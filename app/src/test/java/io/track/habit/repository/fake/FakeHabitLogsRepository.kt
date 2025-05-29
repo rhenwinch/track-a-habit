@@ -68,7 +68,6 @@ class FakeHabitLogsRepository : HabitLogsRepository {
                 Habit(
                     habitId = habitId,
                     name = "Test Habit",
-                    isActive = true,
                     createdAt = Date(),
                     updatedAt = Date(),
                 )
