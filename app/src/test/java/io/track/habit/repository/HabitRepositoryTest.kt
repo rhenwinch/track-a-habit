@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteConstraintException
 import app.cash.turbine.test
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.repository.HabitRepository
+import io.track.habit.domain.utils.SortOrder
 import io.track.habit.repository.fake.FakeHabitRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -35,7 +36,7 @@ class HabitRepositoryTest {
     fun `insert habit should add habit to repository and return positive id`() =
         testScope.runTest {
             val habitName = "Read a book"
-            val newHabit = Habit(name = habitName, createdAt = Date(), updatedAt = Date())
+            val newHabit = Habit(name = habitName)
             val habitId = repository.insertHabit(newHabit)
 
             assertTrue("Returned ID should be positive", habitId > 0L)
@@ -48,11 +49,11 @@ class HabitRepositoryTest {
     fun `insert habit should fail when duplicate name is provided`() =
         testScope.runTest {
             val habitName = "Unique Name"
-            val habit1 = Habit(name = habitName, createdAt = Date(), updatedAt = Date())
+            val habit1 = Habit(name = habitName, createdAt = Date())
             val id1 = repository.insertHabit(habit1)
             assertTrue(id1 > 0L)
 
-            val habit2 = Habit(name = habitName, createdAt = Date(), updatedAt = Date()) // Same name
+            val habit2 = Habit(name = habitName, createdAt = Date()) // Same name
 
             var caughtException: SQLiteConstraintException? = null
 
@@ -78,7 +79,7 @@ class HabitRepositoryTest {
     @Test
     fun `delete habit should remove habit from repository`() =
         testScope.runTest {
-            val habit = Habit(name = "Exercise", createdAt = Date(), updatedAt = Date())
+            val habit = Habit(name = "Exercise")
             val habitId = repository.insertHabit(habit)
 
             val habitToDelete = repository.getHabitById(habitId)!!
@@ -91,11 +92,11 @@ class HabitRepositoryTest {
     @Test
     fun `delete habit should not affect other habits when non-existent habit is deleted`() =
         testScope.runTest {
-            val existingHabit = Habit(name = "Meditate", createdAt = Date(), updatedAt = Date())
+            val existingHabit = Habit(name = "Meditate")
             val existingHabitId = repository.insertHabit(existingHabit)
 
             // Create a Habit object that doesn't match any in the repository
-            val nonExistentHabit = Habit(habitId = 999L, name = "Non Existent", createdAt = Date(), updatedAt = Date())
+            val nonExistentHabit = Habit(habitId = 999L, name = "Non Existent")
             repository.deleteHabit(nonExistentHabit) // Should do nothing if no match
 
             val retrievedExistingHabit = repository.getHabitById(existingHabitId)
@@ -105,37 +106,13 @@ class HabitRepositoryTest {
         }
 
     @Test
-    fun `update habit should modify habit properties in repository`() =
-        testScope.runTest {
-            val initialName = "Drink water"
-            val updatedName = "Drink 2L of water"
-            val habit =
-                Habit(name = initialName)
-            val habitId = repository.insertHabit(habit)
-
-            val insertedHabit = repository.getHabitById(habitId)!!
-            val habitToUpdate =
-                insertedHabit.copy(
-                    name = updatedName,
-                    updatedAt = Date().apply { time += 2000 },
-                    createdAt = insertedHabit.createdAt,
-                )
-            repository.updateHabit(habitToUpdate)
-
-            val updatedHabit = repository.getHabitById(habitId)
-            assertNotNull(updatedHabit)
-            assertEquals("Habit name should be updated", updatedName, updatedHabit?.name)
-            assertTrue("UpdatedAt should be more recent", updatedHabit!!.updatedAt.after(insertedHabit.createdAt))
-        }
-
-    @Test
     fun `update habit should not create new habit when non-existent habit is updated`() =
         testScope.runTest {
-            val existingHabit = Habit(name = "Journaling", createdAt = Date(), updatedAt = Date())
+            val existingHabit = Habit(name = "Journaling")
             repository.insertHabit(existingHabit)
             val initialCount = repository.getAllHabits().first().size
 
-            val nonExistentHabit = Habit(habitId = 999L, name = "Ghost Habit", createdAt = Date(), updatedAt = Date())
+            val nonExistentHabit = Habit(habitId = 999L, name = "Ghost Habit")
             repository.updateHabit(nonExistentHabit) // Should do nothing if no match
 
             assertEquals(
@@ -158,8 +135,8 @@ class HabitRepositoryTest {
     @Test
     fun `get all habits should return all inserted habits`() =
         testScope.runTest {
-            val habit1 = Habit(name = "Yoga", createdAt = Date(), updatedAt = Date())
-            val habit2 = Habit(name = "Coding practice", createdAt = Date(), updatedAt = Date())
+            val habit1 = Habit(name = "Yoga")
+            val habit2 = Habit(name = "Coding practice")
             repository.insertHabit(habit1)
             repository.insertHabit(habit2)
 
@@ -178,13 +155,13 @@ class HabitRepositoryTest {
             repository.getAllHabits().test {
                 assertTrue("Initial list should be empty", awaitItem().isEmpty())
 
-                val habit1 = Habit(name = "New Habit 1", createdAt = Date(), updatedAt = Date())
+                val habit1 = Habit(name = "New Habit 1")
                 val id1 = repository.insertHabit(habit1)
                 val listAfterInsert1 = awaitItem()
                 assertEquals("List should contain 1 habit", 1, listAfterInsert1.size)
                 assertEquals(id1, listAfterInsert1.first().habitId)
 
-                val habit2 = Habit(name = "New Habit 2", createdAt = Date(), updatedAt = Date())
+                val habit2 = Habit(name = "New Habit 2")
                 val id2 = repository.insertHabit(habit2)
                 val listAfterInsert2 = awaitItem()
                 assertEquals("List should contain 2 habits", 2, listAfterInsert2.size)
@@ -197,8 +174,8 @@ class HabitRepositoryTest {
     @Test
     fun `get all habits should emit updates when habits are deleted`() =
         testScope.runTest {
-            val habit1 = Habit(name = "To Delete", createdAt = Date(), updatedAt = Date())
-            val habit2 = Habit(name = "To Keep", createdAt = Date(), updatedAt = Date())
+            val habit1 = Habit(name = "To Delete")
+            val habit2 = Habit(name = "To Keep")
             val id1 = repository.insertHabit(habit1)
             val id2 = repository.insertHabit(habit2)
 
@@ -221,14 +198,14 @@ class HabitRepositoryTest {
         testScope.runTest {
             val initialName = "Original Name"
             val updatedName = "Updated Name"
-            val habit = Habit(name = initialName, createdAt = Date(), updatedAt = Date())
+            val habit = Habit(name = initialName)
             val habitId = repository.insertHabit(habit)
 
             repository.getAllHabits().test {
                 var currentList = awaitItem()
                 assertEquals(initialName, currentList.first { it.habitId == habitId }.name)
 
-                val habitToUpdate = repository.getHabitById(habitId)!!.copy(name = updatedName, updatedAt = Date())
+                val habitToUpdate = repository.getHabitById(habitId)!!.copy(name = updatedName)
                 repository.updateHabit(habitToUpdate)
 
                 currentList = awaitItem()
@@ -239,10 +216,77 @@ class HabitRepositoryTest {
         }
 
     @Test
+    fun `get all habits should be sorted by name`() =
+        testScope.runTest {
+            val habit1 = Habit(habitId = 1, name = "Z")
+            val habit2 = Habit(habitId = 2, name = "A")
+            repository.insertHabit(habit1)
+            repository.insertHabit(habit2)
+
+            // Try ascending
+            repository.getAllHabits(SortOrder.Name()).test {
+                val list = awaitItem()
+                assertEquals("Should be sorted by name in an ascending order", listOf(habit2, habit1), list)
+                cancelAndConsumeRemainingEvents()
+            }
+
+            // Try descending
+            repository.getAllHabits(SortOrder.Name(ascending = false)).test {
+                val list = awaitItem()
+                assertEquals("Should be sorted by name in a descending order", listOf(habit1, habit2), list)
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `get all habits should be sorted by creation date`() =
+        testScope.runTest {
+            val habit1 = Habit(habitId = 1, name = "Z")
+            val habit2 = Habit(habitId = 2, name = "A", createdAt = Date().apply { time += 1000 })
+            repository.insertHabit(habit1)
+            repository.insertHabit(habit2)
+
+            // Try ascending
+            repository.getAllHabits(SortOrder.Creation()).test {
+                val list = awaitItem()
+                assertEquals("Should be sorted by creation date in an ascending order", listOf(habit1, habit2), list)
+                cancelAndConsumeRemainingEvents()
+            }
+
+            // Try descending
+            repository.getAllHabits(SortOrder.Creation(ascending = false)).test {
+                val list = awaitItem()
+                assertEquals("Should be sorted by creation date in a descending order", listOf(habit2, habit1), list)
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `get all habits should be sorted by streak`() =
+        testScope.runTest {
+            val habit1 = Habit(habitId = 1, name = "Z")
+            val habit2 = Habit(habitId = 2, name = "A", lastResetAt = Date().apply { time -= 5 * 1000 * 60 * 60 * 24 })
+            repository.insertHabit(habit1)
+            repository.insertHabit(habit2)
+
+            repository.getAllHabits(SortOrder.Streak()).test {
+                val list = awaitItem()
+                assertEquals("Should be sorted by streak in an ascending order", listOf(habit1, habit2), list)
+                cancelAndConsumeRemainingEvents()
+            }
+
+            repository.getAllHabits(SortOrder.Streak(ascending = false)).test {
+                val list = awaitItem()
+                assertEquals("Should be sorted by streak in a descending order", listOf(habit2, habit1), list)
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
     fun `get habit by id should return habit when valid id is provided`() =
         testScope.runTest {
             val habitName = "Clean room"
-            val habit = Habit(name = habitName, createdAt = Date(), updatedAt = Date())
+            val habit = Habit(name = habitName)
             val habitId = repository.insertHabit(habit)
 
             val retrievedHabit = repository.getHabitById(habitId)
@@ -273,7 +317,7 @@ class HabitRepositoryTest {
     fun `get habit by id flow should emit habit when valid id is provided`() =
         testScope.runTest {
             val habitName = "Walk dog"
-            val habit = Habit(name = habitName, createdAt = Date(), updatedAt = Date())
+            val habit = Habit(name = habitName)
             val habitId = repository.insertHabit(habit)
 
             repository.getHabitByIdFlow(habitId).test {
@@ -300,13 +344,13 @@ class HabitRepositoryTest {
         testScope.runTest {
             val initialName = "Initial Flow Name"
             val updatedName = "Updated Flow Name"
-            val habit = Habit(name = initialName, createdAt = Date(), updatedAt = Date())
+            val habit = Habit(name = initialName)
             val habitId = repository.insertHabit(habit)
 
             repository.getHabitByIdFlow(habitId).test {
                 assertEquals(initialName, awaitItem()?.name)
 
-                val habitToUpdate = repository.getHabitById(habitId)!!.copy(name = updatedName, updatedAt = Date())
+                val habitToUpdate = repository.getHabitById(habitId)!!.copy(name = updatedName)
                 repository.updateHabit(habitToUpdate)
 
                 assertEquals(updatedName, awaitItem()?.name)
@@ -317,7 +361,7 @@ class HabitRepositoryTest {
     @Test
     fun `get habit by id flow should emit null after habit is deleted`() =
         testScope.runTest {
-            val habit = Habit(name = "To be deleted via flow", createdAt = Date(), updatedAt = Date())
+            val habit = Habit(name = "To be deleted via flow")
             val habitId = repository.insertHabit(habit)
 
             repository.getHabitByIdFlow(habitId).test {

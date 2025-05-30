@@ -11,17 +11,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
+import java.util.Date
 
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(AndroidJUnit4::class)
 class HabitDaoTest {
     private lateinit var habitDao: HabitDao
@@ -52,7 +47,7 @@ class HabitDaoTest {
             val habit = Habit(name = "Drink water")
 
             habitDao.insertHabit(habit)
-            val allHabits = habitDao.getAllHabits().first()
+            val allHabits = habitDao.getAllHabitsSortedByNameAsc().first()
             assertEquals(allHabits.size, 1)
             assertEquals(allHabits[0].name, "Drink water")
         }
@@ -71,7 +66,7 @@ class HabitDaoTest {
                 )
             habitDao.updateHabit(updatedHabit)
 
-            val allHabits = habitDao.getAllHabits().first()
+            val allHabits = habitDao.getAllHabitsSortedByNameAsc().first()
             assertEquals(allHabits.size, 1)
             assertEquals(allHabits[0].name, "Go for a run")
         }
@@ -91,48 +86,164 @@ class HabitDaoTest {
                 habitDao.deleteHabit(habitToDelete)
             }
 
-            val allHabits = habitDao.getAllHabits().first()
+            val allHabits = habitDao.getAllHabitsSortedByNameAsc().first()
             assertEquals(allHabits.size, 1)
             assertEquals(allHabits[0].name, "Meditate")
         }
 
     @Test
     @Throws(Exception::class)
-    fun getAllHabits() =
+    fun getAllHabitsCountCheck() =
         runBlocking {
             val habit1 = Habit(name = "Learn Kotlin")
             val habit2 = Habit(name = "Code review")
             habitDao.insertHabit(habit1)
             habitDao.insertHabit(habit2)
 
-            val allHabits = habitDao.getAllHabits().first()
+            val allHabits = habitDao.getAllHabitsSortedByNameAsc().first()
             assertEquals(allHabits.size, 2)
         }
 
+    // New sorting tests
+
     @Test
     @Throws(Exception::class)
-    fun getActiveHabits() =
+    fun getAllHabitsSortedByNameAsc() =
         runBlocking {
-            val habit1 = Habit(name = "Walk", isActive = true)
-            val habit2 = Habit(name = "Stretch", isActive = false)
+            val habit1 = Habit(name = "Zebra habit")
+            val habit2 = Habit(name = "Apple habit")
+            val habit3 = Habit(name = "Monkey habit")
+
             habitDao.insertHabit(habit1)
             habitDao.insertHabit(habit2)
+            habitDao.insertHabit(habit3)
 
-            val activeHabits = habitDao.getActiveHabits().first()
-            assertEquals(activeHabits.size, 1)
-            assertEquals(activeHabits[0].name, "Walk")
+            val sortedHabits = habitDao.getAllHabitsSortedByNameAsc().first()
+            assertEquals(sortedHabits.size, 3)
+            assertEquals(sortedHabits[0].name, "Apple habit")
+            assertEquals(sortedHabits[1].name, "Monkey habit")
+            assertEquals(sortedHabits[2].name, "Zebra habit")
         }
 
     @Test
     @Throws(Exception::class)
-    fun setHabitInactive() =
+    fun getAllHabitsSortedByNameDesc() =
         runBlocking {
-            val habit = Habit(name = "Write journal", isActive = true)
-            val habitId = habitDao.insertHabit(habit)
-            habitDao.setHabitInactive(habitId)
+            val habit1 = Habit(name = "Apple habit")
+            val habit2 = Habit(name = "Zebra habit")
+            val habit3 = Habit(name = "Monkey habit")
 
-            val allHabits = habitDao.getAllHabits().first()
-            assertEquals(allHabits.size, 1)
-            assertFalse(allHabits[0].isActive)
+            habitDao.insertHabit(habit1)
+            habitDao.insertHabit(habit2)
+            habitDao.insertHabit(habit3)
+
+            val sortedHabits = habitDao.getAllHabitsSortedByNameDesc().first()
+            assertEquals(sortedHabits.size, 3)
+            assertEquals(sortedHabits[0].name, "Zebra habit")
+            assertEquals(sortedHabits[1].name, "Monkey habit")
+            assertEquals(sortedHabits[2].name, "Apple habit")
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun getAllHabitsSortedByCreationDateAsc() =
+        runBlocking {
+            val baseTime = System.currentTimeMillis()
+            val oldDate = Date(baseTime - 86400000) // 1 day ago
+            val midDate = Date(baseTime - 43200000) // 12 hours ago
+            val newDate = Date(baseTime) // now
+
+            val habit1 = Habit(name = "Old habit", createdAt = oldDate)
+            val habit2 = Habit(name = "New habit", createdAt = newDate)
+            val habit3 = Habit(name = "Mid habit", createdAt = midDate)
+
+            habitDao.insertHabit(habit1)
+            habitDao.insertHabit(habit2)
+            habitDao.insertHabit(habit3)
+
+            val sortedHabits = habitDao.getAllHabitsSortedByCreationDateAsc().first()
+            assertEquals(sortedHabits.size, 3)
+            assertEquals(sortedHabits[0].name, "Old habit")
+            assertEquals(sortedHabits[1].name, "Mid habit")
+            assertEquals(sortedHabits[2].name, "New habit")
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun getAllHabitsSortedByCreationDateDesc() =
+        runBlocking {
+            val baseTime = System.currentTimeMillis()
+            val oldDate = Date(baseTime - 86400000) // 1 day ago
+            val midDate = Date(baseTime - 43200000) // 12 hours ago
+            val newDate = Date(baseTime) // now
+
+            val habit1 = Habit(name = "Old habit", createdAt = oldDate)
+            val habit2 = Habit(name = "New habit", createdAt = newDate)
+            val habit3 = Habit(name = "Mid habit", createdAt = midDate)
+
+            habitDao.insertHabit(habit1)
+            habitDao.insertHabit(habit2)
+            habitDao.insertHabit(habit3)
+
+            val sortedHabits = habitDao.getAllHabitsSortedByCreationDateDesc().first()
+            assertEquals(sortedHabits.size, 3)
+            assertEquals(sortedHabits[0].name, "New habit")
+            assertEquals(sortedHabits[1].name, "Mid habit")
+            assertEquals(sortedHabits[2].name, "Old habit")
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun getHabitById() =
+        runBlocking {
+            val habit = Habit(name = "Test habit")
+            val habitId = habitDao.insertHabit(habit)
+
+            val retrievedHabit = habitDao.getHabitById(habitId)
+            assertEquals(retrievedHabit?.name, "Test habit")
+            assertEquals(retrievedHabit?.habitId, habitId)
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun getHabitByIdNotFound() =
+        runBlocking {
+            val retrievedHabit = habitDao.getHabitById(999L)
+            assertEquals(retrievedHabit, null)
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun getHabitByIdFlow() =
+        runBlocking {
+            val habit = Habit(name = "Flow test habit")
+            val habitId = habitDao.insertHabit(habit)
+
+            val retrievedHabit = habitDao.getHabitByIdFlow(habitId).first()
+            assertEquals(retrievedHabit?.name, "Flow test habit")
+            assertEquals(retrievedHabit?.habitId, habitId)
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun getHabitByIdFlowNotFound() =
+        runBlocking {
+            val retrievedHabit = habitDao.getHabitByIdFlow(999L).first()
+            assertEquals(retrievedHabit, null)
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun streakCalculationTest() =
+        runBlocking {
+            val baseTime = System.currentTimeMillis()
+            val threeDaysAgo = Date(baseTime - 259200000) // 3 days ago
+
+            val habit = Habit(name = "Streak test", lastResetAt = threeDaysAgo)
+            val habitId = habitDao.insertHabit(habit)
+
+            val retrievedHabit = habitDao.getHabitById(habitId)
+            // The streak should be approximately 3 days
+            assertEquals(retrievedHabit?.streakInDays, 3)
         }
 }

@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.track.habit.data.local.database.dao.HabitLogDao
 import io.track.habit.data.local.database.AppDatabase
+import io.track.habit.data.local.database.dao.HabitLogDao
 import io.track.habit.data.local.database.entities.HabitLog
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -138,7 +138,7 @@ class HabitLogDaoTest {
 
             assertNotNull(retrievedLog)
             assertEquals(retrievedLog?.logId, insertedLog.logId)
-            assertEquals(retrievedLog?.habitId, 30)
+            assertEquals(retrievedLog?.habitId, 30L)
             assertEquals(retrievedLog?.streakDuration, 15)
             assertEquals(retrievedLog?.notes, "Specific log")
         }

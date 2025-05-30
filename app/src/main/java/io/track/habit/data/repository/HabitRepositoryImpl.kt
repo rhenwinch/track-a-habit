@@ -3,7 +3,10 @@ package io.track.habit.data.repository
 import io.track.habit.data.local.database.dao.HabitDao
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.repository.HabitRepository
+import io.track.habit.domain.utils.SortOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject // If using Hilt for Dependency Injection
 
 class HabitRepositoryImpl
@@ -23,8 +26,32 @@ class HabitRepositoryImpl
             habitDao.updateHabit(habit)
         }
 
-        override fun getAllHabits(): Flow<List<Habit>> {
-            return habitDao.getAllHabits()
+        @OptIn(ExperimentalCoroutinesApi::class)
+        override fun getAllHabits(sortOrder: SortOrder): Flow<List<Habit>> {
+            return when (sortOrder) {
+                is SortOrder.Streak -> {
+                    val habits = habitDao.getAllHabitsSortedByNameAsc()
+                    if (sortOrder.ascending) {
+                        habits.mapLatest { it.sortedBy { it.streakInDays } }
+                    } else {
+                        habits.mapLatest { it.sortedByDescending { it.streakInDays } }
+                    }
+                }
+                is SortOrder.Creation -> {
+                    if (sortOrder.ascending) {
+                        habitDao.getAllHabitsSortedByCreationDateAsc()
+                    } else {
+                        habitDao.getAllHabitsSortedByCreationDateDesc()
+                    }
+                }
+                is SortOrder.Name -> {
+                    if (sortOrder.ascending) {
+                        habitDao.getAllHabitsSortedByNameAsc()
+                    } else {
+                        habitDao.getAllHabitsSortedByNameDesc()
+                    }
+                }
+            }
         }
 
         override suspend fun getHabitById(habitId: Long): Habit? {

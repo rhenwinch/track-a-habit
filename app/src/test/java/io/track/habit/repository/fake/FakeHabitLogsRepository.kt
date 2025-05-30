@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import java.util.Date
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -68,8 +67,6 @@ class FakeHabitLogsRepository : HabitLogsRepository {
                 Habit(
                     habitId = habitId,
                     name = "Test Habit",
-                    createdAt = Date(),
-                    updatedAt = Date(),
                 )
 
             val habitLogs =

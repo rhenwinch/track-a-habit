@@ -19,8 +19,17 @@ interface HabitDao {
     @Update
     suspend fun updateHabit(habit: Habit)
 
-    @Query("SELECT * FROM habits")
-    fun getAllHabits(): Flow<List<Habit>>
+    @Query("SELECT * FROM habits ORDER BY name ASC")
+    fun getAllHabitsSortedByNameAsc(): Flow<List<Habit>>
+
+    @Query("SELECT * FROM habits ORDER BY name DESC")
+    fun getAllHabitsSortedByNameDesc(): Flow<List<Habit>>
+
+    @Query("SELECT * FROM habits ORDER BY createdAt ASC")
+    fun getAllHabitsSortedByCreationDateAsc(): Flow<List<Habit>>
+
+    @Query("SELECT * FROM habits ORDER BY createdAt DESC")
+    fun getAllHabitsSortedByCreationDateDesc(): Flow<List<Habit>>
 
     @Query("SELECT * FROM habits WHERE habitId = :habitId")
     suspend fun getHabitById(habitId: Long): Habit?
