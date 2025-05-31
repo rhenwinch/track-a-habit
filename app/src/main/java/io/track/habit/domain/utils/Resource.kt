@@ -1,4 +1,4 @@
-package io.track.habit.utils
+package io.track.habit.domain.utils
 
 /**
  * Sealed class representing the state of a resource operation.

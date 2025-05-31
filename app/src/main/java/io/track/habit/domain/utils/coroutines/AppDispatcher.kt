@@ -1,4 +1,4 @@
-package io.track.habit.utils.coroutines
+package io.track.habit.domain.utils.coroutines
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

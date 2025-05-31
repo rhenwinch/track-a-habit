@@ -8,10 +8,10 @@ import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetRandomQuoteUseCase
 import io.track.habit.domain.utils.SortOrder
-import io.track.habit.utils.coroutines.AppDispatcher
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.launchOnIO
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.withIOContext
-import io.track.habit.utils.coroutines.asStateFlow
+import io.track.habit.domain.utils.coroutines.AppDispatcher
+import io.track.habit.domain.utils.coroutines.AppDispatcher.Companion.launchOnIO
+import io.track.habit.domain.utils.coroutines.AppDispatcher.Companion.withIOContext
+import io.track.habit.domain.utils.coroutines.asStateFlow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

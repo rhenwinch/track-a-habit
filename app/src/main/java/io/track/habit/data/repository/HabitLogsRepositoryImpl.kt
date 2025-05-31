@@ -4,7 +4,7 @@ import io.track.habit.data.local.database.dao.HabitLogDao
 import io.track.habit.data.local.database.entities.HabitLog
 import io.track.habit.data.local.database.entities.HabitWithLogs
 import io.track.habit.domain.repository.HabitLogsRepository
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.withIOContext
+import io.track.habit.domain.utils.coroutines.AppDispatcher.Companion.withIOContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
