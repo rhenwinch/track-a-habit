@@ -1,17 +1,5 @@
 package io.track.habit.utils.coroutines
 
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.launchOnDefault
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.launchOnIO
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.launchOnMain
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.runOnDefault
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.runOnIO
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.runOnMain
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.withDefaultContext
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.withIOContext
-import io.track.habit.utils.coroutines.AppDispatcher.Companion.withMainContext
-import io.track.habit.utils.coroutines.AppDispatcher.Default
-import io.track.habit.utils.coroutines.AppDispatcher.IO
-import io.track.habit.utils.coroutines.AppDispatcher.Main
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -153,11 +141,10 @@ enum class AppDispatcher(
          * @see withIOContext
          * @see runOnIO
          */
-        inline fun launchOnIO(crossinline block: suspend CoroutineScope.() -> Unit) {
+        inline fun launchOnIO(crossinline block: suspend CoroutineScope.() -> Unit) =
             IO.scope.launch {
                 block()
             }
-        }
 
         /**
          * Launches a new coroutine on the [Dispatchers.Default] context and executes the given block.
@@ -167,11 +154,10 @@ enum class AppDispatcher(
          * @see withDefaultContext
          * @see runOnDefault
          */
-        inline fun launchOnDefault(crossinline block: suspend CoroutineScope.() -> Unit) {
+        inline fun launchOnDefault(crossinline block: suspend CoroutineScope.() -> Unit) =
             Default.scope.launch {
                 block()
             }
-        }
 
         /**
          * Launches a new coroutine on the [Dispatchers.Main] context and executes the given block.
@@ -181,10 +167,9 @@ enum class AppDispatcher(
          * @see withMainContext
          * @see runOnMain
          */
-        inline fun launchOnMain(crossinline block: suspend CoroutineScope.() -> Unit) {
+        inline fun launchOnMain(crossinline block: suspend CoroutineScope.() -> Unit) =
             Main.scope.launch {
                 block()
             }
-        }
     }
 }
