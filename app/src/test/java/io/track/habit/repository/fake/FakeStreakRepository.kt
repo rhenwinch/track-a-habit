@@ -64,11 +64,6 @@ class FakeStreakRepository : StreakRepository {
         return streaks
     }
 
-    override suspend fun getStreakByDaysRequired(days: Int): Streak {
-        return streaks.find { days >= it.minDaysRequired && days <= it.maxDaysRequired }
-            ?: throw IllegalArgumentException("No streak found for $days days")
-    }
-
     private fun Gson.fromJson(json: String): List<Streak> {
         val type = object : TypeToken<List<Streak>>() {}.type
         return fromJson(json, type)

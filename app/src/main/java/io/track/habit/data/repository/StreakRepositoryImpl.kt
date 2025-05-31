@@ -23,11 +23,6 @@ class StreakRepositoryImpl
             }
         }
 
-        override suspend fun getStreakByDaysRequired(days: Int): Streak {
-            return getAllStreaks().find { days >= it.minDaysRequired && days <= it.maxDaysRequired }
-                ?: throw IllegalArgumentException("No streak found for $days days")
-        }
-
         private suspend fun loadStreaksFromAssets(): List<Streak> {
             val json = assetReader.read(STREAKS_FILE_NAME)
             val type = object : TypeToken<List<Streak>>() {}.type
