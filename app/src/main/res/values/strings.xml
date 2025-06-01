@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Track a Habit</string>
+
+    <string name="habits">Habits</string>
+    <string name="streaks">Streaks</string>
+    <string name="pomodoro">Pomodoro</string>
+    <string name="settings">Settings</string>
 </resources>
