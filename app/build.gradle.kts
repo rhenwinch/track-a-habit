@@ -13,6 +13,9 @@ plugins {
 
 object ProjectConfig {
     const val APP_ID = "io.track.habit"
+    const val APP_MIN_SDK = 24
+    const val APP_COMPILE_SDK = 36
+    const val APP_TARGET_SDK = 35
 
     private const val APP_VERSION_MAJOR = 1
     private const val APP_VERSION_MINOR = 0
@@ -26,12 +29,12 @@ object ProjectConfig {
 
 android {
     namespace = ProjectConfig.APP_ID
-    compileSdk = 35
+    compileSdk = ProjectConfig.APP_COMPILE_SDK
 
     defaultConfig {
         applicationId = ProjectConfig.APP_ID
-        minSdk = 24
-        targetSdk = 35
+        minSdk = ProjectConfig.APP_MIN_SDK
+        targetSdk = ProjectConfig.APP_TARGET_SDK
         versionCode = ProjectConfig.APP_VERSION_CODE
         versionName = ProjectConfig.APP_VERSION_NAME
 
