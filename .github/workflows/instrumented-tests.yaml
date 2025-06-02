@@ -9,17 +9,13 @@ on:
       - master
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   instrumented-tests:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        api-level: [29, 33]
+        api-level: [33, 36]
 
     steps:
       - name: Checkout code
