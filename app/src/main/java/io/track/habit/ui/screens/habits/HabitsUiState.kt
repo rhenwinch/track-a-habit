@@ -9,6 +9,7 @@ data class HabitsUiState(
     val sortOrder: SortOrder = SortOrder.Streak(),
     val showcasedHabit: HabitWithStreak? = null,
     val selectedHabits: List<HabitWithStreak> = emptyList(),
+    val isCensoringHabitNames: Boolean = false,
     val isShowingDeleteConfirmation: Boolean = false,
     val isShowingAddDialog: Boolean = false,
     val isShowingEditDialog: Boolean = false,

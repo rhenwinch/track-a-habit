@@ -1,9 +1,13 @@
 package io.track.habit.viewmodel
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
 import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.datastore.FakeSettingsDataStore
 import io.track.habit.domain.repository.AssetReader
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.repository.StreakRepository
@@ -20,10 +24,13 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import java.util.Date
 
 class HabitsViewModelTest {
+    private lateinit var testDataStore: DataStore<Preferences>
     private lateinit var assetReader: AssetReader
     private lateinit var getHabitsWithStreaksUseCase: GetHabitsWithStreaksUseCase
     private lateinit var getStreaksByDaysUseCase: GetStreaksByDaysUseCase
@@ -35,6 +42,13 @@ class HabitsViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
+
+    @get:Rule
+    val temporaryFolder: TemporaryFolder =
+        TemporaryFolder
+            .builder()
+            .assureDeletion()
+            .build()
 
     @Before
     fun setUp() {
@@ -60,11 +74,18 @@ class HabitsViewModelTest {
                 getStreakByDaysUseCase = getStreaksByDaysUseCase,
             )
 
+        testDataStore =
+            PreferenceDataStoreFactory.create(
+                scope = testScope,
+                produceFile = { temporaryFolder.newFile("test_tah_settings.preferences_pb") },
+            )
+
         viewModel =
             HabitsViewModel(
                 getHabitsWithStreaksUseCase = getHabitsWithStreaksUseCase,
                 getRandomQuoteUseCase = getRandomQuoteUseCase,
                 habitRepository = habitRepository,
+                settingsDataStore = FakeSettingsDataStore(testDataStore),
             )
     }
 
@@ -152,7 +173,11 @@ class HabitsViewModelTest {
                 assert(updatedSelectedHabits.isEmpty())
             }
 
-            assert(viewModel.habits.value.isEmpty())
+            viewModel.habits.test {
+                val habits = awaitItem()
+
+                assert(habits.isEmpty())
+            }
         }
 
     @Test
@@ -339,8 +364,6 @@ class HabitsViewModelTest {
     @Test
     fun `toggleEditDialog updates flag in UiState`() =
         testScope.runTest {
-            // Verify that `toggleEditDialog` updates `_uiState.value.isShowingEditDialog` to `true` and `false` correctly.
-            // TODO implement test
             viewModel.uiState.test {
                 val initialFlag = awaitItem().isShowingEditDialog
                 assert(!initialFlag)
@@ -348,6 +371,71 @@ class HabitsViewModelTest {
                 viewModel.toggleEditDialog(true)
                 val updatedFlag = awaitItem().isShowingEditDialog
                 assert(updatedFlag)
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `toggleCensorshipOnNames updates flag in UiState`() =
+        runTest {
+            viewModel.uiState.test {
+                val initialFlag = awaitItem().isCensoringHabitNames
+                assert(!initialFlag)
+
+                viewModel.toggleCensorshipOnNames(true)
+                val updatedFlag = awaitItem().isCensoringHabitNames
+                assert(updatedFlag)
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `getHabits have censors applied when requested with censoring enabled`() =
+        runTest {
+            viewModel.habits.test {
+                awaitItem() // Initialize collection
+
+                viewModel.toggleCensorshipOnNames(true)
+
+                for (i in 1..5) {
+                    habitRepository.insertHabit(
+                        habit =
+                            Habit(
+                                name = "Habit $i",
+                                lastResetAt = Date().apply { time -= ((i + 3) * 24 * 60 * 60 * 1000) },
+                            ),
+                    )
+                }
+
+                val habits = awaitItem()
+                assert(habits.all { it.habit.name.contains("*") })
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `getHabits have censors applied when requested with censoring disabled`() =
+        runTest {
+            viewModel.habits.test {
+                awaitItem() // Initialize collection
+
+                viewModel.toggleCensorshipOnNames(false)
+
+                for (i in 1..5) {
+                    habitRepository.insertHabit(
+                        habit =
+                            Habit(
+                                name = "Habit $i",
+                                lastResetAt = Date().apply { time -= ((i + 3) * 24 * 60 * 60 * 1000) },
+                            ),
+                    )
+                }
+
+                val habits = awaitItem()
+                assert(habits.all { !it.habit.name.contains("*") })
 
                 cancelAndIgnoreRemainingEvents()
             }
