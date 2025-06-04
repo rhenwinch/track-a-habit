@@ -66,7 +66,7 @@ class HabitsViewModelTest {
 
         habitRepository = FakeHabitRepository()
         streakRepository = FakeStreakRepository()
-        getRandomQuoteUseCase = GetRandomQuoteUseCase(assetReader)
+        getRandomQuoteUseCase = GetRandomQuoteUseCase(assetReader, testDispatcher)
 
         getStreaksByDaysUseCase = GetStreaksByDaysUseCase(streakRepository)
         getHabitsWithStreaksUseCase =
