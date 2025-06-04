@@ -58,12 +58,17 @@ class HabitsViewModel
             uiState
                 .map { it.isCensoringHabitNames }
                 .distinctUntilChanged()
+                .asStateFlow(
+                    scope = viewModelScope,
+                    initialValue = uiState.value.isCensoringHabitNames,
+                )
 
         val isResetProgressButtonLocked =
             settingsDataStore
                 .generalSettingsFlow
                 .map { it.lockResetProgressButton }
                 .distinctUntilChanged()
+                .asStateFlow(scope = viewModelScope)
 
         val habits =
             combine(
