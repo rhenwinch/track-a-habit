@@ -20,6 +20,7 @@ import io.track.habit.repository.fake.FakeHabitRepository
 import io.track.habit.repository.fake.FakeStreakRepository
 import io.track.habit.ui.screens.habits.HabitsViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -92,8 +93,7 @@ class HabitsViewModelTest {
     @Test
     fun `getUiState reflects quote update after init`() {
         assert(
-            viewModel.uiState.value.quote
-                ?.message == "Test Quote",
+            viewModel.uiState.value.quote.message == "Test Quote",
         )
     }
 
@@ -378,7 +378,7 @@ class HabitsViewModelTest {
 
     @Test
     fun `toggleCensorshipOnNames updates flag in UiState`() =
-        runTest {
+        testScope.runTest {
             viewModel.uiState.test {
                 val initialFlag = awaitItem().isCensoringHabitNames
                 assert(!initialFlag)
@@ -393,51 +393,39 @@ class HabitsViewModelTest {
 
     @Test
     fun `getHabits have censors applied when requested with censoring enabled`() =
-        runTest {
-            viewModel.habits.test {
-                awaitItem() // Initialize collection
+        testScope.runTest {
+            viewModel.toggleCensorshipOnNames(true)
 
-                viewModel.toggleCensorshipOnNames(true)
-
-                for (i in 1..5) {
-                    habitRepository.insertHabit(
-                        habit =
-                            Habit(
-                                name = "Habit $i",
-                                lastResetAt = Date().apply { time -= ((i + 3) * 24 * 60 * 60 * 1000) },
-                            ),
-                    )
-                }
-
-                val habits = awaitItem()
-                assert(habits.all { it.habit.name.contains("*") })
-
-                cancelAndIgnoreRemainingEvents()
+            for (i in 1..5) {
+                habitRepository.insertHabit(
+                    habit =
+                        Habit(
+                            name = "Habit $i",
+                            lastResetAt = Date().apply { time -= ((i + 3) * 24 * 60 * 60 * 1000) },
+                        ),
+                )
             }
+
+            val habits = viewModel.habits.first()
+            assert(habits.all { it.habit.name.contains("*") })
         }
 
     @Test
     fun `getHabits have censors applied when requested with censoring disabled`() =
-        runTest {
-            viewModel.habits.test {
-                awaitItem() // Initialize collection
+        testScope.runTest {
+            viewModel.toggleCensorshipOnNames(false)
 
-                viewModel.toggleCensorshipOnNames(false)
-
-                for (i in 1..5) {
-                    habitRepository.insertHabit(
-                        habit =
-                            Habit(
-                                name = "Habit $i",
-                                lastResetAt = Date().apply { time -= ((i + 3) * 24 * 60 * 60 * 1000) },
-                            ),
-                    )
-                }
-
-                val habits = awaitItem()
-                assert(habits.all { !it.habit.name.contains("*") })
-
-                cancelAndIgnoreRemainingEvents()
+            for (i in 1..5) {
+                habitRepository.insertHabit(
+                    habit =
+                        Habit(
+                            name = "Habit $i",
+                            lastResetAt = Date().apply { time -= ((i + 3) * 24 * 60 * 60 * 1000) },
+                        ),
+                )
             }
+
+            val habits = viewModel.habits.first()
+            assert(habits.all { !it.habit.name.contains("*") })
         }
 }
