@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.CardDefaults
@@ -43,8 +41,6 @@ internal fun HabitCard(
     habitWithStreak: HabitWithStreak,
     onClick: () -> Unit,
 ) {
-    val streakInDays = remember { habitWithStreak.habit.streakInDays.toString() }
-
     OutlinedCard(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
@@ -61,28 +57,7 @@ internal fun HabitCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.streak_filled),
-                        contentDescription = stringResource(R.string.streak_icon_content_desc),
-                        modifier =
-                            Modifier
-                                .width(22.dp)
-                                .height(27.dp),
-                    )
-
-                    Text(
-                        text = streakInDays,
-                        style =
-                            LocalTextStyle.current.copy(
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                    )
-                }
+                StreakCounter(habitWithStreak.habit.streakInDays)
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
