@@ -5,4 +5,8 @@
     <string name="streaks">Streaks</string>
     <string name="pomodoro">Pomodoro</string>
     <string name="settings">Settings</string>
+
+    <string name="add_habit">Add a habit</string>
+
+    <string name="streak_icon_content_desc">Streak icon</string>
 </resources>
