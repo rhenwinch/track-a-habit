@@ -1,12 +1,14 @@
 package io.track.habit.domain.model
 
 import android.os.Build
+import androidx.compose.runtime.Immutable
 import io.track.habit.data.local.database.entities.Habit
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+@Immutable
 data class HabitWithStreak(
     val habit: Habit,
     val streak: Streak,
