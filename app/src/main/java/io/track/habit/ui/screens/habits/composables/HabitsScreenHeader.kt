@@ -1,0 +1,336 @@
+package io.track.habit.ui.screens.habits.composables
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.track.habit.R
+import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.domain.model.HabitWithStreak
+import io.track.habit.domain.model.Quote
+import io.track.habit.ui.composables.GradientFireIcon
+import io.track.habit.ui.composables.GradientText
+import io.track.habit.ui.theme.TrackAHabitTheme
+import io.track.habit.ui.utils.FireGradientGenerator
+import io.track.habit.ui.utils.PreviewMocks
+import io.track.habit.ui.utils.UiConstants
+import io.track.habit.ui.utils.UiConstants.MEDIUM_EMPHASIS
+import java.util.Calendar
+import java.util.Date
+import kotlin.random.Random
+
+@Composable
+fun HabitsScreenHeader(
+    username: String,
+    quote: Quote,
+    isCensored: Boolean,
+    habitWithStreak: HabitWithStreak,
+    onEditHabit: () -> Unit,
+    onViewLogs: () -> Unit,
+    onResetProgress: () -> Unit,
+    onToggleCensorship: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val (habit, streak) = habitWithStreak
+    val streakGradient = FireGradientGenerator.getGradient(habitWithStreak.habit.streakInDays)
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(33.dp, Alignment.Top),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier =
+                Modifier
+                    .padding(top = 20.dp, bottom = 10.dp),
+        ) {
+            Text(
+                text = "${getTimeOfDayGreeting()}, $username",
+                style =
+                    LocalTextStyle.current.copy(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+            )
+        }
+
+        CommonLabel(text = stringResource(R.string.habit_name)) {
+            HabitNameWithVisibilityToggle(
+                habit = habit,
+                isCensored = isCensored,
+                onToggleCensorship = onToggleCensorship,
+            )
+        }
+
+        CommonLabel(text = stringResource(R.string.streak_milestone)) {
+            Text(
+                text = streak.title,
+                style =
+                    LocalTextStyle.current.copy(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+            )
+        }
+
+        CommonLabel(text = stringResource(R.string.youve_been_on_track_for)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                GradientFireIcon(
+                    painter = painterResource(R.drawable.streak_filled),
+                    contentDescription = stringResource(R.string.streak_icon_content_desc),
+                    modifier =
+                        Modifier
+                            .width(24.dp)
+                            .height(31.dp),
+                    gradient = streakGradient,
+                )
+
+                GradientText(
+                    text = habitWithStreak.formattedDurationSinceReset,
+                    gradient = streakGradient,
+                    style =
+                        LocalTextStyle.current.copy(
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Black,
+                            shadow =
+                                Shadow(
+                                    color = Color.Black,
+                                    offset = Offset(2f, 2f),
+                                    blurRadius = 2f,
+                                ),
+                        ),
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.since_date_format, habitWithStreak.formattedActiveSinceDate),
+                style =
+                    LocalTextStyle.current.copy(
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontStyle = FontStyle.Italic,
+                    ),
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            CommonButton(
+                icon = painterResource(id = R.drawable.edit_colored),
+                contentDescription = stringResource(R.string.edit_icon_content_desc),
+                text = null,
+                onClick = onEditHabit,
+            )
+
+            CommonButton(
+                icon = painterResource(id = R.drawable.habit_logs),
+                text = stringResource(R.string.logs),
+                contentDescription = stringResource(R.string.habit_logs_icon_content_desc),
+                onClick = onViewLogs,
+            )
+
+            CommonButton(
+                icon = painterResource(id = R.drawable.sad_emoji),
+                text = stringResource(R.string.reset),
+                contentDescription = stringResource(R.string.reset_progress_icon_content_desc),
+                onClick = onResetProgress,
+            )
+        }
+
+        Text(
+            text = quote.toString(),
+            style =
+                MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontStyle = FontStyle.Italic,
+                    color = LocalContentColor.current.copy(alpha = 0.8F),
+                ),
+        )
+    }
+}
+
+@Composable
+private fun CommonLabel(
+    text: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.Start,
+        modifier = modifier,
+    ) {
+        Text(
+            text = text,
+            style =
+                LocalTextStyle.current.copy(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = LocalContentColor.current.copy(MEDIUM_EMPHASIS),
+                ),
+        )
+
+        content()
+    }
+}
+
+@Composable
+private fun HabitNameWithVisibilityToggle(
+    habit: Habit,
+    isCensored: Boolean,
+    onToggleCensorship: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val (icon, contentDesc) =
+        if (isCensored) {
+            painterResource(R.drawable.visibility) to stringResource(R.string.visibility_icon_content_desc)
+        } else {
+            painterResource(R.drawable.visibility_off) to stringResource(R.string.visibility_off_icon_content_desc)
+        }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            modifier.clickable {
+                onToggleCensorship()
+            },
+    ) {
+        Text(
+            text = habit.name,
+            style =
+                LocalTextStyle.current.copy(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+        )
+
+        Icon(
+            painter = icon,
+            contentDescription = contentDesc,
+            modifier =
+                Modifier.clickable {
+                    onToggleCensorship()
+                },
+        )
+    }
+}
+
+@Composable
+private fun getTimeOfDayGreeting(): String {
+    val calendar = Calendar.getInstance()
+    val hourOfDay = calendar.get(Calendar.HOUR_OF_DAY)
+
+    return when (hourOfDay) {
+        in 0..11 -> stringResource(R.string.good_morning)
+        in 12..17 -> stringResource(R.string.good_afternoon)
+        else -> stringResource(R.string.good_evening)
+    }
+}
+
+@Composable
+private fun CommonButton(
+    icon: Painter,
+    text: String?,
+    contentDescription: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    FilledTonalButton(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Icon(
+            painter = icon,
+            contentDescription = contentDescription,
+            tint = Color.Unspecified,
+        )
+
+        text?.let {
+            Text(
+                text = it,
+                modifier =
+                    Modifier
+                        .padding(start = 7.dp),
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun HabitsScreenHeaderPreview() {
+    TrackAHabitTheme {
+        Surface(
+            modifier =
+                Modifier
+                    .fillMaxSize(),
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .padding(horizontal = UiConstants.ScreenPaddingHorizontal),
+            ) {
+                HabitsScreenHeader(
+                    username = "John",
+                    isCensored = false,
+                    quote = PreviewMocks.getQuote(),
+                    habitWithStreak =
+                        HabitWithStreak(
+                            habit =
+                                PreviewMocks.getHabit(
+                                    date =
+                                        Date()
+                                            .apply {
+                                                val monthsToSubtract = Random.nextInt(0, 12)
+                                                val monthsInMs = 1000 * 60 * 60 * 24 * 30L
+
+                                                time -=
+                                                    (monthsInMs * monthsToSubtract) +
+                                                    (Random.nextInt(0, 99 * 1000 * 60 * 60))
+                                            },
+                                ),
+                            streak = PreviewMocks.getStreak(),
+                        ),
+                    onEditHabit = {},
+                    onViewLogs = {},
+                    onResetProgress = {},
+                    onToggleCensorship = {},
+                )
+            }
+        }
+    }
+}

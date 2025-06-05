@@ -7,6 +7,20 @@
     <string name="settings">Settings</string>
 
     <string name="add_habit">Add a habit</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="good_morning">Good morning</string>
+    <string name="habit_name">Habit name</string>
+    <string name="logs">Logs</string>
+    <string name="reset">Reset</string>
+    <string name="since_date_format">since %1$s</string>
+    <string name="streak_milestone">Streak milestone</string>
+    <string name="youve_been_on_track_for">You\'ve been on track for</string>
 
+    <string name="edit_icon_content_desc">Edit icon</string>
+    <string name="habit_logs_icon_content_desc">Habit logs icon</string>
+    <string name="reset_progress_icon_content_desc">Reset progress icon</string>
     <string name="streak_icon_content_desc">Streak icon</string>
+    <string name="visibility_icon_content_desc">Habit name visibility icon</string>
+    <string name="visibility_off_icon_content_desc">Habit name visibility off icon</string>
 </resources>
