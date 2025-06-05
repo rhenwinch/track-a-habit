@@ -24,8 +24,6 @@ class GetRandomQuoteUseCaseTest {
     @Before
     fun setUp() {
         assetReader = mockk()
-        getRandomQuoteUseCase = GetRandomQuoteUseCase(assetReader, dispatcher)
-
         coEvery { assetReader.read(QUOTES_FILE_NAME) } returns
             """
             [
@@ -35,6 +33,8 @@ class GetRandomQuoteUseCaseTest {
                 }
             ]
             """.trimIndent()
+
+        getRandomQuoteUseCase = GetRandomQuoteUseCase(assetReader, dispatcher)
     }
 
     @Test
