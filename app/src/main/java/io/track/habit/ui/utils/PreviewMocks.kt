@@ -1,6 +1,7 @@
 package io.track.habit.ui.utils
 
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.domain.model.Quote
 import io.track.habit.domain.model.Streak
 import java.util.Date
 
@@ -20,5 +21,13 @@ object PreviewMocks {
     ) = Habit(
         name = "Mock Habit${if (suffix.isNotBlank()) " $suffix" else ""}",
         lastResetAt = date,
+    )
+
+    fun getQuote(
+        message: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris iaculis  sollicitudin nibh.",
+        author: String = "Anonymous",
+    ) = Quote(
+        message = message,
+        author = author,
     )
 }
