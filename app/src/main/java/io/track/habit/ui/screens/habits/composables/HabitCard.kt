@@ -29,10 +29,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
-import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.model.HabitWithStreak
-import io.track.habit.domain.model.Streak
 import io.track.habit.ui.theme.TrackAHabitTheme
+import io.track.habit.ui.utils.PreviewMocks
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -137,17 +136,13 @@ private fun HabitCardBasePreview() {
                         habitWithStreak =
                             HabitWithStreak(
                                 habit =
-                                    Habit(
-                                        name = "Test Habit #$it",
-                                        lastResetAt = date,
+                                    PreviewMocks.getHabit(
+                                        date = date,
+                                        suffix = it.toString(),
                                     ),
                                 streak =
-                                    Streak(
-                                        title = "Test Streak #$it",
-                                        minDaysRequired = 0,
-                                        maxDaysRequired = 7,
-                                        badgeIcon = "",
-                                        message = "",
+                                    PreviewMocks.getStreak(
+                                        suffix = it.toString(),
                                     ),
                             ),
                         onClick = {},
