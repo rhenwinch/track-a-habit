@@ -48,7 +48,7 @@ class GetHabitsWithStreaksUseCaseTest {
             }
 
             getHabitsWithStreaksUseCase().test {
-                val habitsWithStreaks = awaitItem()
+                val habitsWithStreaks = expectMostRecentItem()
 
                 assert(habitsWithStreaks.size == 5)
                 assert(habitsWithStreaks[0].habit.streakInDays == 3)

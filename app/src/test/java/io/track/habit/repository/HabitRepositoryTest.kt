@@ -2,11 +2,11 @@ package io.track.habit.repository
 
 import android.database.sqlite.SQLiteConstraintException
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.utils.SortOrder
 import io.track.habit.repository.fake.FakeHabitRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -20,7 +20,6 @@ import org.junit.Before
 import org.junit.Test
 import java.util.Date
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class HabitRepositoryTest {
     private lateinit var repository: HabitRepository
 
@@ -127,7 +126,7 @@ class HabitRepositoryTest {
     fun `get all habits should return empty list when no habits exist`() =
         testScope.runTest {
             repository.getAllHabits().test {
-                assertTrue("Should emit an empty list initially", awaitItem().isEmpty())
+                assertTrue("Should emit an empty list initially", expectMostRecentItem().isEmpty())
                 cancelAndConsumeRemainingEvents()
             }
         }
@@ -141,7 +140,7 @@ class HabitRepositoryTest {
             repository.insertHabit(habit2)
 
             repository.getAllHabits().test {
-                val list = awaitItem()
+                val list = expectMostRecentItem()
                 assertEquals("Should retrieve all inserted habits", 2, list.size)
                 assertTrue("List should contain habit1", list.any { it.name == habit1.name })
                 assertTrue("List should contain habit2", list.any { it.name == habit2.name })
@@ -157,12 +156,14 @@ class HabitRepositoryTest {
 
                 val habit1 = Habit(name = "New Habit 1")
                 val id1 = repository.insertHabit(habit1)
-                val listAfterInsert1 = awaitItem()
+
+                val listAfterInsert1 = expectMostRecentItem()
                 assertEquals("List should contain 1 habit", 1, listAfterInsert1.size)
                 assertEquals(id1, listAfterInsert1.first().habitId)
 
                 val habit2 = Habit(name = "New Habit 2")
                 val id2 = repository.insertHabit(habit2)
+
                 val listAfterInsert2 = awaitItem()
                 assertEquals("List should contain 2 habits", 2, listAfterInsert2.size)
                 assertTrue(listAfterInsert2.any { it.habitId == id2 })
@@ -180,7 +181,7 @@ class HabitRepositoryTest {
             val id2 = repository.insertHabit(habit2)
 
             repository.getAllHabits().test {
-                assertEquals("Initial list should have 2 habits", 2, awaitItem().size)
+                assertEquals("Initial list should have 2 habits", 2, expectMostRecentItem().size)
 
                 val habitToDelete = repository.getHabitById(id1)!!
                 repository.deleteHabit(habitToDelete)
@@ -202,7 +203,7 @@ class HabitRepositoryTest {
             val habitId = repository.insertHabit(habit)
 
             repository.getAllHabits().test {
-                var currentList = awaitItem()
+                var currentList = expectMostRecentItem()
                 assertEquals(initialName, currentList.first { it.habitId == habitId }.name)
 
                 val habitToUpdate = repository.getHabitById(habitId)!!.copy(name = updatedName)
@@ -223,18 +224,23 @@ class HabitRepositoryTest {
             repository.insertHabit(habit1)
             repository.insertHabit(habit2)
 
-            // Try ascending
-            repository.getAllHabits(SortOrder.Name()).test {
-                val list = awaitItem()
-                assertEquals("Should be sorted by name in an ascending order", listOf(habit2, habit1), list)
-                cancelAndConsumeRemainingEvents()
-            }
+            turbineScope {
+                val ascendingTurbine = repository.getAllHabits(SortOrder.Name()).testIn(backgroundScope)
+                val descendingTurbine =
+                    repository.getAllHabits(SortOrder.Name(ascending = false)).testIn(backgroundScope)
 
-            // Try descending
-            repository.getAllHabits(SortOrder.Name(ascending = false)).test {
-                val list = awaitItem()
-                assertEquals("Should be sorted by name in a descending order", listOf(habit1, habit2), list)
-                cancelAndConsumeRemainingEvents()
+                with(ascendingTurbine) {
+                    val list = expectMostRecentItem()
+                    assertEquals("Should be sorted by name in an ascending order", listOf(habit2, habit1), list)
+                }
+
+                ascendingTurbine.cancelAndConsumeRemainingEvents()
+
+                with(descendingTurbine) {
+                    val list = awaitItem()
+                    assertEquals("Should be sorted by name in a descending order", listOf(habit1, habit2), list)
+                    cancelAndConsumeRemainingEvents()
+                }
             }
         }
 
@@ -242,22 +248,26 @@ class HabitRepositoryTest {
     fun `get all habits should be sorted by creation date`() =
         testScope.runTest {
             val habit1 = Habit(habitId = 1, name = "Z")
-            val habit2 = Habit(habitId = 2, name = "A", createdAt = Date().apply { time += 1000 })
+            val habit2 = Habit(habitId = 2, name = "A", createdAt = Date().apply { time -= 1000 })
             repository.insertHabit(habit1)
             repository.insertHabit(habit2)
 
-            // Try ascending
-            repository.getAllHabits(SortOrder.Creation()).test {
-                val list = awaitItem()
-                assertEquals("Should be sorted by creation date in an ascending order", listOf(habit1, habit2), list)
-                cancelAndConsumeRemainingEvents()
-            }
+            turbineScope {
+                val ascendingTurbine = repository.getAllHabits(SortOrder.Creation()).testIn(backgroundScope)
+                val descendingTurbine =
+                    repository.getAllHabits(SortOrder.Creation(ascending = false)).testIn(backgroundScope)
 
-            // Try descending
-            repository.getAllHabits(SortOrder.Creation(ascending = false)).test {
-                val list = awaitItem()
-                assertEquals("Should be sorted by creation date in a descending order", listOf(habit2, habit1), list)
-                cancelAndConsumeRemainingEvents()
+                with(ascendingTurbine) {
+                    val list = expectMostRecentItem()
+                    assertEquals("Should be sorted by name in an ascending order", listOf(habit2, habit1), list)
+                    cancelAndConsumeRemainingEvents()
+                }
+
+                with(descendingTurbine) {
+                    val list = expectMostRecentItem()
+                    assertEquals("Should be sorted by name in a descending order", listOf(habit1, habit2), list)
+                    cancelAndConsumeRemainingEvents()
+                }
             }
         }
 
@@ -269,16 +279,22 @@ class HabitRepositoryTest {
             repository.insertHabit(habit1)
             repository.insertHabit(habit2)
 
-            repository.getAllHabits(SortOrder.Streak()).test {
-                val list = awaitItem()
-                assertEquals("Should be sorted by streak in an ascending order", listOf(habit1, habit2), list)
-                cancelAndConsumeRemainingEvents()
-            }
+            turbineScope {
+                val ascendingTurbine = repository.getAllHabits(SortOrder.Streak()).testIn(backgroundScope)
+                val descendingTurbine =
+                    repository.getAllHabits(SortOrder.Streak(ascending = false)).testIn(backgroundScope)
 
-            repository.getAllHabits(SortOrder.Streak(ascending = false)).test {
-                val list = awaitItem()
-                assertEquals("Should be sorted by streak in a descending order", listOf(habit2, habit1), list)
-                cancelAndConsumeRemainingEvents()
+                with(ascendingTurbine) {
+                    val list = expectMostRecentItem()
+                    assertEquals("Should be sorted by streak in an ascending order", listOf(habit1, habit2), list)
+                    cancelAndConsumeRemainingEvents()
+                }
+
+                with(descendingTurbine) {
+                    val list = expectMostRecentItem()
+                    assertEquals("Should be sorted by streak in a descending order", listOf(habit2, habit1), list)
+                    cancelAndConsumeRemainingEvents()
+                }
             }
         }
 
@@ -321,7 +337,7 @@ class HabitRepositoryTest {
             val habitId = repository.insertHabit(habit)
 
             repository.getHabitByIdFlow(habitId).test {
-                val emittedHabit = awaitItem()
+                val emittedHabit = expectMostRecentItem()
                 assertNotNull(emittedHabit)
                 assertEquals(habitName, emittedHabit?.name)
                 assertEquals(habitId, emittedHabit?.habitId)
@@ -333,7 +349,6 @@ class HabitRepositoryTest {
     fun `get habit by id flow should return null when non-existent id is provided`() =
         testScope.runTest {
             repository.getHabitByIdFlow(54321L).test {
-                // Non-existent ID
                 assertNull("Flow should emit null for non-existent ID", awaitItem())
                 cancelAndConsumeRemainingEvents()
             }
@@ -348,7 +363,7 @@ class HabitRepositoryTest {
             val habitId = repository.insertHabit(habit)
 
             repository.getHabitByIdFlow(habitId).test {
-                assertEquals(initialName, awaitItem()?.name)
+                assertEquals(initialName, expectMostRecentItem()?.name)
 
                 val habitToUpdate = repository.getHabitById(habitId)!!.copy(name = updatedName)
                 repository.updateHabit(habitToUpdate)
@@ -365,7 +380,7 @@ class HabitRepositoryTest {
             val habitId = repository.insertHabit(habit)
 
             repository.getHabitByIdFlow(habitId).test {
-                assertNotNull("Should emit habit initially", awaitItem())
+                assertNotNull("Should emit habit initially", expectMostRecentItem())
 
                 val habitToDelete = repository.getHabitById(habitId)!!
                 repository.deleteHabit(habitToDelete)

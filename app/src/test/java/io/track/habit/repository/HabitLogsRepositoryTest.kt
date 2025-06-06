@@ -1,10 +1,10 @@
 package io.track.habit.repository
 
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import io.track.habit.data.local.database.entities.HabitLog
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.repository.fake.FakeHabitLogsRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -14,7 +14,6 @@ import org.junit.Before
 import org.junit.Test
 import java.util.Date
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class HabitLogsRepositoryTest {
     private lateinit var repository: HabitLogsRepository
 
@@ -131,9 +130,8 @@ class HabitLogsRepositoryTest {
             repository.insertHabitLog(log3)
 
             repository.getHabitLogsByHabitId(habitId).test {
-                val logs = awaitItem()
+                val logs = expectMostRecentItem()
                 assertEquals(3, logs.size)
-                // Should be ordered by createdAt DESC (most recent first)
                 assertEquals(3, logs[0].streakDuration) // Most recent
                 assertEquals(2, logs[1].streakDuration)
                 assertEquals(1, logs[2].streakDuration) // Oldest
@@ -166,9 +164,10 @@ class HabitLogsRepositoryTest {
             repository.insertHabitLog(log3)
 
             repository.getLongestStreakForHabit(habitId).test {
-                val longestStreak = awaitItem()
+                val longestStreak = expectMostRecentItem()
                 assertNotNull(longestStreak)
                 assertEquals(10, longestStreak?.streakDuration)
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -202,14 +201,14 @@ class HabitLogsRepositoryTest {
             repository.insertHabitLog(log2)
 
             repository.getHabitWithLogs(habitId).test {
-                val result = awaitItem()
+                val result = expectMostRecentItem()
 
-                print(result)
                 assertNotNull(result)
                 assertEquals("Test Habit", result?.habit?.name)
                 assertEquals(2, result?.logs?.size)
                 assertEquals("Evening reflection", result?.logs?.get(0)?.notes)
                 assertEquals("Morning pages", result?.logs?.get(1)?.notes)
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -245,19 +244,13 @@ class HabitLogsRepositoryTest {
             val habitId = 1L
 
             repository.getHabitLogsByHabitId(habitId).test {
-                // Initial empty state
-                val initialLogs = awaitItem()
-                assertTrue(initialLogs.isEmpty())
-
-                // Add first log
                 val log1 = createTestHabitLog(habitId = habitId, streakDuration = 1)
                 repository.insertHabitLog(log1)
 
-                val logsAfterFirst = awaitItem()
+                val logsAfterFirst = expectMostRecentItem()
                 assertEquals(1, logsAfterFirst.size)
                 assertEquals(1, logsAfterFirst[0].streakDuration)
 
-                // Add second log
                 val log2 =
                     createTestHabitLog(
                         habitId = habitId,
@@ -281,27 +274,19 @@ class HabitLogsRepositoryTest {
             val habitId = 1L
 
             repository.getLongestStreakForHabit(habitId).test {
-                // Initial null state
-                val initialLongest = awaitItem()
-                assertNull(initialLongest)
-
-                // Add first log
                 val log1 = createTestHabitLog(habitId = habitId, streakDuration = 5)
                 repository.insertHabitLog(log1)
 
-                val longestAfterFirst = awaitItem()
+                val longestAfterFirst = expectMostRecentItem()
                 assertEquals(5, longestAfterFirst?.streakDuration)
 
-                // Add shorter streak (shouldn't change longest)
                 val log2 = createTestHabitLog(habitId = habitId, streakDuration = 3)
                 repository.insertHabitLog(log2)
 
-                // Add longer streak
-                awaitItem()
                 val log3 = createTestHabitLog(habitId = habitId, streakDuration = 10)
                 repository.insertHabitLog(log3)
 
-                val longestAfterThird = awaitItem()
+                val longestAfterThird = expectMostRecentItem()
                 assertEquals(10, longestAfterThird?.streakDuration)
 
                 cancelAndIgnoreRemainingEvents()
@@ -328,19 +313,24 @@ class HabitLogsRepositoryTest {
                 )
             repository.insertHabitLog(log2ForHabit1)
 
-            repository.getHabitLogsByHabitId(habit1Id).test {
-                val habit1Logs = awaitItem()
-                assertEquals(2, habit1Logs.size)
-                assertEquals(3, habit1Logs[0].streakDuration)
-                assertEquals(5, habit1Logs[1].streakDuration)
-                cancelAndIgnoreRemainingEvents()
-            }
+            turbineScope {
+                val habit1Turbine = repository.getHabitLogsByHabitId(habit1Id).testIn(backgroundScope)
+                val habit2Turbine = repository.getHabitLogsByHabitId(habit2Id).testIn(backgroundScope)
 
-            repository.getHabitLogsByHabitId(habit2Id).test {
-                val habit2Logs = awaitItem()
-                assertEquals(1, habit2Logs.size)
-                assertEquals(8, habit2Logs[0].streakDuration)
-                cancelAndIgnoreRemainingEvents()
+                with(habit1Turbine) {
+                    val habit1Logs = expectMostRecentItem()
+                    assertEquals(2, habit1Logs.size)
+                    assertEquals(3, habit1Logs[0].streakDuration)
+                    assertEquals(5, habit1Logs[1].streakDuration)
+                    cancelAndIgnoreRemainingEvents()
+                }
+
+                with(habit2Turbine) {
+                    val habit2Logs = expectMostRecentItem()
+                    assertEquals(1, habit2Logs.size)
+                    assertEquals(8, habit2Logs[0].streakDuration)
+                    cancelAndIgnoreRemainingEvents()
+                }
             }
         }
 

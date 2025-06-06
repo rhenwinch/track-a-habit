@@ -1,10 +1,12 @@
 package io.track.habit.ui.screens.habits
 
+import androidx.activity.result.launch
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.di.IoDispatcher
 import io.track.habit.domain.datastore.SettingsDataStore
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.HabitWithStreak.Companion.censorName
@@ -12,18 +14,19 @@ import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetRandomQuoteUseCase
 import io.track.habit.domain.utils.SortOrder
-import io.track.habit.domain.utils.coroutines.AppDispatcher.Companion.launchOnIO
 import io.track.habit.domain.utils.coroutines.AppDispatcher.Companion.withIOContext
 import io.track.habit.domain.utils.coroutines.asStateFlow
-import io.track.habit.domain.utils.coroutines.awaitFirst
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,25 +37,28 @@ class HabitsViewModel
         getRandomQuoteUseCase: GetRandomQuoteUseCase,
         private val settingsDataStore: SettingsDataStore,
         private val habitRepository: HabitRepository,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
-        private val _uiState =
-            MutableStateFlow(
-                HabitsUiState(
-                    quote = getRandomQuoteUseCase(),
-                    isCensoringHabitNames =
-                        runBlocking {
-                            settingsDataStore
-                                .generalSettingsFlow
-                                .awaitFirst()
-                                .censorHabitNames
-                        },
-                ),
-            )
+        private val ioScope = CoroutineScope(ioDispatcher)
+
+        private val _uiState = MutableStateFlow(HabitsUiState(quote = getRandomQuoteUseCase()))
         val uiState = _uiState.asStateFlow()
 
         var deleteJob: Job? = null
         var addJob: Job? = null
         var editJob: Job? = null
+
+        init {
+            viewModelScope.launch {
+                val initialCensorSetting =
+                    settingsDataStore
+                        .generalSettingsFlow
+                        .first()
+                        .censorHabitNames
+
+                toggleCensorshipOnNames(initialCensorSetting)
+            }
+        }
 
         val isCensoringHabitNames =
             uiState
@@ -68,7 +74,10 @@ class HabitsViewModel
                 .generalSettingsFlow
                 .map { it.lockResetProgressButton }
                 .distinctUntilChanged()
-                .asStateFlow(scope = viewModelScope)
+                .asStateFlow(
+                    scope = viewModelScope,
+                    initialValue = false,
+                )
 
         val habits =
             combine(
@@ -90,7 +99,7 @@ class HabitsViewModel
             if (deleteJob?.isActive == true) return
 
             deleteJob =
-                launchOnIO {
+                ioScope.launch {
                     _uiState.value.selectedHabits.forEach {
                         deleteHabit(it.habit)
                     }
@@ -102,7 +111,7 @@ class HabitsViewModel
             if (addJob?.isActive == true) return
 
             addJob =
-                launchOnIO {
+                ioScope.launch {
                     habitRepository.insertHabit(habit)
                 }
         }
@@ -110,7 +119,7 @@ class HabitsViewModel
         fun updateHabit(habit: Habit) {
             if (editJob?.isActive == true) return
 
-            editJob = launchOnIO { habitRepository.updateHabit(habit) }
+            editJob = ioScope.launch { habitRepository.updateHabit(habit) }
         }
 
         fun toggleSelectionOnHabit(habit: HabitWithStreak) {
@@ -123,7 +132,7 @@ class HabitsViewModel
                     selectedHabits.add(habit)
                 }
 
-                it.copy(selectedHabits = selectedHabits)
+                it.copy(selectedHabits = selectedHabits.toList())
             }
         }
 
