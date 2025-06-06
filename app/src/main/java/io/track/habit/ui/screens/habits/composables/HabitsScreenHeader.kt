@@ -2,9 +2,9 @@ package io.track.habit.ui.screens.habits.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -35,50 +35,31 @@ import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.ui.theme.TrackAHabitTheme
-import io.track.habit.ui.utils.FireGradientGenerator
 import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
 import io.track.habit.ui.utils.UiConstants.MEDIUM_EMPHASIS
-import java.util.Calendar
 import java.util.Date
 import kotlin.random.Random
 
 @Composable
 fun HabitsScreenHeader(
-    username: String,
     quote: Quote,
     isCensored: Boolean,
     habitWithStreak: HabitWithStreak,
     onEditHabit: () -> Unit,
+    onDeleteHabit: () -> Unit,
     onViewLogs: () -> Unit,
     onResetProgress: () -> Unit,
     onToggleCensorship: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val (habit, streak) = habitWithStreak
-    val streakGradient = FireGradientGenerator.getGradient(habitWithStreak.habit.streakInDays)
 
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(33.dp, Alignment.Top),
         horizontalAlignment = Alignment.Start,
     ) {
-        Box(
-            contentAlignment = Alignment.CenterStart,
-            modifier =
-                Modifier
-                    .padding(top = 20.dp, bottom = 10.dp),
-        ) {
-            Text(
-                text = "${getTimeOfDayGreeting()}, $username",
-                style =
-                    LocalTextStyle.current.copy(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-            )
-        }
-
         CommonLabel(text = stringResource(R.string.habit_name)) {
             HabitNameWithVisibilityToggle(
                 habit = habit,
@@ -126,7 +107,7 @@ fun HabitsScreenHeader(
             )
         }
 
-        Row(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             CommonButton(
@@ -145,9 +126,16 @@ fun HabitsScreenHeader(
 
             CommonButton(
                 icon = painterResource(id = R.drawable.sad_emoji),
-                text = stringResource(R.string.reset),
+                text = stringResource(R.string.reset_progress),
                 contentDescription = stringResource(R.string.reset_progress_icon_content_desc),
                 onClick = onResetProgress,
+            )
+
+            CommonButton(
+                icon = painterResource(id = R.drawable.delete_colored),
+                contentDescription = stringResource(R.string.delete_icon_content_desc),
+                text = stringResource(R.string.delete),
+                onClick = onDeleteHabit,
             )
         }
 
@@ -232,18 +220,6 @@ private fun HabitNameWithVisibilityToggle(
 }
 
 @Composable
-private fun getTimeOfDayGreeting(): String {
-    val calendar = Calendar.getInstance()
-    val hourOfDay = calendar.get(Calendar.HOUR_OF_DAY)
-
-    return when (hourOfDay) {
-        in 0..11 -> stringResource(R.string.good_morning)
-        in 12..17 -> stringResource(R.string.good_afternoon)
-        else -> stringResource(R.string.good_evening)
-    }
-}
-
-@Composable
 private fun CommonButton(
     icon: Painter,
     text: String?,
@@ -287,7 +263,6 @@ private fun HabitsScreenHeaderPreview() {
                         .padding(horizontal = UiConstants.ScreenPaddingHorizontal),
             ) {
                 HabitsScreenHeader(
-                    username = "John",
                     isCensored = false,
                     quote = PreviewMocks.getQuote(),
                     habitWithStreak =
@@ -308,6 +283,7 @@ private fun HabitsScreenHeaderPreview() {
                             streak = PreviewMocks.getStreak(),
                         ),
                     onEditHabit = {},
+                    onDeleteHabit = {},
                     onViewLogs = {},
                     onResetProgress = {},
                     onToggleCensorship = {},
