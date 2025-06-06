@@ -1,6 +1,5 @@
 package io.track.habit.ui.screens.habits
 
-import androidx.activity.result.launch
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,7 +13,6 @@ import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetRandomQuoteUseCase
 import io.track.habit.domain.utils.SortOrder
-import io.track.habit.domain.utils.coroutines.AppDispatcher.Companion.withIOContext
 import io.track.habit.domain.utils.coroutines.asStateFlow
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -27,7 +25,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
+import kotlin.math.max
 
 @HiltViewModel
 class HabitsViewModel
@@ -44,23 +44,45 @@ class HabitsViewModel
         private val _uiState = MutableStateFlow(HabitsUiState(quote = getRandomQuoteUseCase()))
         val uiState = _uiState.asStateFlow()
 
-        var deleteJob: Job? = null
-        var addJob: Job? = null
-        var editJob: Job? = null
+        private var deleteJob: Job? = null
+        private var resetProgressJob: Job? = null
+        private var changeShowcaseJob: Job? = null
 
         init {
             viewModelScope.launch {
-                val initialCensorSetting =
+                val generalSettings =
                     settingsDataStore
                         .generalSettingsFlow
                         .first()
-                        .censorHabitNames
 
-                toggleCensorshipOnNames(initialCensorSetting)
+                val initialCensorSetting = generalSettings.censorHabitNames
+                val initialShowcasedHabitId = generalSettings.lastShowcasedHabitId
+
+                val habits = getHabitsWithStreaksUseCase().first()
+                val habit = habits.indexOfFirst { it.habit.habitId == initialShowcasedHabitId }.toLong()
+
+                _uiState.update {
+                    it.copy(
+                        isCensoringHabitNames = initialCensorSetting,
+                        habitIdToShow = max(habit, 0L),
+                        isInitialized = true,
+                    )
+                }
             }
         }
 
-        val isCensoringHabitNames =
+        val username by lazy {
+            settingsDataStore
+                .generalSettingsFlow
+                .map { it.userName }
+                .distinctUntilChanged()
+                .asStateFlow(
+                    scope = viewModelScope,
+                    initialValue = "",
+                )
+        }
+
+        val isCensoringHabitNames by lazy {
             uiState
                 .map { it.isCensoringHabitNames }
                 .distinctUntilChanged()
@@ -68,6 +90,7 @@ class HabitsViewModel
                     scope = viewModelScope,
                     initialValue = uiState.value.isCensoringHabitNames,
                 )
+        }
 
         val isResetProgressButtonLocked =
             settingsDataStore
@@ -79,7 +102,7 @@ class HabitsViewModel
                     initialValue = false,
                 )
 
-        val habits =
+        val habits by lazy {
             combine(
                 getHabitsWithStreaksUseCase(),
                 this@HabitsViewModel.isCensoringHabitNames,
@@ -89,76 +112,62 @@ class HabitsViewModel
                 scope = viewModelScope,
                 initialValue = emptyList(),
             )
+        }
 
-        suspend fun deleteHabit(habit: Habit) =
-            withIOContext {
-                habitRepository.deleteHabit(habit)
-            }
-
-        fun deleteSelectedHabits() {
+        fun deleteHabit(habit: Habit) {
             if (deleteJob?.isActive == true) return
 
             deleteJob =
                 ioScope.launch {
-                    _uiState.value.selectedHabits.forEach {
-                        deleteHabit(it.habit)
-                    }
-                    unselectAll()
+                    habitRepository.deleteHabit(habit)
                 }
         }
 
-        fun addHabit(habit: Habit) {
-            if (addJob?.isActive == true) return
+        fun resetProgress(habit: Habit) {
+            if (resetProgressJob?.isActive == true) return
 
-            addJob =
+            resetProgressJob =
                 ioScope.launch {
-                    habitRepository.insertHabit(habit)
+                    val originalHabit = habitRepository.getHabitById(habit.habitId)!!
+
+                    habitRepository.updateHabit(
+                        originalHabit.copy(lastResetAt = Date()),
+                    )
                 }
         }
 
-        fun updateHabit(habit: Habit) {
-            if (editJob?.isActive == true) return
-
-            editJob = ioScope.launch { habitRepository.updateHabit(habit) }
-        }
-
-        fun toggleSelectionOnHabit(habit: HabitWithStreak) {
+        fun onHabitLongClick(habit: HabitWithStreak?) {
             _uiState.update {
-                val selectedHabits = it.selectedHabits.toMutableList()
-
-                if (selectedHabits.contains(habit)) {
-                    selectedHabits.remove(habit)
-                } else {
-                    selectedHabits.add(habit)
-                }
-
-                it.copy(selectedHabits = selectedHabits.toList())
+                it.copy(longPressedHabit = habit)
             }
         }
 
-        fun unselectAll() {
-            _uiState.update { it.copy(selectedHabits = emptyList()) }
-        }
-
-        fun toggleSortOrder(sortOrder: SortOrder) {
+        fun onSortOrderSelect(sortOrder: SortOrder) {
             _uiState.update { it.copy(sortOrder = sortOrder) }
-        }
-
-        fun toggleDeleteConfirmation(show: Boolean) {
-            _uiState.update { it.copy(isShowingDeleteConfirmation = show) }
-        }
-
-        fun toggleAddDialog(show: Boolean) {
-            _uiState.update { it.copy(isShowingAddDialog = show) }
-        }
-
-        fun toggleEditDialog(show: Boolean) {
-            _uiState.update { it.copy(isShowingEditDialog = show) }
         }
 
         fun toggleCensorshipOnNames(show: Boolean) {
             _uiState.update {
                 it.copy(isCensoringHabitNames = show)
+            }
+        }
+
+        fun toggleShowcaseHabit(habit: HabitWithStreak) {
+            _uiState.update { it.copy(habitIdToShow = habit.habit.habitId) }
+
+            if (habit != null) {
+                if (changeShowcaseJob?.isActive == true) {
+                    changeShowcaseJob?.cancel()
+                }
+
+                changeShowcaseJob =
+                    ioScope.launch {
+                        val currentSettings = settingsDataStore.generalSettingsFlow.first()
+
+                        settingsDataStore.updateSettings(
+                            currentSettings.copy(lastShowcasedHabitId = habit.habit.habitId),
+                        )
+                    }
             }
         }
     }
