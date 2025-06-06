@@ -1,5 +1,6 @@
 package io.track.habit.ui.screens.habits.composables
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,13 +44,18 @@ import java.util.Locale
 internal fun HabitCard(
     habitWithStreak: HabitWithStreak,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     OutlinedCard(
-        onClick = onClick,
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.outlinedCardColors(),
         border = CardDefaults.outlinedCardBorder(),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+        modifier = modifier
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -164,6 +170,7 @@ private fun HabitCardBasePreview() {
                                     ),
                             ),
                         onClick = {},
+                        onLongClick = {},
                     )
                 }
             }

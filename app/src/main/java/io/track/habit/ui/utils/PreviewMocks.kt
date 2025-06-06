@@ -16,9 +16,11 @@ object PreviewMocks {
         )
 
     fun getHabit(
+        habitId: Long = 0,
         date: Date = Date(),
         suffix: String = "",
     ) = Habit(
+        habitId = habitId,
         name = "Mock Habit${if (suffix.isNotBlank()) " $suffix" else ""}",
         lastResetAt = date,
     )
