@@ -1,5 +1,8 @@
 package io.track.habit.domain.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class Quote(
     val message: String,
     val author: String,
@@ -9,6 +12,6 @@ data class Quote(
             $message
 
             — $author
-        """.trimIndent()
+            """.trimIndent()
     }
 }
