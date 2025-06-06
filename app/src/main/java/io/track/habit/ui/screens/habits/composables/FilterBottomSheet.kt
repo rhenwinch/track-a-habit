@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -37,7 +38,7 @@ import io.track.habit.ui.theme.TrackAHabitTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun FilterBottomSheet(
+fun FilterBottomSheet(
     currentSortOrder: SortOrder,
     onSortOrderSelect: (SortOrder) -> Unit,
     onDismiss: () -> Unit,
@@ -127,6 +128,7 @@ private fun SortOption(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
             Modifier
+                .clip(MaterialTheme.shapes.small)
                 .clickable(onClick = onClick)
                 .padding(8.dp),
     ) {
