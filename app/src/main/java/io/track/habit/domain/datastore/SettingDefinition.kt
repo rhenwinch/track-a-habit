@@ -1,5 +1,8 @@
 package io.track.habit.domain.datastore
 
+import io.track.habit.domain.utils.StringResource
+import io.track.habit.domain.utils.stringLiteral
+
 /**
  * Represents the definition of a setting in the application.
  *
@@ -19,7 +22,7 @@ data class SettingDefinition<T>(
     val key: String,
     val defaultValue: T,
     val type: SettingType<T>,
-    val displayName: String,
-    val description: String? = null,
-    val category: String = "general",
+    val displayName: StringResource,
+    val description: StringResource? = null,
+    val category: StringResource = stringLiteral("general"),
 )

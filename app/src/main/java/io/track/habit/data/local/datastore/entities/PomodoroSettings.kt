@@ -2,9 +2,11 @@ package io.track.habit.data.local.datastore.entities
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.longPreferencesKey
+import io.track.habit.R
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingEntity
 import io.track.habit.domain.datastore.SettingType
+import io.track.habit.domain.utils.stringRes
 
 /**
  * Data class representing Pomodoro settings.
@@ -53,8 +55,8 @@ object PomodoroSettingsRegistry {
             key = "rest_time_in_ms",
             defaultValue = 5 * (1000 * 60),
             type = SettingType.LongType,
-            displayName = "Rest Time",
-            description = "Time for the rest period",
+            displayName = stringRes(R.string.settings_rest_time),
+            description = stringRes(R.string.settings_rest_time_desc),
         )
 
     val WORK_TIME_IN_MS =
@@ -62,7 +64,7 @@ object PomodoroSettingsRegistry {
             key = "work_time_in_ms",
             defaultValue = 25 * (1000 * 60),
             type = SettingType.LongType,
-            displayName = "Work Time",
-            description = "Time for the work period",
+            displayName = stringRes(R.string.settings_work_time),
+            description = stringRes(R.string.settings_work_time_desc),
         )
 }
