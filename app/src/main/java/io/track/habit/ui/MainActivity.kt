@@ -17,6 +17,7 @@ import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
 import io.track.habit.ui.navigation.BottomNavBar
 import io.track.habit.ui.navigation.NavRoute
+import io.track.habit.ui.screens.habits.HabitsScreen
 import io.track.habit.ui.theme.TrackAHabitTheme
 
 @AndroidEntryPoint
@@ -59,7 +60,7 @@ private fun App() {
             entryProvider =
                 entryProvider {
                     entry<NavRoute.Companion.Habits> {
-                        Greeting("Habits")
+                        HabitsScreen()
                     }
 
                     entry<NavRoute.Companion.Streaks> {
