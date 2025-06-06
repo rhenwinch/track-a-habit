@@ -2,8 +2,7 @@ package io.track.habit.ui.screens.habits.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -19,8 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
@@ -33,6 +34,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun StreakCounter(
     streak: Int,
+    style: TextStyle,
+    iconSize: DpSize,
     modifier: Modifier = Modifier,
 ) {
     val streakGradient = FireGradientGenerator.getGradient(streak)
@@ -45,27 +48,14 @@ fun StreakCounter(
         GradientFireIcon(
             painter = painterResource(R.drawable.streak_filled),
             contentDescription = stringResource(R.string.streak_icon_content_desc),
-            modifier =
-                Modifier
-                    .width(22.dp)
-                    .height(27.dp),
+            modifier = Modifier.size(iconSize),
             gradient = streakGradient,
         )
 
         GradientText(
             text = streak.toString(),
             gradient = streakGradient,
-            style =
-                LocalTextStyle.current.copy(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    shadow =
-                        Shadow(
-                            color = Color.Black,
-                            offset = Offset(2f, 2f),
-                            blurRadius = 2f,
-                        ),
-                ),
+            style = style,
         )
     }
 }
@@ -84,7 +74,21 @@ private fun StreakCounterPreview() {
 
     TrackAHabitTheme {
         Surface {
-            StreakCounter(streakDays)
+            StreakCounter(
+                streakDays,
+                iconSize = DpSize(22.dp, 27.dp),
+                style =
+                    LocalTextStyle.current.copy(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        shadow =
+                            Shadow(
+                                color = Color.Black,
+                                offset = Offset(2f, 2f),
+                                blurRadius = 2f,
+                            ),
+                    ),
+            )
         }
     }
 }

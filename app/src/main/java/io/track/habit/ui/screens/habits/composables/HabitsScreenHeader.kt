@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -29,14 +27,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
-import io.track.habit.ui.composables.GradientFireIcon
-import io.track.habit.ui.composables.GradientText
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.FireGradientGenerator
 import io.track.habit.ui.utils.PreviewMocks
@@ -102,36 +99,21 @@ fun HabitsScreenHeader(
         }
 
         CommonLabel(text = stringResource(R.string.youve_been_on_track_for)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                GradientFireIcon(
-                    painter = painterResource(R.drawable.streak_filled),
-                    contentDescription = stringResource(R.string.streak_icon_content_desc),
-                    modifier =
-                        Modifier
-                            .width(24.dp)
-                            .height(31.dp),
-                    gradient = streakGradient,
-                )
-
-                GradientText(
-                    text = habitWithStreak.formattedDurationSinceReset,
-                    gradient = streakGradient,
-                    style =
-                        LocalTextStyle.current.copy(
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Black,
-                            shadow =
-                                Shadow(
-                                    color = Color.Black,
-                                    offset = Offset(2f, 2f),
-                                    blurRadius = 2f,
-                                ),
-                        ),
-                )
-            }
+            StreakCounter(
+                streak = habitWithStreak.habit.streakInDays,
+                iconSize = DpSize(24.dp, 31.dp),
+                style =
+                    LocalTextStyle.current.copy(
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.Black,
+                        shadow =
+                            Shadow(
+                                color = Color.Black,
+                                offset = Offset(2f, 2f),
+                                blurRadius = 2f,
+                            ),
+                    ),
+            )
 
             Text(
                 text = stringResource(R.string.since_date_format, habitWithStreak.formattedActiveSinceDate),
