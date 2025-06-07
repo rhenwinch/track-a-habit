@@ -1,7 +1,6 @@
 package io.track.habit.domain.usecase
 
 import io.track.habit.domain.model.HabitWithStreak
-import io.track.habit.domain.model.HabitWithStreak.Companion.censor
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.utils.SortOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,10 +15,7 @@ class GetHabitsWithStreaksUseCase
         private val getStreakByDaysUseCase: GetStreaksByDaysUseCase,
     ) {
         @OptIn(ExperimentalCoroutinesApi::class)
-        operator fun invoke(
-            censorHabitNames: Boolean,
-            sortOrder: SortOrder = SortOrder.Streak(),
-        ): Flow<List<HabitWithStreak>> {
+        operator fun invoke(sortOrder: SortOrder = SortOrder.Streak()): Flow<List<HabitWithStreak>> {
             return habitRepository.getAllHabits(sortOrder).mapLatest {
                 it.map { habit ->
                     val streak = getStreakByDaysUseCase(habit.streakInDays)
@@ -27,7 +23,6 @@ class GetHabitsWithStreaksUseCase
                     HabitWithStreak(
                         habit = habit,
                         streak = streak,
-                        habitName = habit.name.censor(censorHabitNames),
                     )
                 }
             }

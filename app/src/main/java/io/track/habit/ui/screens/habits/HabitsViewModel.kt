@@ -63,7 +63,7 @@ class HabitsViewModel
                 val initialCensorSetting = generalSettings.censorHabitNames
                 val initialShowcasedHabitId = generalSettings.lastShowcasedHabitId
 
-                val habits = getHabitsWithStreaksUseCase(initialCensorSetting).first()
+                val habits = getHabitsWithStreaksUseCase().first()
                 val habit =
                     habits.fastFirstOrNull { it.habit.habitId == initialShowcasedHabitId }
                         ?: habits.firstOrNull()
@@ -101,13 +101,10 @@ class HabitsViewModel
 
         val habits by lazy {
             uiState
-                .map { it.sortOrder to it.isCensoringHabitNames }
+                .map { it.sortOrder }
                 .distinctUntilChanged()
-                .flatMapLatest { (sortOrder, censorHabitNames) ->
-                    getHabitsWithStreaksUseCase(
-                        censorHabitNames = censorHabitNames,
-                        sortOrder = sortOrder,
-                    ).map { habits ->
+                .flatMapLatest { sortOrder ->
+                    getHabitsWithStreaksUseCase(sortOrder = sortOrder).map { habits ->
                         updateShowcasedHabit(habits)
                         habits
                     }

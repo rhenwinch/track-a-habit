@@ -15,13 +15,11 @@ import java.util.Locale
  *
  * @property habit The habit entity containing details like name and last reset timestamp.
  * @property streak The streak associated with the habit.
- * @property habitName The name of the habit, which can be censored or uncensored.
  */
 @Immutable
 data class HabitWithStreak(
     val habit: Habit,
     val streak: Streak,
-    val habitName: String,
 ) {
     /**
      * Formats the `lastResetAt` date of the habit into a human-readable string.
@@ -76,6 +74,7 @@ data class HabitWithStreak(
                     val decades = totalDecades.toInt()
                     if (decades == 1) "1 decade" else "$decades decades"
                 }
+
                 totalYears >= 1 -> {
                     val years = totalYears.toInt()
                     val remainingDays = (totalDays - years * 365).toInt()
@@ -87,10 +86,12 @@ data class HabitWithStreak(
                             val monthText = if (remainingMonths == 1) "1 mo" else "$remainingMonths mos"
                             "$yearText & $monthText"
                         }
+
                         years == 1 -> "1 year"
                         else -> "$years years"
                     }
                 }
+
                 totalMonths >= 1 -> {
                     val months = totalMonths.toInt()
                     val remainingDays = (totalDays - months * 30).toInt()
@@ -102,10 +103,12 @@ data class HabitWithStreak(
                             val weekText = if (remainingWeeks == 1) "1 wk" else "$remainingWeeks wks"
                             "$monthText & $weekText"
                         }
+
                         months == 1 -> "1 month"
                         else -> "$months months"
                     }
                 }
+
                 totalWeeks >= 1 -> {
                     val weeks = totalWeeks.toInt()
                     val remainingDays = (totalDays - weeks * 7).toInt()
@@ -116,10 +119,12 @@ data class HabitWithStreak(
                             val dayText = if (remainingDays == 1) "1 day" else "$remainingDays days"
                             "$weekText & $dayText"
                         }
+
                         weeks == 1 -> "1 week"
                         else -> "$weeks weeks"
                     }
                 }
+
                 totalDays >= 1 -> {
                     val days = totalDays.toInt()
                     val remainingHours = (totalHours - days * 24).toInt()
@@ -130,10 +135,12 @@ data class HabitWithStreak(
                             val hourText = if (remainingHours == 1) "1 hr" else "$remainingHours hrs"
                             "$dayText & $hourText"
                         }
+
                         days == 1 -> "1 day"
                         else -> "$days days"
                     }
                 }
+
                 totalHours >= 1 -> {
                     val hours = totalHours.toInt()
                     val remainingMinutes = (totalMinutes - hours * 60).toInt()
@@ -144,10 +151,12 @@ data class HabitWithStreak(
                             val minuteText = if (remainingMinutes == 1) "1 min" else "$remainingMinutes mins"
                             "$hourText & $minuteText"
                         }
+
                         hours == 1 -> "1 hour"
                         else -> "$hours hours"
                     }
                 }
+
                 totalMinutes >= 1 -> {
                     val minutes = totalMinutes.toInt()
                     val remainingSeconds = (totalSeconds - minutes * 60).toInt()
@@ -158,49 +167,52 @@ data class HabitWithStreak(
                             val secondText = if (remainingSeconds == 1) "1 sec" else "$remainingSeconds secs"
                             "$minuteText & $secondText"
                         }
+
                         minutes == 1 -> "1 minute"
                         else -> "$minutes minutes"
                     }
                 }
+
                 totalSeconds >= 1 -> {
                     val seconds = totalSeconds.toInt()
                     if (seconds == 1) "1 second" else "$seconds seconds"
                 }
+
                 else -> "0 seconds"
             }
         }
 
-    companion object {
-        private fun randomLetter(): Char = ('A'..'z').random()
+    fun getName(isCensored: Boolean): String {
+        return if (isCensored) {
+            val censoredName =
+                when {
+                    habit.name.length <= 2 -> {
+                        buildString {
+                            append(habit.name)
+                            while (length < 3) {
+                                val lastChar = lastOrNull() ?: 'A'
+                                val shiftedChar =
+                                    when {
+                                        lastChar.isLetter() -> {
+                                            val base = if (lastChar.isUpperCase()) 'A' else 'a'
+                                            ((lastChar.code - base.code + 3) % 26 + base.code).toChar()
+                                        }
 
-        /**
-         * Censors the name of the habit based on the `isCensored` flag.
-         * If censored, the name is truncated or padded with random letters and asterisks.
-         *
-         * @param isCensored Flag indicating whether the name should be censored.
-         * @return A new `HabitWithStreak` instance with the censored or uncensored name.
-         */
-        fun String.censor(isCensored: Boolean): String {
-            return if (isCensored) {
-                val censoredName =
-                    when {
-                        length <= 2 -> {
-                            buildString {
-                                append(this)
-                                while (length < 3) {
-                                    append(randomLetter())
-                                }
-                            }.take(2)
-                        }
+                                        else -> 'A'
+                                    }
 
-                        else -> take(2)
+                                append(shiftedChar)
+                            }
+                        }.take(2)
                     }
-                val paddedName = censoredName.padEnd(8, '*')
 
-                paddedName
-            } else {
-                this
-            }
+                    else -> habit.name.take(2)
+                }
+            val paddedName = censoredName.padEnd(8, '*')
+
+            paddedName
+        } else {
+            habit.name
         }
     }
 }

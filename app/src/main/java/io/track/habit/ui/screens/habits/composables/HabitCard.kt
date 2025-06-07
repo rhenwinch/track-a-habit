@@ -43,6 +43,7 @@ import java.util.Locale
 @Composable
 internal fun HabitCard(
     habitWithStreak: HabitWithStreak,
+    isCensored: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -110,7 +111,7 @@ internal fun HabitCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = habitWithStreak.habitName,
+                    text = habitWithStreak.getName(isCensored = isCensored),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style =
@@ -158,6 +159,7 @@ private fun HabitCardBasePreview() {
                         }
 
                     HabitCard(
+                        isCensored = false,
                         habitWithStreak =
                             HabitWithStreak(
                                 habit =
@@ -169,7 +171,6 @@ private fun HabitCardBasePreview() {
                                     PreviewMocks.getStreak(
                                         suffix = it.toString(),
                                     ),
-                                habitName = "Habit Name $it",
                             ),
                         onClick = {},
                         onLongClick = {},

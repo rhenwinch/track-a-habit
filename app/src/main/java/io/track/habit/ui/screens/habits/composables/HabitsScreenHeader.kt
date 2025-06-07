@@ -57,7 +57,8 @@ fun HabitsScreenHeader(
     onToggleCensorship: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val (_, streak, habitName) = habitWithStreak
+    val (_, streak) = habitWithStreak
+    val habitName = habitWithStreak.getName(isCensored = isCensored)
     val formattedActiveSinceDate by remember {
         derivedStateOf {
             habitWithStreak.formattedActiveSinceDate
@@ -314,7 +315,6 @@ private fun HabitsScreenHeaderPreview() {
                                             },
                                 ),
                             streak = PreviewMocks.getStreak(),
-                            habitName = "Morning Run",
                         ),
                     onEditHabit = {},
                     onDeleteHabit = {},

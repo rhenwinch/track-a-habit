@@ -233,6 +233,7 @@ fun HabitsScreenContent(
                             if (habitWithStreak != habitToShowcase) {
                                 HabitCard(
                                     habitWithStreak = habitWithStreak,
+                                    isCensored = isCensoringHabitNames,
                                     onClick = { onHabitClick(habitWithStreak) },
                                     onLongClick = { onHabitLongClick(habitWithStreak) },
                                     modifier =
@@ -253,7 +254,7 @@ fun HabitsScreenContent(
     if (habitToShowcase != null) {
         if (showEditDialog) {
             EditHabitDialog(
-                initialHabitName = habitToShowcase.habitName,
+                initialHabitName = habitToShowcase.getName(isCensoringHabitNames),
                 onDismissRequest = { showEditDialog = false },
                 onSaveClick = { updatedHabit ->
                     onEditHabit(habitToShowcase.habit.copy(name = updatedHabit))
@@ -427,7 +428,6 @@ private fun HabitsScreenPreview() {
                                 habitId = index.toLong(),
                             ),
                         streak = PreviewMocks.getStreak(suffix = index.toString()),
-                        habitName = "Habit $index",
                     )
                 }
 
