@@ -108,6 +108,14 @@ private fun CreateScreenContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Text(
+                text = stringResource(R.string.habit_name_privacy_message),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                style = MaterialTheme.typography.bodySmall,
+            )
+
             OutlinedTextField(
                 value = habitName,
                 onValueChange = onHabitNameChange,
