@@ -6,7 +6,9 @@
     <string name="pomodoro">Pomodoro</string>
     <string name="settings">Settings</string>
 
+    <string name="add_a_habit">Add a habit</string>
     <string name="add_habit">Add a habit</string>
+    <string name="add_icon_content_desc">Add icon</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="delete">Delete</string>

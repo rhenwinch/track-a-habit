@@ -1,6 +1,9 @@
 package io.track.habit.ui.screens.habits
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -25,8 +29,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -50,6 +56,7 @@ import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.utils.SortOrder
 import io.track.habit.ui.composables.AlertDialog
+import io.track.habit.ui.screens.habits.composables.AddHabitFab
 import io.track.habit.ui.screens.habits.composables.EditHabitDialog
 import io.track.habit.ui.screens.habits.composables.FilterBottomSheet
 import io.track.habit.ui.screens.habits.composables.HabitCard
@@ -99,6 +106,9 @@ fun HabitsScreen(
                 sortOrder = uiState.sortOrder,
                 onSortOrderSelect = viewModel::onSortOrderSelect,
                 onEditHabit = viewModel::updateHabit,
+                onAddHabit = {
+                    // TODO(Implement navigation or dialog for adding a habit)
+                },
                 onViewLogs = {
                     // Handle view logs action
                     // Navigation or dialog would be handled here
@@ -127,49 +137,74 @@ fun HabitsScreenContent(
     onViewLogs: (Habit) -> Unit,
     onResetProgress: (ResetDetails) -> Unit,
     onDeleteHabit: (Habit) -> Unit,
+    onAddHabit: () -> Unit,
     onToggleCensorship: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
+    val gridState = rememberLazyGridState()
+
+    val isFabExtended by
+        remember {
+            derivedStateOf {
+                // Show extended FAB when at the top or when not actively scrolling
+                gridState.firstVisibleItemIndex == 0 || !gridState.isScrollInProgress
+            }
+        }
 
     var showEditDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var showResetProgressDialog by rememberSaveable { mutableStateOf(false) }
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
 
-    AnimatedContent(
-        targetState = habits.isNotEmpty(),
-        modifier = modifier.fillMaxSize(),
-    ) {
-        if (it) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = "${getTimeOfDayGreeting()}, $username",
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style =
-                                    LocalTextStyle.current.copy(
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                    ),
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            AnimatedVisibility(
+                visible = habits.isNotEmpty(),
+                label = "HabitsScreenTopAppBar",
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "${getTimeOfDayGreeting()}, $username",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style =
+                                LocalTextStyle.current.copy(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = { showSortSheet = true }) {
+                            Icon(
+                                painter = painterResource(R.drawable.filter),
+                                contentDescription = stringResource(R.string.filter_icon_content_desc),
                             )
-                        },
-                        actions = {
-                            IconButton(onClick = { showSortSheet = true }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.filter),
-                                    contentDescription = stringResource(R.string.filter_icon_content_desc),
-                                )
-                            }
-                        },
-                    )
-                },
-            ) { innerPadding ->
+                        }
+                    },
+                )
+            }
+        },
+        floatingActionButton = {
+            AddHabitFab(
+                onClick = onAddHabit,
+                isExtended = isFabExtended,
+            )
+        },
+    ) { innerPadding ->
+        AnimatedContent(
+            targetState = habits.isNotEmpty(),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            if (it) {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(300.dp),
+                    state = gridState,
                     contentPadding =
                         PaddingValues(
                             horizontal = UiConstants.ScreenPaddingHorizontal,
@@ -226,9 +261,9 @@ fun HabitsScreenContent(
                         }
                     }
                 }
+            } else {
+                EmptyDataScreen()
             }
-        } else {
-            EmptyDataScreen()
         }
     }
 
@@ -433,6 +468,7 @@ private fun HabitsScreenPreview() {
                 onResetProgress = {},
                 onToggleCensorship = {},
                 onSortOrderSelect = {},
+                onAddHabit = {},
             )
         }
     }
