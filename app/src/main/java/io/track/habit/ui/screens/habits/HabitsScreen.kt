@@ -199,10 +199,8 @@ fun HabitsScreenContent(
                         ),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        val habitToShow = habits.getOrNull(indexOfHabitToShow) ?: habits.first()
-
                         AnimatedContent(
-                            targetState = habitToShow,
+                            targetState = habits.getOrNull(indexOfHabitToShow),
                             label = "HabitsScreenHeader",
                             transitionSpec = {
                                 val initialOffsetX = { fullWidth: Int -> fullWidth / 5 }
@@ -214,19 +212,21 @@ fun HabitsScreenContent(
                                     (fadeOut(targetAlpha = 0.3f) + slideOutHorizontally(targetOffsetX = targetOffsetX))
                             },
                             modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            HabitsScreenHeader(
-                                quote = quote,
-                                isResetProgressButtonLocked = isResetProgressButtonLocked,
-                                isCensored = isCensoringHabitNames,
-                                habitWithStreak = it,
-                                onEditHabit = { showEditDialog = true },
-                                onDeleteHabit = { showDeleteDialog = true },
-                                onViewLogs = { onViewLogs(habitToShow.habit) },
-                                onResetProgress = { showResetProgressDialog = true },
-                                onToggleCensorship = onToggleCensorship,
-                                modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
-                            )
+                        ) { habitWithStreak ->
+                            if (habitWithStreak != null) {
+                                HabitsScreenHeader(
+                                    quote = quote,
+                                    isResetProgressButtonLocked = isResetProgressButtonLocked,
+                                    isCensored = isCensoringHabitNames,
+                                    habitWithStreak = habitWithStreak,
+                                    onEditHabit = { showEditDialog = true },
+                                    onDeleteHabit = { showDeleteDialog = true },
+                                    onViewLogs = { onViewLogs(habitWithStreak.habit) },
+                                    onResetProgress = { showResetProgressDialog = true },
+                                    onToggleCensorship = onToggleCensorship,
+                                    modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
+                                )
+                            }
                         }
                     }
 
