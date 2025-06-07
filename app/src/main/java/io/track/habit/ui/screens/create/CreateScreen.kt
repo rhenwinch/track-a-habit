@@ -52,10 +52,16 @@ import java.util.Locale
 
 @Composable
 fun CreateScreen(
-    viewModel: CreateViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
+    viewModel: CreateViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.isCreationSuccessful) {
+        if (uiState.isCreationSuccessful) {
+            onNavigateBack()
+        }
+    }
 
     CreateScreenContent(
         habitName = uiState.habitName,
@@ -64,12 +70,7 @@ fun CreateScreen(
         onHabitNameChange = viewModel::updateHabitName,
         onDateSelect = viewModel::updateSelectedDate,
         onNavigateBack = onNavigateBack,
-        onCreateHabit = {
-            viewModel.createHabit()
-            if (uiState.isCreationSuccessful) {
-                onNavigateBack()
-            }
-        },
+        onCreateHabit = viewModel::createHabit,
     )
 }
 
@@ -110,9 +111,10 @@ private fun CreateScreenContent(
         ) {
             Text(
                 text = stringResource(R.string.habit_name_privacy_message),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp),
                 style = MaterialTheme.typography.bodySmall,
             )
 
