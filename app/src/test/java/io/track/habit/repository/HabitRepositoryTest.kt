@@ -9,7 +9,6 @@ import io.track.habit.domain.utils.SortOrder
 import io.track.habit.repository.fake.FakeHabitRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -24,7 +23,6 @@ class HabitRepositoryTest {
     private lateinit var repository: HabitRepository
 
     private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setUp() {
@@ -33,7 +31,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `insert habit should add habit to repository and return positive id`() =
-        testScope.runTest {
+        runTest {
             val habitName = "Read a book"
             val newHabit = Habit(name = habitName)
             val habitId = repository.insertHabit(newHabit)
@@ -46,7 +44,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `insert habit should fail when duplicate name is provided`() =
-        testScope.runTest {
+        runTest {
             val habitName = "Unique Name"
             val habit1 = Habit(name = habitName, createdAt = Date())
             val id1 = repository.insertHabit(habit1)
@@ -77,7 +75,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `delete habit should remove habit from repository`() =
-        testScope.runTest {
+        runTest {
             val habit = Habit(name = "Exercise")
             val habitId = repository.insertHabit(habit)
 
@@ -90,7 +88,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `delete habit should not affect other habits when non-existent habit is deleted`() =
-        testScope.runTest {
+        runTest {
             val existingHabit = Habit(name = "Meditate")
             val existingHabitId = repository.insertHabit(existingHabit)
 
@@ -106,7 +104,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `update habit should not create new habit when non-existent habit is updated`() =
-        testScope.runTest {
+        runTest {
             val existingHabit = Habit(name = "Journaling")
             repository.insertHabit(existingHabit)
             val initialCount = repository.getAllHabits().first().size
@@ -124,7 +122,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get all habits should return empty list when no habits exist`() =
-        testScope.runTest {
+        runTest {
             repository.getAllHabits().test {
                 assertTrue("Should emit an empty list initially", expectMostRecentItem().isEmpty())
                 cancelAndConsumeRemainingEvents()
@@ -133,7 +131,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get all habits should return all inserted habits`() =
-        testScope.runTest {
+        runTest {
             val habit1 = Habit(name = "Yoga")
             val habit2 = Habit(name = "Coding practice")
             repository.insertHabit(habit1)
@@ -150,7 +148,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get all habits should emit updates when habits are added`() =
-        testScope.runTest {
+        runTest {
             repository.getAllHabits().test {
                 assertTrue("Initial list should be empty", awaitItem().isEmpty())
 
@@ -174,7 +172,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get all habits should emit updates when habits are deleted`() =
-        testScope.runTest {
+        runTest {
             val habit1 = Habit(name = "To Delete")
             val habit2 = Habit(name = "To Keep")
             val id1 = repository.insertHabit(habit1)
@@ -196,7 +194,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get all habits should emit updates when habits are updated`() =
-        testScope.runTest {
+        runTest {
             val initialName = "Original Name"
             val updatedName = "Updated Name"
             val habit = Habit(name = initialName)
@@ -218,7 +216,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get all habits should be sorted by name`() =
-        testScope.runTest {
+        runTest {
             val habit1 = Habit(habitId = 1, name = "Z")
             val habit2 = Habit(habitId = 2, name = "A")
             repository.insertHabit(habit1)
@@ -246,7 +244,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get all habits should be sorted by creation date`() =
-        testScope.runTest {
+        runTest {
             val habit1 = Habit(habitId = 1, name = "Z")
             val habit2 = Habit(habitId = 2, name = "A", createdAt = Date().apply { time -= 1000 })
             repository.insertHabit(habit1)
@@ -273,7 +271,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get all habits should be sorted by streak`() =
-        testScope.runTest {
+        runTest {
             val habit1 = Habit(habitId = 1, name = "Z")
             val habit2 = Habit(habitId = 2, name = "A", lastResetAt = Date().apply { time -= 5 * 1000 * 60 * 60 * 24 })
             repository.insertHabit(habit1)
@@ -300,7 +298,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get habit by id should return habit when valid id is provided`() =
-        testScope.runTest {
+        runTest {
             val habitName = "Clean room"
             val habit = Habit(name = habitName)
             val habitId = repository.insertHabit(habit)
@@ -313,14 +311,14 @@ class HabitRepositoryTest {
 
     @Test
     fun `get habit by id should return null when non-existent id is provided`() =
-        testScope.runTest {
+        runTest {
             val retrievedHabit = repository.getHabitById(12345L) // Non-existent ID
             assertNull("Should return null for non-existent ID", retrievedHabit)
         }
 
     @Test
     fun `get habit by id should return null when invalid id is provided`() =
-        testScope.runTest {
+        runTest {
             // Assuming standard autoGenerate = true, which starts from 1.
             var retrievedHabit = repository.getHabitById(0L)
             assertNull("Should return null for ID 0", retrievedHabit)
@@ -331,7 +329,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get habit by id flow should emit habit when valid id is provided`() =
-        testScope.runTest {
+        runTest {
             val habitName = "Walk dog"
             val habit = Habit(name = habitName)
             val habitId = repository.insertHabit(habit)
@@ -347,7 +345,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get habit by id flow should return null when non-existent id is provided`() =
-        testScope.runTest {
+        runTest {
             repository.getHabitByIdFlow(54321L).test {
                 assertNull("Flow should emit null for non-existent ID", awaitItem())
                 cancelAndConsumeRemainingEvents()
@@ -356,7 +354,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get habit by id flow should emit updates when habit is updated`() =
-        testScope.runTest {
+        runTest {
             val initialName = "Initial Flow Name"
             val updatedName = "Updated Flow Name"
             val habit = Habit(name = initialName)
@@ -375,7 +373,7 @@ class HabitRepositoryTest {
 
     @Test
     fun `get habit by id flow should emit null after habit is deleted`() =
-        testScope.runTest {
+        runTest {
             val habit = Habit(name = "To be deleted via flow")
             val habitId = repository.insertHabit(habit)
 
