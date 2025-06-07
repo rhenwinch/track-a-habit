@@ -1,5 +1,6 @@
 package io.track.habit.ui.screens.habits.composables
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -54,6 +58,11 @@ fun HabitsScreenHeader(
     modifier: Modifier = Modifier,
 ) {
     val (_, streak, habitName) = habitWithStreak
+    val formattedActiveSinceDate by remember {
+        derivedStateOf {
+            habitWithStreak.formattedActiveSinceDate
+        }
+    }
 
     Column(
         modifier = modifier,
@@ -69,42 +78,57 @@ fun HabitsScreenHeader(
         }
 
         CommonLabel(text = stringResource(R.string.streak_milestone)) {
-            Text(
-                text = streak.title,
-                style =
-                    LocalTextStyle.current.copy(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-            )
+            AnimatedContent(
+                targetState = streak.title,
+                label = "StreakTitle",
+            ) {
+                Text(
+                    text = it,
+                    style =
+                        LocalTextStyle.current.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                )
+            }
         }
 
         CommonLabel(text = stringResource(R.string.youve_been_on_track_for)) {
-            StreakCounter(
-                streak = habitWithStreak.habit.streakInDays,
-                iconSize = DpSize(24.dp, 31.dp),
-                style =
-                    LocalTextStyle.current.copy(
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.Black,
-                        shadow =
-                            Shadow(
-                                color = Color.Black,
-                                offset = Offset(2f, 2f),
-                                blurRadius = 2f,
-                            ),
-                    ),
-            )
+            AnimatedContent(
+                targetState = habitWithStreak.habit.streakInDays,
+                label = "StreakCounter",
+            ) {
+                StreakCounter(
+                    streak = it,
+                    iconSize = DpSize(24.dp, 31.dp),
+                    style =
+                        LocalTextStyle.current.copy(
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Black,
+                            shadow =
+                                Shadow(
+                                    color = Color.Black,
+                                    offset = Offset(2f, 2f),
+                                    blurRadius = 2f,
+                                ),
+                        ),
+                )
+            }
 
-            Text(
-                text = stringResource(R.string.since_date_format, habitWithStreak.formattedActiveSinceDate),
-                style =
-                    LocalTextStyle.current.copy(
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Normal,
-                        fontStyle = FontStyle.Italic,
-                    ),
-            )
+            AnimatedContent(
+                targetState = formattedActiveSinceDate,
+                label = "SinceDate",
+            ) {
+                Text(
+                    text = stringResource(R.string.since_date_format, it),
+                    style =
+                        LocalTextStyle.current.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontStyle = FontStyle.Italic,
+                        ),
+                )
+            }
         }
 
         FlowRow(
@@ -200,14 +224,19 @@ private fun HabitNameWithVisibilityToggle(
                 onToggleCensorship()
             },
     ) {
-        Text(
-            text = habitName,
-            style =
-                LocalTextStyle.current.copy(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                ),
-        )
+        AnimatedContent(
+            targetState = habitName,
+            label = "HabitName",
+        ) {
+            Text(
+                text = it,
+                style =
+                    LocalTextStyle.current.copy(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+            )
+        }
 
         Icon(
             painter = icon,

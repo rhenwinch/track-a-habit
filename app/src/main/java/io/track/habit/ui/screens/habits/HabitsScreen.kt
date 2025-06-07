@@ -4,9 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -199,34 +196,21 @@ fun HabitsScreenContent(
                         ),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        AnimatedContent(
-                            targetState = habits.getOrNull(indexOfHabitToShow),
-                            label = "HabitsScreenHeader",
-                            transitionSpec = {
-                                val initialOffsetX = { fullWidth: Int -> fullWidth / 5 }
-                                val targetOffsetX = { fullWidth: Int -> -fullWidth / 5 }
+                        val habitWithStreak = habits.getOrNull(indexOfHabitToShow)
 
-                                fadeIn(
-                                    initialAlpha = 0.6f,
-                                ) + slideInHorizontally(initialOffsetX = initialOffsetX) togetherWith
-                                    (fadeOut(targetAlpha = 0.3f) + slideOutHorizontally(targetOffsetX = targetOffsetX))
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) { habitWithStreak ->
-                            if (habitWithStreak != null) {
-                                HabitsScreenHeader(
-                                    quote = quote,
-                                    isResetProgressButtonLocked = isResetProgressButtonLocked,
-                                    isCensored = isCensoringHabitNames,
-                                    habitWithStreak = habitWithStreak,
-                                    onEditHabit = { showEditDialog = true },
-                                    onDeleteHabit = { showDeleteDialog = true },
-                                    onViewLogs = { onViewLogs(habitWithStreak.habit) },
-                                    onResetProgress = { showResetProgressDialog = true },
-                                    onToggleCensorship = onToggleCensorship,
-                                    modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
-                                )
-                            }
+                        if (habitWithStreak != null) {
+                            HabitsScreenHeader(
+                                quote = quote,
+                                isResetProgressButtonLocked = isResetProgressButtonLocked,
+                                isCensored = isCensoringHabitNames,
+                                habitWithStreak = habitWithStreak,
+                                onEditHabit = { showEditDialog = true },
+                                onDeleteHabit = { showDeleteDialog = true },
+                                onViewLogs = { onViewLogs(habitWithStreak.habit) },
+                                onResetProgress = { showResetProgressDialog = true },
+                                onToggleCensorship = onToggleCensorship,
+                                modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
+                            )
                         }
                     }
 
