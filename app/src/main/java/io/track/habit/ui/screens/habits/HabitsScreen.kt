@@ -199,7 +199,7 @@ fun HabitsScreenContent(
                         ),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        val habitToShow = habits[indexOfHabitToShow]
+                        val habitToShow = habits.getOrNull(indexOfHabitToShow) ?: habits.first()
 
                         AnimatedContent(
                             targetState = habitToShow,

@@ -134,6 +134,7 @@ class HabitsViewModel
             deleteJob =
                 ioScope.launch {
                     habitRepository.deleteHabit(habit)
+                    toggleShowcaseHabit(0)
                 }
         }
 
