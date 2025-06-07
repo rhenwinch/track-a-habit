@@ -107,11 +107,24 @@ class HabitsViewModel
                     getHabitsWithStreaksUseCase(
                         censorHabitNames = censorHabitNames,
                         sortOrder = sortOrder,
-                    )
+                    ).map { habits ->
+                        updateShowcasedHabit(habits)
+                        habits
+                    }
                 }.asStateFlow(
                     scope = viewModelScope,
                     initialValue = emptyList(),
                 )
+        }
+
+        private fun updateShowcasedHabit(habits: List<HabitWithStreak>) {
+            _uiState.update { currentState ->
+                val updatedShowcaseHabit =
+                    habits.firstOrNull { habit ->
+                        habit.habit.habitId == currentState.habitToShowcase?.habit?.habitId
+                    }
+                currentState.copy(habitToShowcase = updatedShowcaseHabit)
+            }
         }
 
         fun updateHabit(habit: Habit) {
