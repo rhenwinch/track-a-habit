@@ -1,5 +1,6 @@
 package io.track.habit.ui.screens.habits
 
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +30,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
-import kotlin.math.max
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -64,12 +64,14 @@ class HabitsViewModel
                 val initialShowcasedHabitId = generalSettings.lastShowcasedHabitId
 
                 val habits = getHabitsWithStreaksUseCase(initialCensorSetting).first()
-                val habit = habits.indexOfFirst { it.habit.habitId == initialShowcasedHabitId }
+                val habit =
+                    habits.fastFirstOrNull { it.habit.habitId == initialShowcasedHabitId }
+                        ?: habits.firstOrNull()
 
                 _uiState.update {
                     it.copy(
                         isCensoringHabitNames = initialCensorSetting,
-                        indexOfHabitToShow = max(habit, 0),
+                        habitToShowcase = habit,
                         isInitialized = true,
                     )
                 }
@@ -109,10 +111,13 @@ class HabitsViewModel
 
         val habits by lazy {
             uiState
-                .map { it.isCensoringHabitNames }
+                .map { it.sortOrder to it.isCensoringHabitNames }
                 .distinctUntilChanged()
-                .flatMapLatest { censorHabitNames ->
-                    getHabitsWithStreaksUseCase(censorHabitNames)
+                .flatMapLatest { (sortOrder, censorHabitNames) ->
+                    getHabitsWithStreaksUseCase(
+                        censorHabitNames = censorHabitNames,
+                        sortOrder = sortOrder,
+                    )
                 }.asStateFlow(
                     scope = viewModelScope,
                     initialValue = emptyList(),
@@ -134,7 +139,7 @@ class HabitsViewModel
             deleteJob =
                 ioScope.launch {
                     habitRepository.deleteHabit(habit)
-                    toggleShowcaseHabit(0)
+                    habits.value.firstOrNull()?.let(::toggleShowcaseHabit)
                 }
         }
 
@@ -175,8 +180,8 @@ class HabitsViewModel
             }
         }
 
-        fun toggleShowcaseHabit(index: Int) {
-            _uiState.update { it.copy(indexOfHabitToShow = index) }
+        fun toggleShowcaseHabit(habitWithStreak: HabitWithStreak) {
+            _uiState.update { it.copy(habitToShowcase = habitWithStreak) }
 
             if (changeShowcaseJob?.isActive == true) {
                 changeShowcaseJob?.cancel()
@@ -185,10 +190,9 @@ class HabitsViewModel
             changeShowcaseJob =
                 ioScope.launch {
                     val currentSettings = settingsDataStore.generalSettingsFlow.first()
-                    val habit = habits.value[index]
 
                     settingsDataStore.updateSettings(
-                        currentSettings.copy(lastShowcasedHabitId = habit.habit.habitId),
+                        currentSettings.copy(lastShowcasedHabitId = habitWithStreak.habit.habitId),
                     )
                 }
         }

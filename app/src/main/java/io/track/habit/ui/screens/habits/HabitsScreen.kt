@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -94,7 +94,7 @@ fun HabitsScreen(
             HabitsScreenContent(
                 username = username,
                 habits = habits,
-                indexOfHabitToShow = uiState.indexOfHabitToShow,
+                habitToShowcase = uiState.habitToShowcase,
                 quote = uiState.quote,
                 longPressedHabit = uiState.longPressedHabit,
                 sortOrder = uiState.sortOrder,
@@ -118,14 +118,14 @@ fun HabitsScreen(
 fun HabitsScreenContent(
     username: String,
     habits: List<HabitWithStreak>,
-    indexOfHabitToShow: Int,
+    habitToShowcase: HabitWithStreak?,
     quote: Quote,
     longPressedHabit: HabitWithStreak?,
     isResetProgressButtonLocked: Boolean,
     isCensoringHabitNames: Boolean,
     sortOrder: SortOrder,
     onSortOrderSelect: (SortOrder) -> Unit,
-    onHabitClick: (Int) -> Unit,
+    onHabitClick: (HabitWithStreak) -> Unit,
     onHabitLongClick: (HabitWithStreak?) -> Unit,
     onEditHabit: (Habit) -> Unit,
     onViewLogs: (Habit) -> Unit,
@@ -142,7 +142,7 @@ fun HabitsScreenContent(
     var showResetProgressDialog by rememberSaveable { mutableStateOf(false) }
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(indexOfHabitToShow) {
+    LaunchedEffect(habitToShowcase) {
         gridState.animateScrollToItem(0)
     }
 
@@ -196,17 +196,15 @@ fun HabitsScreenContent(
                         ),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        val habitWithStreak = habits.getOrNull(indexOfHabitToShow)
-
-                        if (habitWithStreak != null) {
+                        if (habitToShowcase != null) {
                             HabitsScreenHeader(
                                 quote = quote,
                                 isResetProgressButtonLocked = isResetProgressButtonLocked,
                                 isCensored = isCensoringHabitNames,
-                                habitWithStreak = habitWithStreak,
+                                habitWithStreak = habitToShowcase,
                                 onEditHabit = { showEditDialog = true },
                                 onDeleteHabit = { showDeleteDialog = true },
-                                onViewLogs = { onViewLogs(habitWithStreak.habit) },
+                                onViewLogs = { onViewLogs(habitToShowcase.habit) },
                                 onResetProgress = { showResetProgressDialog = true },
                                 onToggleCensorship = onToggleCensorship,
                                 modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
@@ -235,14 +233,14 @@ fun HabitsScreenContent(
                             EmptyDataScreen()
                         }
                     } else {
-                        itemsIndexed(
+                        items(
                             habits,
-                            key = { _, key -> key.habit.habitId },
-                        ) { i, habitWithStreak ->
-                            if (i != indexOfHabitToShow) {
+                            key = { key -> key.habit.habitId },
+                        ) { habitWithStreak ->
+                            if (habitWithStreak != habitToShowcase) {
                                 HabitCard(
                                     habitWithStreak = habitWithStreak,
-                                    onClick = { onHabitClick(i) },
+                                    onClick = { onHabitClick(habitWithStreak) },
                                     onLongClick = { onHabitLongClick(habitWithStreak) },
                                     modifier =
                                         Modifier
@@ -259,44 +257,40 @@ fun HabitsScreenContent(
         }
     }
 
-    if (showEditDialog) {
-        val habitToShow = habits[indexOfHabitToShow]
+    if (habitToShowcase != null) {
+        if (showEditDialog) {
+            EditHabitDialog(
+                initialHabitName = habitToShowcase.habitName,
+                onDismissRequest = { showEditDialog = false },
+                onSaveClick = { updatedHabit ->
+                    onEditHabit(habitToShowcase.habit.copy(name = updatedHabit))
+                    showEditDialog = false
+                },
+            )
+        }
 
-        EditHabitDialog(
-            initialHabitName = habitToShow.habitName,
-            onDismissRequest = { showEditDialog = false },
-            onSaveClick = { updatedHabit ->
-                onEditHabit(habitToShow.habit.copy(name = updatedHabit))
-                showEditDialog = false
-            },
-        )
-    }
+        if (showDeleteDialog) {
+            AlertDialog(
+                dialogTitle = stringResource(R.string.delete_habit),
+                dialogText = stringResource(R.string.delete_habit_confirmation),
+                onDismissRequest = { showDeleteDialog = false },
+                onConfirmation = {
+                    onDeleteHabit(habitToShowcase.habit)
+                    showDeleteDialog = false
+                },
+            )
+        }
 
-    if (showDeleteDialog) {
-        val habitToShow = habits[indexOfHabitToShow]
-
-        AlertDialog(
-            dialogTitle = stringResource(R.string.delete_habit),
-            dialogText = stringResource(R.string.delete_habit_confirmation),
-            onDismissRequest = { showDeleteDialog = false },
-            onConfirmation = {
-                onDeleteHabit(habitToShow.habit)
-                showDeleteDialog = false
-            },
-        )
-    }
-
-    if (showResetProgressDialog) {
-        val habitToShow = habits[indexOfHabitToShow]
-
-        ResetProgressDialog(
-            onConfirm = {
-                onResetProgress(it)
-                showResetProgressDialog = false
-            },
-            onDismissRequest = { showResetProgressDialog = false },
-            habitId = habitToShow.habit.habitId,
-        )
+        if (showResetProgressDialog) {
+            ResetProgressDialog(
+                onConfirm = {
+                    onResetProgress(it)
+                    showResetProgressDialog = false
+                },
+                onDismissRequest = { showResetProgressDialog = false },
+                habitId = habitToShowcase.habit.habitId,
+            )
+        }
     }
 
     if (showSortSheet) {
@@ -447,7 +441,7 @@ private fun HabitsScreenPreview() {
             HabitsScreenContent(
                 username = "Preview User",
                 habits = previewHabits,
-                indexOfHabitToShow = 0,
+                habitToShowcase = previewHabits[0],
                 quote = PreviewMocks.getQuote(),
                 isResetProgressButtonLocked = true,
                 isCensoringHabitNames = false,
