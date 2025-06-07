@@ -9,11 +9,26 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Represents a data model that combines a Habit and its associated streak information.
+ * This model is immutable and provides utility properties for formatted date and duration.
+ *
+ * @property habit The habit entity containing details like name and last reset timestamp.
+ * @property streak The streak associated with the habit.
+ * @property habitName The name of the habit, which can be censored or uncensored.
+ */
 @Immutable
 data class HabitWithStreak(
     val habit: Habit,
     val streak: Streak,
+    val habitName: String,
 ) {
+    /**
+     * Formats the `lastResetAt` date of the habit into a human-readable string.
+     * Uses `DateTimeFormatter` for API >= 26 and `SimpleDateFormat` for older versions.
+     *
+     * @return A formatted string representing the date and time of the last reset.
+     */
     val formattedActiveSinceDate: String
         get() {
             val format = "M/d/yyyy hh:mm a"
@@ -35,6 +50,12 @@ data class HabitWithStreak(
             }
         }
 
+    /**
+     * Calculates the duration since the habit was last reset and formats it into a human-readable string.
+     * The duration is expressed in terms of decades, years, months, weeks, days, hours, minutes, or seconds.
+     *
+     * @return A formatted string representing the duration since the last reset.
+     */
     val formattedDurationSinceReset: String
         get() {
             val currentTime = Date().time
@@ -152,26 +173,31 @@ data class HabitWithStreak(
     companion object {
         private fun randomLetter(): Char = ('A'..'z').random()
 
-        fun HabitWithStreak.censorName(isCensored: Boolean): HabitWithStreak {
-            val name = habit.name
-
+        /**
+         * Censors the name of the habit based on the `isCensored` flag.
+         * If censored, the name is truncated or padded with random letters and asterisks.
+         *
+         * @param isCensored Flag indicating whether the name should be censored.
+         * @return A new `HabitWithStreak` instance with the censored or uncensored name.
+         */
+        fun String.censor(isCensored: Boolean): String {
             return if (isCensored) {
                 val censoredName =
                     when {
-                        name.length <= 2 -> {
+                        length <= 2 -> {
                             buildString {
-                                append(name)
+                                append(this)
                                 while (length < 3) {
                                     append(randomLetter())
                                 }
                             }.take(2)
                         }
 
-                        else -> name.take(2)
+                        else -> take(2)
                     }
                 val paddedName = censoredName.padEnd(8, '*')
 
-                copy(habit = habit.copy(name = paddedName))
+                paddedName
             } else {
                 this
             }

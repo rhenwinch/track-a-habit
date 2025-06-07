@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
-import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.ui.theme.TrackAHabitTheme
@@ -44,6 +43,7 @@ import kotlin.random.Random
 @Composable
 fun HabitsScreenHeader(
     quote: Quote,
+    isResetProgressButtonLocked: Boolean,
     isCensored: Boolean,
     habitWithStreak: HabitWithStreak,
     onEditHabit: () -> Unit,
@@ -53,7 +53,7 @@ fun HabitsScreenHeader(
     onToggleCensorship: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val (habit, streak) = habitWithStreak
+    val (_, streak, habitName) = habitWithStreak
 
     Column(
         modifier = modifier,
@@ -62,7 +62,7 @@ fun HabitsScreenHeader(
     ) {
         CommonLabel(text = stringResource(R.string.habit_name)) {
             HabitNameWithVisibilityToggle(
-                habit = habit,
+                habitName = habitName,
                 isCensored = isCensored,
                 onToggleCensorship = onToggleCensorship,
             )
@@ -129,6 +129,7 @@ fun HabitsScreenHeader(
                 text = stringResource(R.string.reset_progress),
                 contentDescription = stringResource(R.string.reset_progress_icon_content_desc),
                 onClick = onResetProgress,
+                enabled = isResetProgressButtonLocked,
             )
 
             CommonButton(
@@ -179,7 +180,7 @@ private fun CommonLabel(
 
 @Composable
 private fun HabitNameWithVisibilityToggle(
-    habit: Habit,
+    habitName: String,
     isCensored: Boolean,
     onToggleCensorship: () -> Unit,
     modifier: Modifier = Modifier,
@@ -200,7 +201,7 @@ private fun HabitNameWithVisibilityToggle(
             },
     ) {
         Text(
-            text = habit.name,
+            text = habitName,
             style =
                 LocalTextStyle.current.copy(
                     fontSize = 18.sp,
@@ -226,10 +227,12 @@ private fun CommonButton(
     contentDescription: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     FilledTonalButton(
         onClick = onClick,
         modifier = modifier,
+        enabled = enabled,
     ) {
         Icon(
             painter = icon,
@@ -263,6 +266,7 @@ private fun HabitsScreenHeaderPreview() {
                         .padding(horizontal = UiConstants.ScreenPaddingHorizontal),
             ) {
                 HabitsScreenHeader(
+                    isResetProgressButtonLocked = false,
                     isCensored = false,
                     quote = PreviewMocks.getQuote(),
                     habitWithStreak =
@@ -281,6 +285,7 @@ private fun HabitsScreenHeaderPreview() {
                                             },
                                 ),
                             streak = PreviewMocks.getStreak(),
+                            habitName = "Morning Run",
                         ),
                     onEditHabit = {},
                     onDeleteHabit = {},

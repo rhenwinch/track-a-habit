@@ -9,7 +9,7 @@ import io.track.habit.domain.utils.SortOrder
 data class HabitsUiState(
     val quote: Quote,
     val sortOrder: SortOrder = SortOrder.Streak(),
-    val habitIdToShow: Long = 0,
+    val indexOfHabitToShow: Int = 0,
     val longPressedHabit: HabitWithStreak? = null,
     val isCensoringHabitNames: Boolean = false,
     val isInitialized: Boolean = false,

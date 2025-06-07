@@ -51,11 +51,12 @@ internal fun HabitCard(
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.outlinedCardColors(),
         border = CardDefaults.outlinedCardBorder(),
-        modifier = modifier
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
-            ),
+        modifier =
+            modifier
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                ),
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -109,7 +110,7 @@ internal fun HabitCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = habitWithStreak.habit.name,
+                    text = habitWithStreak.habitName,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style =
@@ -168,6 +169,7 @@ private fun HabitCardBasePreview() {
                                     PreviewMocks.getStreak(
                                         suffix = it.toString(),
                                     ),
+                                habitName = "Habit Name $it",
                             ),
                         onClick = {},
                         onLongClick = {},
