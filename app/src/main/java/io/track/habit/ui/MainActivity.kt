@@ -63,7 +63,7 @@ fun Greeting(
 @Composable
 private fun App(topLevelBackStack: TopLevelBackStack<NavKey>) {
     val currentRoute by remember {
-        derivedStateOf { topLevelBackStack.topLevelKey }
+        derivedStateOf { topLevelBackStack.backStack.lastOrNull() }
     }
 
     val showFab by remember {
