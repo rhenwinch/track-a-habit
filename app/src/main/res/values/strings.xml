@@ -27,6 +27,7 @@
     <string name="good_evening">Good evening</string>
     <string name="good_morning">Good morning</string>
     <string name="habit_name">Habit name</string>
+    <string name="habit_start_time_explanation">If you\'ve already started this habit, you can customize when it began. This will be used to calculate your streak.</string>
     <string name="logs">Logs</string>
     <string name="my_other_habits">My other habits</string>
     <string name="placeholder_notes">Notes (optional)</string>
