@@ -21,6 +21,7 @@ import io.track.habit.ui.navigation.BottomNavBar
 import io.track.habit.ui.navigation.NavRoute
 import io.track.habit.ui.navigation.SubNavRoute
 import io.track.habit.ui.navigation.TopLevelBackStack
+import io.track.habit.ui.screens.create.CreateScreen
 import io.track.habit.ui.screens.habits.HabitsScreen
 import io.track.habit.ui.theme.TrackAHabitTheme
 
@@ -71,7 +72,7 @@ private fun App(topLevelBackStack: TopLevelBackStack<NavKey>) {
                     }
 
                     entry<SubNavRoute.Companion.HabitsCreate> {
-                        Greeting("Create Habit")
+                        CreateScreen(onNavigateBack = { topLevelBackStack.removeLast() })
                     }
 
                     entry<SubNavRoute.Companion.HabitsViewLogs> {
