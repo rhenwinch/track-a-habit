@@ -3,7 +3,6 @@ package io.track.habit.model
 import io.mockk.mockk
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.model.HabitWithStreak
-import io.track.habit.domain.model.HabitWithStreak.Companion.censorName
 import io.track.habit.domain.model.Streak
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
@@ -35,11 +34,10 @@ class HabitWithStreakTest {
             val streak = mockk<Streak>()
             val original = HabitWithStreak(habit, streak)
 
-            val censored = original.censorName(true)
+            val censored = original.getName(true)
 
             println("Actual habit name: $name")
-            println("Censored habit name: ${censored.habit.name}")
-            println("====")
+            println("Censored habit name: $censored")
 
             name = name.dropLast(1)
         }
@@ -51,11 +49,11 @@ class HabitWithStreakTest {
         val streak = mockk<Streak>()
         val original = HabitWithStreak(habit, streak)
 
-        val censored = original.censorName(true)
+        val censored = original.getName(true)
 
         // Take 2 characters and pad to 8
-        println("Censored habit name: ${censored.habit.name}")
-        assertEquals("Ex******", censored.habit.name)
+        println("Censored habit name: $censored")
+        assertEquals("Ex******", censored)
     }
 
     @Test
@@ -64,10 +62,10 @@ class HabitWithStreakTest {
         val streak = mockk<Streak>()
         val original = HabitWithStreak(habit, streak)
 
-        val censored = original.censorName(false)
+        val censored = original.getName(false)
 
-        println("Censored habit name: ${censored.habit.name}")
-        assertEquals("ExerciseDaily", censored.habit.name)
+        println("Censored habit name: $censored")
+        assertEquals("ExerciseDaily", censored)
     }
 
     private fun createHabitWithLastResetAt(timeAgo: Long): HabitWithStreak {
