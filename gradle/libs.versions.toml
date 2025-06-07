@@ -30,6 +30,7 @@ nav3M3Adaptive = "1.0.0-SNAPSHOT"
 room = "2.7.1"
 turbine = "1.2.0"
 versions = "0.52.0"
+strikt = "0.34.0"
 
 
 [libraries]
@@ -66,6 +67,7 @@ espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref =
 junit = { module = "junit:junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+strikt = { group = "io.strikt", name = "strikt-core", version.ref = "strikt" }
 
 # UI
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxCompose" }

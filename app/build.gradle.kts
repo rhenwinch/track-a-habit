@@ -109,9 +109,10 @@ dependencies {
     detektPlugins(libs.detekt.twitter.compose.rules)
     detektPlugins(libs.detekt.formatting)
 
-    testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.strikt)
     testImplementation(libs.turbine)
 
     androidTestImplementation(platform(libs.compose.bom))
@@ -122,6 +123,7 @@ dependencies {
     androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.strikt)
     androidTestImplementation(libs.turbine)
 }
 
