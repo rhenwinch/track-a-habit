@@ -89,16 +89,6 @@ class HabitsViewModel
                 )
         }
 
-        val isCensoringHabitNames by lazy {
-            uiState
-                .map { it.isCensoringHabitNames }
-                .distinctUntilChanged()
-                .asStateFlow(
-                    scope = viewModelScope,
-                    initialValue = uiState.value.isCensoringHabitNames,
-                )
-        }
-
         val isResetProgressButtonLocked =
             settingsDataStore
                 .generalSettingsFlow

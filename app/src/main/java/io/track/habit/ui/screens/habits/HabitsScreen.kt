@@ -86,7 +86,6 @@ fun HabitsScreen(
             InitializationScreen()
         } else {
             val habits by viewModel.habits.collectAsStateWithLifecycle()
-            val isCensoringHabitNames by viewModel.isCensoringHabitNames.collectAsStateWithLifecycle()
             val username by viewModel.username.collectAsStateWithLifecycle()
             val isResetProgressButtonLocked by viewModel.isResetProgressButtonLocked.collectAsStateWithLifecycle()
 
@@ -98,10 +97,10 @@ fun HabitsScreen(
                 longPressedHabit = uiState.longPressedHabit,
                 sortOrder = uiState.sortOrder,
                 isResetProgressButtonLocked = isResetProgressButtonLocked,
-                isCensoringHabitNames = isCensoringHabitNames,
+                isCensoringHabitNames = uiState.isCensoringHabitNames,
                 onHabitClick = viewModel::toggleShowcaseHabit,
                 onDeleteHabit = viewModel::deleteHabit,
-                onToggleCensorship = { viewModel.toggleCensorshipOnNames(!isCensoringHabitNames) },
+                onToggleCensorship = { viewModel.toggleCensorshipOnNames(!uiState.isCensoringHabitNames) },
                 onHabitLongClick = viewModel::onHabitLongClick,
                 onResetProgress = viewModel::resetProgress,
                 onSortOrderSelect = viewModel::onSortOrderSelect,
