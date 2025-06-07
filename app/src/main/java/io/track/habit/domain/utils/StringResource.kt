@@ -62,3 +62,5 @@ fun stringRes(
 ): StringResource = StringResource.Resource(resId, *args)
 
 fun stringLiteral(value: String): StringResource = StringResource.Literal(value)
+
+fun stringLiteral(error: Throwable?): StringResource = StringResource.Literal(error)
