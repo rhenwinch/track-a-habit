@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -29,10 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -56,7 +54,6 @@ import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.utils.SortOrder
 import io.track.habit.ui.composables.AlertDialog
-import io.track.habit.ui.screens.habits.composables.AddHabitFab
 import io.track.habit.ui.screens.habits.composables.EditHabitDialog
 import io.track.habit.ui.screens.habits.composables.FilterBottomSheet
 import io.track.habit.ui.screens.habits.composables.HabitCard
@@ -72,7 +69,6 @@ import java.util.Calendar
 
 @Composable
 fun HabitsScreen(
-    onAddHabit: () -> Unit,
     onViewLogs: (Habit) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HabitsViewModel = hiltViewModel(),
@@ -108,7 +104,6 @@ fun HabitsScreen(
                 onResetProgress = viewModel::resetProgress,
                 onSortOrderSelect = viewModel::onSortOrderSelect,
                 onEditHabit = viewModel::updateHabit,
-                onAddHabit = onAddHabit,
                 onViewLogs = onViewLogs,
             )
         }
@@ -133,20 +128,10 @@ fun HabitsScreenContent(
     onViewLogs: (Habit) -> Unit,
     onResetProgress: (ResetDetails) -> Unit,
     onDeleteHabit: (Habit) -> Unit,
-    onAddHabit: () -> Unit,
     onToggleCensorship: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
-    val gridState = rememberLazyGridState()
-
-    val isFabExtended by
-        remember {
-            derivedStateOf {
-                // Show extended FAB when at the top or when not actively scrolling
-                gridState.firstVisibleItemIndex == 0 || !gridState.isScrollInProgress
-            }
-        }
 
     var showEditDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -154,7 +139,8 @@ fun HabitsScreenContent(
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
-        modifier = modifier,
+        modifier =
+            modifier.fillMaxSize(),
         topBar = {
             AnimatedVisibility(
                 visible = habits.isNotEmpty(),
@@ -186,21 +172,13 @@ fun HabitsScreenContent(
                 )
             }
         },
-        floatingActionButton = {
-            AddHabitFab(
-                onClick = onAddHabit,
-                isExtended = isFabExtended,
-            )
-        },
     ) { innerPadding ->
         AnimatedContent(
             targetState = habits.isNotEmpty(),
-            modifier = Modifier.fillMaxSize(),
         ) {
             if (it) {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(300.dp),
-                    state = gridState,
                     contentPadding =
                         PaddingValues(
                             horizontal = UiConstants.ScreenPaddingHorizontal,
@@ -240,20 +218,26 @@ fun HabitsScreenContent(
                         )
                     }
 
-                    itemsIndexed(
-                        habits,
-                        key = { _, key -> key.habit.habitId },
-                    ) { i, habitWithStreak ->
-                        if (i != indexOfHabitToShow) {
-                            HabitCard(
-                                habitWithStreak = habitWithStreak,
-                                onClick = { onHabitClick(i) },
-                                onLongClick = { onHabitLongClick(habitWithStreak) },
-                                modifier =
-                                    Modifier
-                                        .padding(vertical = 5.dp)
-                                        .animateItem(),
-                            )
+                    if (habits.size == 1) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            EmptyDataScreen()
+                        }
+                    } else {
+                        itemsIndexed(
+                            habits,
+                            key = { _, key -> key.habit.habitId },
+                        ) { i, habitWithStreak ->
+                            if (i != indexOfHabitToShow) {
+                                HabitCard(
+                                    habitWithStreak = habitWithStreak,
+                                    onClick = { onHabitClick(i) },
+                                    onLongClick = { onHabitLongClick(habitWithStreak) },
+                                    modifier =
+                                        Modifier
+                                            .padding(vertical = 5.dp)
+                                            .animateItem(),
+                                )
+                            }
                         }
                     }
                 }
@@ -362,6 +346,7 @@ private fun EmptyDataScreen() {
         modifier =
             Modifier
                 .padding(UiConstants.ScreenPaddingHorizontal)
+                .heightIn(400.dp)
                 .fillMaxSize(),
     ) {
         Icon(
@@ -464,7 +449,6 @@ private fun HabitsScreenPreview() {
                 onResetProgress = {},
                 onToggleCensorship = {},
                 onSortOrderSelect = {},
-                onAddHabit = {},
             )
         }
     }
