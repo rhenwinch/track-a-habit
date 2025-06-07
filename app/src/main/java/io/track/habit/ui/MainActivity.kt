@@ -8,15 +8,19 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
 import io.track.habit.ui.navigation.BottomNavBar
 import io.track.habit.ui.navigation.NavRoute
+import io.track.habit.ui.navigation.SubNavRoute
+import io.track.habit.ui.navigation.TopLevelBackStack
 import io.track.habit.ui.screens.habits.HabitsScreen
 import io.track.habit.ui.theme.TrackAHabitTheme
 
@@ -26,8 +30,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val viewModel: MainViewModel = hiltViewModel()
+
             TrackAHabitTheme {
-                App()
+                App(topLevelBackStack = viewModel.backStack)
             }
         }
     }
@@ -45,22 +51,31 @@ fun Greeting(
 }
 
 @Composable
-private fun App() {
-    val backStack = rememberNavBackStack(NavRoute.Companion.Habits)
-
+private fun App(topLevelBackStack: TopLevelBackStack<NavKey>) {
     Scaffold(
         bottomBar = {
-            BottomNavBar(backStack = backStack)
+            BottomNavBar(backStack = topLevelBackStack)
         },
     ) { innerPadding ->
         NavDisplay(
             modifier = Modifier.consumeWindowInsets(innerPadding),
-            backStack = backStack,
-            onBack = { backStack.removeLastOrNull() },
+            backStack = topLevelBackStack.backStack,
+            onBack = { topLevelBackStack.removeLast() },
             entryProvider =
                 entryProvider {
                     entry<NavRoute.Companion.Habits> {
-                        HabitsScreen()
+                        HabitsScreen(
+                            onAddHabit = { topLevelBackStack.add(SubNavRoute.Companion.HabitsCreate) },
+                            onViewLogs = { topLevelBackStack.add(SubNavRoute.Companion.HabitsViewLogs) },
+                        )
+                    }
+
+                    entry<SubNavRoute.Companion.HabitsCreate> {
+                        Greeting("Create Habit")
+                    }
+
+                    entry<SubNavRoute.Companion.HabitsViewLogs> {
+                        Greeting("View Habit Logs")
                     }
 
                     entry<NavRoute.Companion.Streaks> {
@@ -81,8 +96,10 @@ private fun App() {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+private fun AppPreview() {
     TrackAHabitTheme {
-        App()
+        App(
+            topLevelBackStack = remember { TopLevelBackStack(NavRoute.Companion.Habits) },
+        )
     }
 }

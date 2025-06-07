@@ -72,6 +72,8 @@ import java.util.Calendar
 
 @Composable
 fun HabitsScreen(
+    onAddHabit: () -> Unit,
+    onViewLogs: (Habit) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HabitsViewModel = hiltViewModel(),
 ) {
@@ -96,6 +98,7 @@ fun HabitsScreen(
                 indexOfHabitToShow = uiState.indexOfHabitToShow,
                 quote = uiState.quote,
                 longPressedHabit = uiState.longPressedHabit,
+                sortOrder = uiState.sortOrder,
                 isResetProgressButtonLocked = isResetProgressButtonLocked,
                 isCensoringHabitNames = isCensoringHabitNames,
                 onHabitClick = viewModel::toggleShowcaseHabit,
@@ -103,17 +106,10 @@ fun HabitsScreen(
                 onToggleCensorship = { viewModel.toggleCensorshipOnNames(!isCensoringHabitNames) },
                 onHabitLongClick = viewModel::onHabitLongClick,
                 onResetProgress = viewModel::resetProgress,
-                sortOrder = uiState.sortOrder,
                 onSortOrderSelect = viewModel::onSortOrderSelect,
                 onEditHabit = viewModel::updateHabit,
-                onAddHabit = {
-                    // TODO(Implement navigation or dialog for adding a habit)
-                },
-                onViewLogs = {
-                    // Handle view logs action
-                    // Navigation or dialog would be handled here
-                    // TODO
-                },
+                onAddHabit = onAddHabit,
+                onViewLogs = onViewLogs,
             )
         }
     }

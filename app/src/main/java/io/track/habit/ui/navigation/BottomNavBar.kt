@@ -6,28 +6,27 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.NavKey
+import io.track.habit.ui.navigation.NavRoute.Companion.TOP_LEVEL_ROUTES
 import io.track.habit.ui.theme.TrackAHabitTheme
 
 @Composable
 fun BottomNavBar(
+    backStack: TopLevelBackStack<NavKey>,
     modifier: Modifier = Modifier,
-    backStack: NavBackStack,
 ) {
     NavigationBar(
         modifier = modifier,
     ) {
-        NavRoute.TOP_LEVEL_ROUTES.forEach { route ->
-            val isSelected = route == backStack.lastOrNull()
+        TOP_LEVEL_ROUTES.forEach { route ->
+            val isSelected = route == backStack.topLevelKey
 
             NavigationBarItem(
                 selected = isSelected,
-                onClick = {
-                    backStack.add(route)
-                },
+                onClick = { backStack.addTopLevel(route) },
                 label = {
                     Text(
                         text = route.name.asString(),
@@ -58,7 +57,7 @@ fun BottomNavBar(
 @Composable
 private fun BottomNavBarPreview() {
     TrackAHabitTheme {
-        val backStack = rememberNavBackStack(NavRoute.Companion.Habits)
+        val backStack = remember { TopLevelBackStack<NavKey>(TOP_LEVEL_ROUTES.first()) }
 
         BottomNavBar(backStack = backStack)
     }

@@ -25,12 +25,16 @@ interface NavRoute : NavKey {
     val selectedIcon: DrawableResource
     val name: StringResource
 
+    val subRoutes: List<SubNavRoute> get() = emptyList()
+
     companion object {
         @Serializable
         data object Habits : NavRoute {
             override val unselectedIcon: DrawableResource = drawableRes(R.drawable.habits_outlined)
             override val selectedIcon: DrawableResource = drawableRes(R.drawable.habits_filled)
             override val name: StringResource = stringRes(R.string.habits)
+            override val subRoutes: List<SubNavRoute> =
+                listOf(SubNavRoute.Companion.HabitsCreate)
         }
 
         @Serializable
