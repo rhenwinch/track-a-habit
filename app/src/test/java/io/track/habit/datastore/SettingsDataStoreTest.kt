@@ -11,6 +11,7 @@ import io.track.habit.data.local.datastore.entities.PomodoroSettingsRegistry
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingType
 import io.track.habit.domain.datastore.SettingsDataStore
+import io.track.habit.domain.utils.stringLiteral
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -109,7 +110,7 @@ class SettingsDataStoreTest {
                     key = "test_int_settings",
                     defaultValue = 1,
                     type = SettingType.IntType,
-                    displayName = "Test int key",
+                    displayName = stringLiteral("Test int key"),
                 )
 
             settingsDataStore.updateSetting(testIntSetting, 2)
