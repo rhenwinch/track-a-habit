@@ -4,6 +4,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -30,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -133,11 +138,16 @@ fun HabitsScreenContent(
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
+    val gridState = rememberLazyGridState()
 
     var showEditDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var showResetProgressDialog by rememberSaveable { mutableStateOf(false) }
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(indexOfHabitToShow) {
+        gridState.animateScrollToItem(0)
+    }
 
     Scaffold(
         modifier =
@@ -181,6 +191,7 @@ fun HabitsScreenContent(
             if (it) {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(300.dp),
+                    state = gridState,
                     contentPadding =
                         PaddingValues(
                             horizontal = UiConstants.ScreenPaddingHorizontal,
@@ -190,18 +201,33 @@ fun HabitsScreenContent(
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         val habitToShow = habits[indexOfHabitToShow]
 
-                        HabitsScreenHeader(
-                            quote = quote,
-                            isResetProgressButtonLocked = isResetProgressButtonLocked,
-                            isCensored = isCensoringHabitNames,
-                            habitWithStreak = habitToShow,
-                            onEditHabit = { showEditDialog = true },
-                            onDeleteHabit = { showDeleteDialog = true },
-                            onViewLogs = { onViewLogs(habitToShow.habit) },
-                            onResetProgress = { showResetProgressDialog = true },
-                            onToggleCensorship = onToggleCensorship,
-                            modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
-                        )
+                        AnimatedContent(
+                            targetState = habitToShow,
+                            label = "HabitsScreenHeader",
+                            transitionSpec = {
+                                val initialOffsetX = { fullWidth: Int -> fullWidth / 5 }
+                                val targetOffsetX = { fullWidth: Int -> -fullWidth / 5 }
+
+                                fadeIn(
+                                    initialAlpha = 0.6f,
+                                ) + slideInHorizontally(initialOffsetX = initialOffsetX) togetherWith
+                                    (fadeOut(targetAlpha = 0.3f) + slideOutHorizontally(targetOffsetX = targetOffsetX))
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            HabitsScreenHeader(
+                                quote = quote,
+                                isResetProgressButtonLocked = isResetProgressButtonLocked,
+                                isCensored = isCensoringHabitNames,
+                                habitWithStreak = it,
+                                onEditHabit = { showEditDialog = true },
+                                onDeleteHabit = { showDeleteDialog = true },
+                                onViewLogs = { onViewLogs(habitToShow.habit) },
+                                onResetProgress = { showResetProgressDialog = true },
+                                onToggleCensorship = onToggleCensorship,
+                                modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
+                            )
+                        }
                     }
 
                     item(span = { GridItemSpan(maxLineSpan) }) {
