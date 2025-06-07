@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -157,17 +156,12 @@ fun HabitsScreenContent(
                 exit = fadeOut(),
             ) {
                 TopAppBar(
-                    windowInsets = WindowInsets(0.dp),
                     title = {
                         Text(
                             text = "${getTimeOfDayGreeting()}, $username",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            style =
-                                LocalTextStyle.current.copy(
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                ),
+                            style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
                         )
                     },
                     actions = {
