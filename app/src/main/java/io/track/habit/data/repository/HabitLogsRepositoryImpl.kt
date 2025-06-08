@@ -4,7 +4,6 @@ import io.track.habit.data.local.database.dao.HabitLogDao
 import io.track.habit.data.local.database.entities.HabitLog
 import io.track.habit.data.local.database.entities.HabitWithLogs
 import io.track.habit.domain.repository.HabitLogsRepository
-import io.track.habit.domain.utils.coroutines.AppDispatcher.Companion.withIOContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
@@ -27,10 +26,9 @@ class HabitLogsRepositoryImpl
             return habitLogsDao.getHabitLogById(logId)
         }
 
-        override suspend fun insertHabitLog(habitLog: HabitLog) =
-            withIOContext {
-                habitLogsDao.insertHabitLog(habitLog)
-            }
+        override suspend fun insertHabitLog(habitLog: HabitLog): Long {
+            return habitLogsDao.insertHabitLog(habitLog)
+        }
 
         override suspend fun updateHabitLog(habitLog: HabitLog) {
             habitLogsDao.updateHabitLog(habitLog)

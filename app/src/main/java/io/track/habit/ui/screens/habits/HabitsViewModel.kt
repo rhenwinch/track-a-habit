@@ -14,7 +14,7 @@ import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetRandomQuoteUseCase
 import io.track.habit.domain.utils.SortOrder
-import io.track.habit.domain.utils.coroutines.asStateFlow
+import io.track.habit.domain.utils.asStateFlow
 import io.track.habit.ui.screens.habits.composables.ResetDetails
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

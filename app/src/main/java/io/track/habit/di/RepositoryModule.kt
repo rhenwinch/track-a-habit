@@ -16,6 +16,7 @@ import io.track.habit.domain.repository.AssetReader
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.repository.StreakRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Singleton
 
 @Module
@@ -37,8 +38,9 @@ object RepositoryModule {
     @Provides
     fun provideAndroidAssetReader(
         @ApplicationContext context: Context,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ): AssetReader {
-        return AndroidAssetReader(context)
+        return AndroidAssetReader(context, ioDispatcher)
     }
 
     @Singleton

@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.track.habit.domain.utils.coroutines.AppDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Qualifier
 
 @Module
@@ -13,7 +13,7 @@ import javax.inject.Qualifier
 object DispatcherModule {
     @IoDispatcher
     @Provides
-    fun providesIoDispatcher(): CoroutineDispatcher = AppDispatcher.IO.dispatcher
+    fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
 
 @Retention(AnnotationRetention.RUNTIME)
