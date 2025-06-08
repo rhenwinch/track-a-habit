@@ -20,6 +20,9 @@ interface HabitLogDao {
     @Query("SELECT * FROM habit_logs WHERE habitId = :habitId ORDER BY streakDuration DESC LIMIT 1")
     fun getLongestStreakForHabit(habitId: Long): Flow<HabitLog?>
 
+    @Query("SELECT COALESCE(MAX(streakDuration), 0) FROM habit_logs")
+    fun getLongestStreakAchieved(): Flow<Int>
+
     @Transaction
     @Query("SELECT * FROM habits WHERE habitId = :habitId")
     fun getHabitWithLogsFlow(habitId: Long): Flow<HabitWithLogs?>
