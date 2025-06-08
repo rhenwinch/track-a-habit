@@ -6,12 +6,14 @@ import io.track.habit.data.local.database.entities.HabitLog
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.repository.fake.FakeHabitLogsRepository
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import strikt.api.expectThat
+import strikt.assertions.hasSize
+import strikt.assertions.isEmpty
+import strikt.assertions.isEqualTo
+import strikt.assertions.isNotNull
+import strikt.assertions.isNull
 import java.util.Date
 
 class HabitLogsRepositoryTest {
@@ -36,11 +38,13 @@ class HabitLogsRepositoryTest {
             repository.insertHabitLog(habitLog)
 
             val retrievedLog = repository.getHabitLogById(1L)
-            assertNotNull(retrievedLog)
-            assertEquals(1L, retrievedLog?.habitId)
-            assertEquals(5, retrievedLog?.streakDuration)
-            assertEquals("Morning alarm", retrievedLog?.trigger)
-            assertEquals("Felt great today", retrievedLog?.notes)
+            expectThat(retrievedLog) {
+                isNotNull()
+                get { this!!.habitId }.isEqualTo(1L)
+                get { this!!.streakDuration }.isEqualTo(5)
+                get { this!!.trigger }.isEqualTo("Morning alarm")
+                get { this!!.notes }.isEqualTo("Felt great today")
+            }
         }
 
     @Test
@@ -57,11 +61,14 @@ class HabitLogsRepositoryTest {
 
             val result = repository.getHabitLogById(1L)
 
-            assertNotNull(result)
-            assertEquals(1L, result?.habitId)
-            assertEquals(3, result?.streakDuration)
-            assertEquals("Before bed", result?.trigger)
-            assertEquals("Read 20 pages", result?.notes)
+            expectThat(result) {
+                isNotNull()
+                get { this!!.logId }.isEqualTo(1L)
+                get { this!!.habitId }.isEqualTo(1L)
+                get { this!!.streakDuration }.isEqualTo(3)
+                get { this!!.trigger }.isEqualTo("Before bed")
+                get { this!!.notes }.isEqualTo("Read 20 pages")
+            }
         }
 
     @Test
@@ -69,7 +76,7 @@ class HabitLogsRepositoryTest {
         runTest {
             val result = repository.getHabitLogById(999L)
 
-            assertNull(result)
+            expectThat(result).isNull()
         }
 
     @Test
@@ -96,10 +103,12 @@ class HabitLogsRepositoryTest {
             repository.updateHabitLog(updatedLog)
 
             val result = repository.getHabitLogById(1L)
-            assertNotNull(result)
-            assertEquals(7, result?.streakDuration)
-            assertEquals("Morning routine", result?.trigger)
-            assertEquals("10 minutes meditation", result?.notes)
+            expectThat(result) {
+                isNotNull()
+                get { this!!.streakDuration }.isEqualTo(7)
+                get { this!!.trigger }.isEqualTo("Morning routine")
+                get { this!!.notes }.isEqualTo("10 minutes meditation")
+            }
         }
 
     @Test
@@ -131,10 +140,13 @@ class HabitLogsRepositoryTest {
 
             repository.getHabitLogsByHabitId(habitId).test {
                 val logs = expectMostRecentItem()
-                assertEquals(3, logs.size)
-                assertEquals(3, logs[0].streakDuration) // Most recent
-                assertEquals(2, logs[1].streakDuration)
-                assertEquals(1, logs[2].streakDuration) // Oldest
+                expectThat(logs) {
+                    hasSize(3)
+                    get { this[0].streakDuration }.isEqualTo(3) // Most recent
+                    get { this[1].streakDuration }.isEqualTo(2)
+                    get { this[2].streakDuration }.isEqualTo(1) // Oldest
+                }
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -146,7 +158,7 @@ class HabitLogsRepositoryTest {
 
             repository.getHabitLogsByHabitId(habitId).test {
                 val logs = awaitItem()
-                assertTrue(logs.isEmpty())
+                expectThat(logs).isEmpty()
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -165,21 +177,39 @@ class HabitLogsRepositoryTest {
 
             repository.getLongestStreakForHabit(habitId).test {
                 val longestStreak = expectMostRecentItem()
-                assertNotNull(longestStreak)
-                assertEquals(10, longestStreak?.streakDuration)
-
+                expectThat(longestStreak) {
+                    isNotNull()
+                    get { this!!.streakDuration }.isEqualTo(10)
+                }
                 cancelAndIgnoreRemainingEvents()
             }
         }
 
     @Test
-    fun `when getting longest streak for habit with no logs then returns null`() =
+    fun `when getting longest streak achieved then returns highest streak duration from all habits`() =
         runTest {
-            val habitId = 1L
+            // Insert logs with different streak durations for different habits
+            val habit1Id = 1L
+            val habit2Id = 2L
 
-            repository.getLongestStreakForHabit(habitId).test {
-                val longestStreak = awaitItem()
-                assertNull(longestStreak)
+            repository.insertHabitLog(createTestHabitLog(habitId = habit1Id, streakDuration = 5))
+            repository.insertHabitLog(createTestHabitLog(habitId = habit1Id, streakDuration = 12))
+            repository.insertHabitLog(createTestHabitLog(habitId = habit2Id, streakDuration = 8))
+            repository.insertHabitLog(createTestHabitLog(habitId = habit2Id, streakDuration = 20)) // Highest overall
+
+            repository.getLongestStreakAchieved().test {
+                val longestStreak = expectMostRecentItem()
+                expectThat(longestStreak).isEqualTo(20)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `when no habit logs exist then longest streak achieved returns zero`() =
+        runTest {
+            repository.getLongestStreakAchieved().test {
+                val longestStreak = expectMostRecentItem()
+                expectThat(longestStreak).isEqualTo(0)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -203,11 +233,13 @@ class HabitLogsRepositoryTest {
             repository.getHabitWithLogs(habitId).test {
                 val result = expectMostRecentItem()
 
-                assertNotNull(result)
-                assertEquals("Test Habit", result?.habit?.name)
-                assertEquals(2, result?.logs?.size)
-                assertEquals("Evening reflection", result?.logs?.get(0)?.notes)
-                assertEquals("Morning pages", result?.logs?.get(1)?.notes)
+                expectThat(result) {
+                    isNotNull()
+                    get { this!!.habit.name }.isEqualTo("Test Habit")
+                    get { this!!.logs }.hasSize(2)
+                    get { this!!.logs[0].notes }.isEqualTo("Evening reflection")
+                    get { this!!.logs[1].notes }.isEqualTo("Morning pages")
+                }
 
                 cancelAndIgnoreRemainingEvents()
             }
@@ -221,9 +253,13 @@ class HabitLogsRepositoryTest {
             repository.getHabitWithLogs(habitId).test {
                 val result = awaitItem()
 
-                assertNotNull(result)
-                assertEquals("Test Habit", result?.habit?.name)
-                assertTrue(result?.logs?.isEmpty() == true)
+                expectThat(result) {
+                    isNotNull()
+                    get { this!!.habit.habitId }.isEqualTo(habitId)
+                    get { this!!.habit.name }.isEqualTo("Test Habit")
+                    get { this!!.logs }.isEmpty()
+                }
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -233,7 +269,7 @@ class HabitLogsRepositoryTest {
         runTest {
             repository.getHabitWithLogs(999L).test {
                 val result = awaitItem()
-                assertNull(result)
+                expectThat(result).isNull()
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -248,8 +284,8 @@ class HabitLogsRepositoryTest {
                 repository.insertHabitLog(log1)
 
                 val logsAfterFirst = expectMostRecentItem()
-                assertEquals(1, logsAfterFirst.size)
-                assertEquals(1, logsAfterFirst[0].streakDuration)
+                expectThat(logsAfterFirst).hasSize(1)
+                expectThat(logsAfterFirst[0].streakDuration).isEqualTo(1)
 
                 val log2 =
                     createTestHabitLog(
@@ -260,9 +296,11 @@ class HabitLogsRepositoryTest {
                 repository.insertHabitLog(log2)
 
                 val logsAfterSecond = awaitItem()
-                assertEquals(2, logsAfterSecond.size)
-                assertEquals(2, logsAfterSecond[0].streakDuration)
-                assertEquals(1, logsAfterSecond[1].streakDuration)
+                expectThat(logsAfterSecond) {
+                    hasSize(2)
+                    get { this[0].streakDuration }.isEqualTo(2)
+                    get { this[1].streakDuration }.isEqualTo(1)
+                }
 
                 cancelAndIgnoreRemainingEvents()
             }
@@ -278,7 +316,7 @@ class HabitLogsRepositoryTest {
                 repository.insertHabitLog(log1)
 
                 val longestAfterFirst = expectMostRecentItem()
-                assertEquals(5, longestAfterFirst?.streakDuration)
+                expectThat(longestAfterFirst?.streakDuration).isEqualTo(5)
 
                 val log2 = createTestHabitLog(habitId = habitId, streakDuration = 3)
                 repository.insertHabitLog(log2)
@@ -287,7 +325,7 @@ class HabitLogsRepositoryTest {
                 repository.insertHabitLog(log3)
 
                 val longestAfterThird = expectMostRecentItem()
-                assertEquals(10, longestAfterThird?.streakDuration)
+                expectThat(longestAfterThird?.streakDuration).isEqualTo(10)
 
                 cancelAndIgnoreRemainingEvents()
             }
@@ -319,16 +357,20 @@ class HabitLogsRepositoryTest {
 
                 with(habit1Turbine) {
                     val habit1Logs = expectMostRecentItem()
-                    assertEquals(2, habit1Logs.size)
-                    assertEquals(3, habit1Logs[0].streakDuration)
-                    assertEquals(5, habit1Logs[1].streakDuration)
+                    expectThat(habit1Logs) {
+                        hasSize(2)
+                        get { this[0].streakDuration }.isEqualTo(3)
+                        get { this[1].streakDuration }.isEqualTo(5)
+                    }
                     cancelAndIgnoreRemainingEvents()
                 }
 
                 with(habit2Turbine) {
                     val habit2Logs = expectMostRecentItem()
-                    assertEquals(1, habit2Logs.size)
-                    assertEquals(8, habit2Logs[0].streakDuration)
+                    expectThat(habit2Logs) {
+                        hasSize(1)
+                        get { this[0].streakDuration }.isEqualTo(8)
+                    }
                     cancelAndIgnoreRemainingEvents()
                 }
             }

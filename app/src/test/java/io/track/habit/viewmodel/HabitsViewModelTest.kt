@@ -118,7 +118,6 @@ class HabitsViewModelTest {
                 val logs = awaitItem()
 
                 expectThat(logs.size).isEqualTo(1)
-                expectThat(logs).isNotNull()
                 expectThat(logs[0]) {
                     get { habitId }.isEqualTo(habitId)
                     get { trigger }.isEqualTo("Test Trigger")

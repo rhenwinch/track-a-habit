@@ -9,6 +9,8 @@ interface HabitLogsRepository {
 
     fun getLongestStreakForHabit(habitId: Long): Flow<HabitLog?>
 
+    fun getLongestStreakAchieved(): Flow<Int>
+
     fun getHabitWithLogs(habitId: Long): Flow<HabitWithLogs?>
 
     suspend fun getHabitLogById(logId: Long): HabitLog?

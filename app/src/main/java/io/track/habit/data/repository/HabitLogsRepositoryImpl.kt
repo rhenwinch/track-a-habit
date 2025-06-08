@@ -34,6 +34,10 @@ class HabitLogsRepositoryImpl
             habitLogsDao.updateHabitLog(habitLog)
         }
 
+        override fun getLongestStreakAchieved(): Flow<Int> {
+            return habitLogsDao.getLongestStreakAchieved()
+        }
+
         @OptIn(ExperimentalCoroutinesApi::class)
         override fun getHabitWithLogs(habitId: Long): Flow<HabitWithLogs?> {
             return habitLogsDao
