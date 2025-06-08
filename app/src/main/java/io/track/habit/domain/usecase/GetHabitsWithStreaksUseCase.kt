@@ -12,7 +12,7 @@ class GetHabitsWithStreaksUseCase
     @Inject
     constructor(
         private val habitRepository: HabitRepository,
-        private val getStreakByDaysUseCase: GetStreaksByDaysUseCase,
+        private val getStreakByDaysUseCase: GetStreakUseCase,
     ) {
         @OptIn(ExperimentalCoroutinesApi::class)
         operator fun invoke(sortOrder: SortOrder = SortOrder.Streak()): Flow<List<HabitWithStreak>> {

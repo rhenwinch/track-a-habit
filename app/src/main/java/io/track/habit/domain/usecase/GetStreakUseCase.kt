@@ -4,7 +4,7 @@ import io.track.habit.domain.model.Streak
 import io.track.habit.domain.repository.StreakRepository
 import javax.inject.Inject
 
-class GetStreaksByDaysUseCase
+class GetStreakUseCase
     @Inject
     constructor(
         private val streakRepository: StreakRepository,

@@ -5,7 +5,7 @@ import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.repository.StreakRepository
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
-import io.track.habit.domain.usecase.GetStreaksByDaysUseCase
+import io.track.habit.domain.usecase.GetStreakUseCase
 import io.track.habit.repository.fake.FakeHabitRepository
 import io.track.habit.repository.fake.FakeStreakRepository
 import kotlinx.coroutines.test.runTest
@@ -17,14 +17,14 @@ class GetHabitsWithStreaksUseCaseTest {
     private lateinit var habitRepository: HabitRepository
     private lateinit var streakRepository: StreakRepository
     private lateinit var getHabitsWithStreaksUseCase: GetHabitsWithStreaksUseCase
-    private lateinit var getStreaksByDaysUseCase: GetStreaksByDaysUseCase
+    private lateinit var getStreakUseCase: GetStreakUseCase
 
     @Before
     fun setup() {
         habitRepository = FakeHabitRepository()
         streakRepository = FakeStreakRepository()
-        getStreaksByDaysUseCase = GetStreaksByDaysUseCase(streakRepository)
-        getHabitsWithStreaksUseCase = GetHabitsWithStreaksUseCase(habitRepository, getStreaksByDaysUseCase)
+        getStreakUseCase = GetStreakUseCase(streakRepository)
+        getHabitsWithStreaksUseCase = GetHabitsWithStreaksUseCase(habitRepository, getStreakUseCase)
     }
 
     @Test

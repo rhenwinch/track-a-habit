@@ -13,7 +13,7 @@ import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetRandomQuoteUseCase
-import io.track.habit.domain.usecase.GetStreaksByDaysUseCase
+import io.track.habit.domain.usecase.GetStreakUseCase
 import io.track.habit.domain.usecase.QUOTES_FILE_NAME
 import io.track.habit.domain.utils.SortOrder
 import io.track.habit.repository.fake.FakeHabitLogsRepository
@@ -71,11 +71,11 @@ class HabitsViewModelTest {
             val getRandomQuoteUseCase = GetRandomQuoteUseCase(assetReader, testDispatcher)
             val streakRepository = FakeStreakRepository()
 
-            val getStreaksByDaysUseCase = GetStreaksByDaysUseCase(streakRepository)
+            val getStreakUseCase = GetStreakUseCase(streakRepository)
             val getHabitsWithStreaksUseCase =
                 GetHabitsWithStreaksUseCase(
                     habitRepository = habitRepository,
-                    getStreakByDaysUseCase = getStreaksByDaysUseCase,
+                    getStreakByDaysUseCase = getStreakUseCase,
                 )
 
             val testDataStore =
