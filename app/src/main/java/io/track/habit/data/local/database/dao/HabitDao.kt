@@ -36,4 +36,9 @@ interface HabitDao {
 
     @Query("SELECT * FROM habits WHERE habitId = :habitId")
     fun getHabitByIdFlow(habitId: Long): Flow<Habit?>
+
+    @Query(
+        "SELECT COALESCE(MAX((strftime('%s', 'now') - strftime('%s', datetime(lastResetAt/1000, 'unixepoch'))) / 86400), 0) FROM habits WHERE lastResetAt > 0",
+    )
+    fun getLongestStreakInDays(): Flow<Int>
 }
