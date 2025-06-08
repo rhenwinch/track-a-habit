@@ -34,7 +34,7 @@ class HabitLogsRepositoryImpl
             habitLogsDao.updateHabitLog(habitLog)
         }
 
-        override fun getLongestStreakAchieved(): Flow<Int> {
+        override fun getLongestStreakInDays(): Flow<Int> {
             return habitLogsDao.getLongestStreakAchieved()
         }
 

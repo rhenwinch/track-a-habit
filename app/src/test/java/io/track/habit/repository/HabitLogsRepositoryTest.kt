@@ -197,7 +197,7 @@ class HabitLogsRepositoryTest {
             repository.insertHabitLog(createTestHabitLog(habitId = habit2Id, streakDuration = 8))
             repository.insertHabitLog(createTestHabitLog(habitId = habit2Id, streakDuration = 20)) // Highest overall
 
-            repository.getLongestStreakAchieved().test {
+            repository.getLongestStreakInDays().test {
                 val longestStreak = expectMostRecentItem()
                 expectThat(longestStreak).isEqualTo(20)
                 cancelAndIgnoreRemainingEvents()
@@ -207,7 +207,7 @@ class HabitLogsRepositoryTest {
     @Test
     fun `when no habit logs exist then longest streak achieved returns zero`() =
         runTest {
-            repository.getLongestStreakAchieved().test {
+            repository.getLongestStreakInDays().test {
                 val longestStreak = expectMostRecentItem()
                 expectThat(longestStreak).isEqualTo(0)
                 cancelAndIgnoreRemainingEvents()

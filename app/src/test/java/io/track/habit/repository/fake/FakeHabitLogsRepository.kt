@@ -82,7 +82,7 @@ class FakeHabitLogsRepository : HabitLogsRepository {
         }
     }
 
-    override fun getLongestStreakAchieved(): Flow<Int> {
+    override fun getLongestStreakInDays(): Flow<Int> {
         return logsStateFlow.map { logs ->
             logs.maxOfOrNull { it.streakDuration } ?: 0
         }
