@@ -26,6 +26,10 @@ class HabitRepositoryImpl
             habitDao.updateHabit(habit)
         }
 
+        override fun getLongestStreakInDays(): Flow<Int> {
+            return habitDao.getLongestStreakInDays()
+        }
+
         @OptIn(ExperimentalCoroutinesApi::class)
         override fun getAllHabits(sortOrder: SortOrder): Flow<List<Habit>> {
             return when (sortOrder) {

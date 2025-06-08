@@ -58,6 +58,12 @@ class FakeHabitRepository : HabitRepository {
         }
     }
 
+    override fun getLongestStreakInDays(): Flow<Int> {
+        return allHabitsFlow.map { habits ->
+            habits.maxOfOrNull { it.streakInDays } ?: 0
+        }
+    }
+
     override fun getAllHabits(sortOrder: SortOrder): Flow<List<Habit>> {
         return allHabitsFlow.mapLatest {
             when (sortOrder) {
