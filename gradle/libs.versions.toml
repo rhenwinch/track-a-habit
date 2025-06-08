@@ -30,7 +30,7 @@ nav3M3Adaptive = "1.0.0-SNAPSHOT"
 room = "2.7.1"
 turbine = "1.2.0"
 versions = "0.52.0"
-strikt = "0.34.0"
+strikt = "0.33.0"
 
 
 [libraries]
