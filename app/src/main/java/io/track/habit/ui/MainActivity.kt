@@ -26,7 +26,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
 import io.track.habit.R
-import io.track.habit.ui.navigation.BottomNavBar
+import io.track.habit.ui.composables.BottomNavBar
 import io.track.habit.ui.navigation.NavRoute
 import io.track.habit.ui.navigation.SubNavRoute
 import io.track.habit.ui.navigation.TopLevelBackStack
