@@ -3,6 +3,8 @@ package io.track.habit.ui.utils
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.model.Streak
+import io.track.habit.domain.utils.stringLiteral
+import io.track.habit.ui.screens.streaks.StreakSummary
 import java.util.Date
 
 object PreviewMocks {
@@ -31,5 +33,15 @@ object PreviewMocks {
     ) = Quote(
         message = message,
         author = author,
+    )
+
+    fun getStreakSummary(
+        streak: Streak = getStreak(),
+        status: String = "Active",
+        durationText: String = "7 days - 15 days",
+    ) = StreakSummary(
+        streak = streak,
+        status = stringLiteral(status),
+        durationText = stringLiteral(durationText),
     )
 }
