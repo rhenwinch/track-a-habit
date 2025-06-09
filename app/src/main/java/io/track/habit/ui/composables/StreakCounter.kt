@@ -1,4 +1,4 @@
-package io.track.habit.ui.screens.habits.composables
+package io.track.habit.ui.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -25,8 +25,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
-import io.track.habit.ui.composables.GradientFireIcon
-import io.track.habit.ui.composables.GradientText
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.FireGradientGenerator
 import kotlinx.coroutines.delay

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
 import io.track.habit.domain.model.HabitWithStreak
+import io.track.habit.ui.composables.StreakCounter
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
 import java.text.SimpleDateFormat
