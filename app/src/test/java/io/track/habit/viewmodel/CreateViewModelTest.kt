@@ -128,6 +128,7 @@ class CreateViewModelTest {
                 when (val message = state.errorMessage) {
                     is StringResource.Literal -> expectThat(message.value).isEqualTo(errorMessage)
                     is StringResource.Resource -> expectThat(message.id).isEqualTo(R.string.error_create_habit)
+                    is StringResource.Plural -> Unit // Not expected in this case
                 }
             }
         }
@@ -151,6 +152,7 @@ class CreateViewModelTest {
                 when (val message = state.errorMessage) {
                     is StringResource.Literal -> expectThat(message.value).isEqualTo("")
                     is StringResource.Resource -> expectThat(message.id).isEqualTo(R.string.error_create_habit)
+                    is StringResource.Plural -> Unit // Not expected in this case
                 }
             }
         }
