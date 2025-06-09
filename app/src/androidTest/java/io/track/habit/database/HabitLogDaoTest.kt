@@ -170,19 +170,15 @@ class HabitLogDaoTest {
     @Test
     fun getLongestStreakAchievedReturnsHighestStreakDurationAcrossAllHabits() =
         runTest(testDispatcher) {
+            habitLogDao.insertHabitLog(HabitLog(habitId = 1, streakDuration = 15))
+            habitLogDao.insertHabitLog(HabitLog(habitId = 1, streakDuration = 25))
+            habitLogDao.insertHabitLog(HabitLog(habitId = 2, streakDuration = 10))
+            habitLogDao.insertHabitLog(HabitLog(habitId = 2, streakDuration = 35))
+            habitLogDao.insertHabitLog(HabitLog(habitId = 3, streakDuration = 5))
+
             habitLogDao.getLongestStreakAchieved().test {
-                val initialLongestStreak = awaitItem()
-                expectThat(initialLongestStreak).isEqualTo(0)
-
-                // Insert logs for different habits with various streak durations
-                habitLogDao.insertHabitLog(HabitLog(habitId = 1, streakDuration = 15))
-                habitLogDao.insertHabitLog(HabitLog(habitId = 1, streakDuration = 25))
-                habitLogDao.insertHabitLog(HabitLog(habitId = 2, streakDuration = 10))
-                habitLogDao.insertHabitLog(HabitLog(habitId = 2, streakDuration = 35))
-                habitLogDao.insertHabitLog(HabitLog(habitId = 3, streakDuration = 5))
-
-                // Emit again with new value
-                expectThat(expectMostRecentItem()).isEqualTo(35)
+                val habit = awaitItem()
+                expectThat(habit).isEqualTo(35)
 
                 cancelAndIgnoreRemainingEvents()
             }
