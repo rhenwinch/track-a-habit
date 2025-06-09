@@ -2,9 +2,15 @@ package io.track.habit.data.repository
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import io.track.habit.di.IoDispatcher
 import io.track.habit.domain.model.Streak
 import io.track.habit.domain.repository.AssetReader
 import io.track.habit.domain.repository.StreakRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 const val STREAKS_FILE_NAME = "streaks.json"
@@ -14,12 +20,21 @@ class StreakRepositoryImpl
     constructor(
         private val assetReader: AssetReader,
         private val gson: Gson = Gson(),
+        @IoDispatcher private val dispatcher: CoroutineDispatcher,
     ) : StreakRepository {
-        private var cachedStreaks: List<Streak>? = null
+        private var streaks: List<Streak>? = null
 
-        override suspend fun getAllStreaks(): List<Streak> {
-            return cachedStreaks ?: loadStreaksFromAssets().also {
-                cachedStreaks = it
+        init {
+            CoroutineScope(dispatcher + Job()).launch {
+                streaks = loadStreaksFromAssets()
+            }
+        }
+
+        override fun getAllStreaks(): List<Streak> {
+            return streaks ?: runBlocking {
+                loadStreaksFromAssets().also {
+                    streaks = it
+                }
             }
         }
 

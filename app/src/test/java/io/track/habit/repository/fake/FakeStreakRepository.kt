@@ -60,7 +60,7 @@ class FakeStreakRepository : StreakRepository {
         streaks = gson.fromJson(jsonContent)
     }
 
-    override suspend fun getAllStreaks(): List<Streak> {
+    override fun getAllStreaks(): List<Streak> {
         return streaks
     }
 
