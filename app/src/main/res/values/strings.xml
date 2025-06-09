@@ -6,9 +6,24 @@
     <string name="pomodoro">Pomodoro</string>
     <string name="settings">Settings</string>
 
+    <string name="ascending_icon_content_desc">Ascending icon</string>
+    <string name="date_icon_content_desc">Select date</string>
+    <string name="delete_icon_content_desc">Delete icon</string>
+    <string name="descending_icon_content_desc">Descending icon</string>
+    <string name="edit_icon_content_desc">Edit icon</string>
+    <string name="empty_data_icon_content_desc">Empty data icon</string>
+    <string name="filter_icon_content_desc">Filter icon</string>
+    <string name="habit_logs_icon_content_desc">Habit logs icon</string>
+    <string name="reset_progress_icon_content_desc">Reset progress icon</string>
+    <string name="streak_icon_content_desc">Streak icon</string>
+    <string name="time_icon_content_desc">Select time</string>
+    <string name="visibility_icon_content_desc">Habit name visibility icon</string>
+    <string name="visibility_off_icon_content_desc">Habit name visibility off icon</string>
+
     <string name="add_a_habit">Add a habit</string>
     <string name="add_habit">Add habit</string>
     <string name="add_icon_content_desc">Add icon</string>
+    <string name="all_time">All-time</string>
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
@@ -31,7 +46,10 @@
     <string name="habit_name_privacy_message">Note: You can later choose to censor habit names in the settings for your privacy.</string>
     <string name="habit_start_time_explanation">If you\'ve already started this habit, you can customize when it began. This will be used to calculate your streak.</string>
     <string name="logs">Logs</string>
+    <string name="longest_streaks">Longest streaks</string>
+    <string name="longest_streaks_desc">The following are the details of your longest streaks on both on-going and all-time habits.</string>
     <string name="my_other_habits">My other habits</string>
+    <string name="ongoing">Ongoing</string>
     <string name="placeholder_habit_name">Enter habit name</string>
     <string name="placeholder_notes">Notes (optional)</string>
     <string name="placeholder_trigger_cause">Trigger cause (optional)</string>
@@ -65,20 +83,6 @@
     <string name="streak_very_close">You\'re almost there!</string>
     <string name="time">Time</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
-
-    <string name="ascending_icon_content_desc">Ascending icon</string>
-    <string name="date_icon_content_desc">Select date</string>
-    <string name="delete_icon_content_desc">Delete icon</string>
-    <string name="descending_icon_content_desc">Descending icon</string>
-    <string name="edit_icon_content_desc">Edit icon</string>
-    <string name="empty_data_icon_content_desc">Empty data icon</string>
-    <string name="filter_icon_content_desc">Filter icon</string>
-    <string name="habit_logs_icon_content_desc">Habit logs icon</string>
-    <string name="reset_progress_icon_content_desc">Reset progress icon</string>
-    <string name="streak_icon_content_desc">Streak icon</string>
-    <string name="time_icon_content_desc">Select time</string>
-    <string name="visibility_icon_content_desc">Habit name visibility icon</string>
-    <string name="visibility_off_icon_content_desc">Habit name visibility off icon</string>
 
     <plurals name="streak_achieved_habits">
         <item quantity="one">%d habit in this streak</item>
