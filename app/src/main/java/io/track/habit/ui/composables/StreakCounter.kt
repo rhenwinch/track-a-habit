@@ -35,11 +35,12 @@ fun StreakCounter(
     style: TextStyle,
     iconSize: DpSize,
     modifier: Modifier = Modifier,
+    arrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp),
 ) {
     val streakGradient = FireGradientGenerator.getGradient(streak)
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = arrangement,
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
     ) {
