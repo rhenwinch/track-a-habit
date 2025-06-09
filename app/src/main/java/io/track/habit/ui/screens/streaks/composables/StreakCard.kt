@@ -65,7 +65,7 @@ fun StreakCard(
                     Icon(
                         // TODO: Replace with actual icon from streakSummary.streak.badgeIcon
                         painter = painterResource(id = R.drawable.sad_emoji),
-                        contentDescription = streakSummary.name,
+                        contentDescription = streakSummary.title.asString(),
                         tint = Color.Unspecified,
                         modifier =
                             Modifier
@@ -78,7 +78,7 @@ fun StreakCard(
                         horizontalAlignment = Alignment.Start,
                     ) {
                         Text(
-                            text = streakSummary.name,
+                            text = streakSummary.title.asString(),
                             style =
                                 LocalTextStyle.current.copy(
                                     fontSize = 18.sp,

@@ -39,9 +39,11 @@ object PreviewMocks {
         streak: Streak = getStreak(),
         status: String = "Active",
         durationText: String = "7 days - 15 days",
+        isAchieved: Boolean = true,
     ) = StreakSummary(
-        streak = streak,
+        title = stringLiteral(streak.title),
         status = stringLiteral(status),
         durationText = stringLiteral(durationText),
+        isAchieved = isAchieved,
     )
 }

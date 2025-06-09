@@ -22,6 +22,7 @@
     <string name="edit_habit">Edit habit</string>
     <string name="empty_habits_message">Start by adding a new habit!</string>
     <string name="empty_title">Seems empty here…</string><string name="loading_message">Counting your streaks and motivating electrons…</string>
+    <string name="error_create_habit">Failed to create habit</string>
     <string name="error_empty_habit_name">Habit name cannot be empty</string>
     <string name="good_afternoon">Good afternoon</string>
     <string name="good_evening">Good evening</string>
@@ -31,6 +32,7 @@
     <string name="habit_start_time_explanation">If you\'ve already started this habit, you can customize when it began. This will be used to calculate your streak.</string>
     <string name="logs">Logs</string>
     <string name="my_other_habits">My other habits</string>
+    <string name="placeholder_habit_name">Enter habit name</string>
     <string name="placeholder_notes">Notes (optional)</string>
     <string name="placeholder_trigger_cause">Trigger cause (optional)</string>
     <string name="reset_progress">Reset progress</string>
@@ -53,7 +55,14 @@
     <string name="sort_by_creation_date">Date created</string>
     <string name="sort_by_name">Name</string>
     <string name="sort_by_streak">Streak</string>
+    <string name="streak_days_range">%1$s - %2$s days</string>
     <string name="streak_milestone">Streak milestone</string>
+    <string name="streak_mystery_title">Mystery milestone</string>
+    <string name="streak_not_achieved">Not achieved yet</string>
+    <string name="streak_partial_days_range">%1$s - ?? days</string>
+    <string name="streak_unknown_days">\?? - ?? days</string>
+    <string name="streak_unknown_title">Next milestone</string>
+    <string name="streak_very_close">You\'re almost there!</string>
     <string name="time">Time</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
 
@@ -70,6 +79,9 @@
     <string name="time_icon_content_desc">Select time</string>
     <string name="visibility_icon_content_desc">Habit name visibility icon</string>
     <string name="visibility_off_icon_content_desc">Habit name visibility off icon</string>
-    <string name="placeholder_habit_name">Enter habit name</string>
-    <string name="error_create_habit">Failed to create habit</string>
+
+    <plurals name="streak_achieved_habits">
+        <item quantity="one">%d habit in this streak</item>
+        <item quantity="other">%d habits in this streak</item>
+    </plurals>
 </resources>
