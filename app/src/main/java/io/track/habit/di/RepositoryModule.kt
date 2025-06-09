@@ -45,7 +45,10 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideStreakRepository(assetReader: AssetReader): StreakRepository {
-        return StreakRepositoryImpl(assetReader)
+    fun provideStreakRepository(
+        assetReader: AssetReader,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
+    ): StreakRepository {
+        return StreakRepositoryImpl(assetReader, dispatcher = ioDispatcher)
     }
 }
