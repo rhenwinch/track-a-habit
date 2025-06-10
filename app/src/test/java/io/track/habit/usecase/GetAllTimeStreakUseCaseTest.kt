@@ -72,8 +72,7 @@ class GetAllTimeStreakUseCaseTest {
             getAllTimeStreakUseCase().test {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
-                expectThat(result!!.habitId).isEqualTo(1L)
-                expectThat(result.streakInDays).isEqualTo(7)
+                expectThat(result!!.streakInDays).isEqualTo(7)
                 expectThat(result.streak.title).isEqualTo("One Week Streak")
                 cancelAndIgnoreRemainingEvents()
             }
@@ -91,8 +90,7 @@ class GetAllTimeStreakUseCaseTest {
             getAllTimeStreakUseCase().test {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
-                expectThat(result!!.habitId).isEqualTo(1L)
-                expectThat(result.streakInDays).isEqualTo(20)
+                expectThat(result!!.streakInDays).isEqualTo(20)
                 expectThat(result.streak.title).isEqualTo("Two Week Streak")
                 cancelAndIgnoreRemainingEvents()
             }
@@ -110,8 +108,7 @@ class GetAllTimeStreakUseCaseTest {
             getAllTimeStreakUseCase().test {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
-                expectThat(result!!.habitId).isEqualTo(1L)
-                expectThat(result.streakInDays).isEqualTo(40)
+                expectThat(result!!.streakInDays).isEqualTo(40)
                 expectThat(result.streak.title).isEqualTo("Champion")
                 expectThat(result.endDate).isNull()
                 cancelAndIgnoreRemainingEvents()
@@ -130,8 +127,7 @@ class GetAllTimeStreakUseCaseTest {
             getAllTimeStreakUseCase().test {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
-                expectThat(result!!.habitId).isEqualTo(2L)
-                expectThat(result.streakInDays).isEqualTo(40)
+                expectThat(result!!.streakInDays).isEqualTo(40)
                 expectThat(result.streak.title).isEqualTo("Champion")
                 expectThat(result.endDate).isNotNull()
                 cancelAndIgnoreRemainingEvents()
@@ -152,8 +148,7 @@ class GetAllTimeStreakUseCaseTest {
             getAllTimeStreakUseCase().test {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
-                expectThat(result!!.habitId).isEqualTo(2L)
-                expectThat(result.streakInDays).isEqualTo(20)
+                expectThat(result!!.streakInDays).isEqualTo(20)
                 expectThat(result.streak.title).isEqualTo("Two Week Streak")
                 cancelAndIgnoreRemainingEvents()
             }

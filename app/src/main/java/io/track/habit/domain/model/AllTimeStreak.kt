@@ -12,7 +12,6 @@ import java.util.Date
  *
  * This class tracks both ongoing and completed streaks, as determined by whether [endDate] is null.
  *
- * @property habitId The unique identifier of the habit this streak belongs to
  * @property streakInDays The duration of the streak in days
  * @property streak The achievement metadata associated with this streak (badge, title, etc.)
  * @property startDate The date when this streak began
@@ -20,7 +19,6 @@ import java.util.Date
  */
 @Stable
 data class AllTimeStreak(
-    val habitId: Long,
     val streakInDays: Int,
     val streak: Streak,
     val startDate: Date,
@@ -47,7 +45,6 @@ data class AllTimeStreak(
          */
         fun HabitWithStreak.toAllTimeStreak(): AllTimeStreak {
             return AllTimeStreak(
-                habitId = habit.habitId,
                 streakInDays = habit.streakInDays,
                 streak = streak,
                 startDate = habit.lastResetAt,
@@ -60,7 +57,6 @@ data class AllTimeStreak(
          */
         fun HabitLog.toAllTimeStreak(streak: Streak): AllTimeStreak {
             return AllTimeStreak(
-                habitId = habitId,
                 streakInDays = streakDuration,
                 streak = streak,
                 startDate = createdAt,
