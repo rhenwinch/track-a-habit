@@ -186,20 +186,20 @@ fun HabitsScreenContent(
                         ),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        if (habitToShowcase != null) {
-                            HabitsScreenHeader(
-                                quote = quote,
-                                isResetProgressButtonLocked = isResetProgressButtonLocked,
-                                isCensored = isCensoringHabitNames,
-                                habitWithStreak = habitToShowcase,
-                                onEditHabit = { showEditDialog = true },
-                                onDeleteHabit = { showDeleteDialog = true },
-                                onViewLogs = { onViewLogs(habitToShowcase.habit) },
-                                onResetProgress = { showResetProgressDialog = true },
-                                onToggleCensorship = onToggleCensorship,
-                                modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
-                            )
-                        }
+                        val habit = habitToShowcase ?: habits.first() // Might be problematic if habits are empty
+
+                        HabitsScreenHeader(
+                            quote = quote,
+                            isResetProgressButtonLocked = isResetProgressButtonLocked,
+                            isCensored = isCensoringHabitNames,
+                            habitWithStreak = habit,
+                            onEditHabit = { showEditDialog = true },
+                            onDeleteHabit = { showDeleteDialog = true },
+                            onViewLogs = { onViewLogs(habit.habit) },
+                            onResetProgress = { showResetProgressDialog = true },
+                            onToggleCensorship = onToggleCensorship,
+                            modifier = Modifier.padding(vertical = UiConstants.ScreenPaddingHorizontal),
+                        )
                     }
 
                     item(span = { GridItemSpan(maxLineSpan) }) {
