@@ -1,6 +1,8 @@
 package io.track.habit.data.local.database.entities
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.Date
 
@@ -17,7 +19,18 @@ import java.util.Date
  *
  * @see Habit
  */
-@Entity(tableName = "habit_logs")
+@Entity(
+    tableName = "habit_logs",
+    indices = [Index(value = ["habitId"])],
+    foreignKeys = [
+        ForeignKey(
+            entity = Habit::class,
+            parentColumns = ["habitId"],
+            childColumns = ["habitId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+)
 data class HabitLog(
     @PrimaryKey(autoGenerate = true) val logId: Long = 0,
     val habitId: Long,
