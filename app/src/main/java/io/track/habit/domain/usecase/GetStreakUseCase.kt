@@ -9,7 +9,7 @@ class GetStreakUseCase
     constructor(
         private val streakRepository: StreakRepository,
     ) {
-        suspend operator fun invoke(days: Int): Streak {
+        operator fun invoke(days: Int): Streak {
             val streaks = streakRepository.getAllStreaks()
 
             return streaks.find { days >= it.minDaysRequired && days <= it.maxDaysRequired }
