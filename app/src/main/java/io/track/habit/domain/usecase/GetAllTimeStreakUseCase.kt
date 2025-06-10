@@ -36,6 +36,10 @@ class GetAllTimeStreakUseCase
                 return null
             }
 
+            if (highestAllTimeStreak?.streakDuration == 0 || highestOngoingStreak?.habit?.streakInDays == 0) {
+                return null
+            }
+
             if (highestOngoingStreak == null) {
                 val streak = getStreakByDaysUseCase(highestAllTimeStreak!!.streakDuration)
                 return highestAllTimeStreak.toAllTimeStreak(streak)

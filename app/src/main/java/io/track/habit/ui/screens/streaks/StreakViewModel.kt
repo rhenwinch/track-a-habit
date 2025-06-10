@@ -73,7 +73,13 @@ class StreakViewModel
             getHabitsWithStreaksUseCase(
                 sortOrder = SortOrder.Streak(ascending = false),
             ).mapLatest {
-                it.firstOrNull()
+                val item = it.firstOrNull()
+
+                if (item?.habit?.streakInDays == 0) {
+                    null
+                } else {
+                    item
+                }
             }.asStateFlow(viewModelScope, initialValue = null)
 
         private fun mapToStreakSummary(
@@ -135,6 +141,7 @@ class StreakViewModel
                     val minDays = NumberFormat.getNumberInstance().format(streak.minDaysRequired)
                     stringRes(R.string.streak_partial_days_range, minDays)
                 }
+
                 else -> stringRes(R.string.streak_unknown_days)
             }
         }
