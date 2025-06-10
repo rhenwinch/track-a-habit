@@ -186,7 +186,7 @@ fun HabitsScreenContent(
                         ),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        val habit = habitToShowcase ?: habits.first() // Might be problematic if habits are empty
+                        val habit = habitToShowcase ?: habits.firstOrNull() ?: return@item
 
                         HabitsScreenHeader(
                             quote = quote,
