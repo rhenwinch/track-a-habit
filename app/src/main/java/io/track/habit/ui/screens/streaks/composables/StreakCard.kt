@@ -20,15 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.track.habit.R
 import io.track.habit.ui.screens.streaks.StreakSummary
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
+import io.track.habit.ui.utils.painterResourceFromString
 
 @Composable
 fun StreakCard(
@@ -63,10 +62,9 @@ fun StreakCard(
                             .padding(end = 8.dp),
                 ) {
                     Icon(
-                        // TODO: Replace with actual icon from streakSummary.streak.badgeIcon
-                        painter = painterResource(id = R.drawable.sad_emoji),
+                        painter = painterResourceFromString(streakSummary.badgeIcon),
                         contentDescription = streakSummary.title.asString(),
-                        tint = Color.Unspecified,
+                        tint = if (streakSummary.isAchieved) Color.Unspecified else LocalContentColor.current,
                         modifier =
                             Modifier
                                 .width(20.dp)

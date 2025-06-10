@@ -78,7 +78,7 @@
     <string name="streak_milestone">Streak milestone</string>
     <string name="streak_milestones">Streak milestones</string>
     <string name="streak_milestones_desc">These are the streaks that you will and have achieved in the past. Keep going!</string>
-    <string name="streak_mystery_title">Mystery milestone</string>
+    <string name="streak_mystery_title">\???</string>
     <string name="streak_not_achieved">Not achieved yet</string>
     <string name="streak_partial_days_range">%1$s - ?? days</string>
     <string name="streak_unknown_days">\?? - ?? days</string>

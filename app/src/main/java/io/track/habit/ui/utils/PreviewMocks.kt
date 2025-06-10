@@ -45,5 +45,6 @@ object PreviewMocks {
         status = stringLiteral(status),
         durationText = stringLiteral(durationText),
         isAchieved = isAchieved,
+        badgeIcon = streak.badgeIcon,
     )
 }

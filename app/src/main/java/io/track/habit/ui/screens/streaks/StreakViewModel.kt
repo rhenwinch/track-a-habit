@@ -83,7 +83,6 @@ class StreakViewModel
         ): StreakSummary {
             val isAchieved = longestStreak >= streak.minDaysRequired
 
-            // Determine title based on achievement status
             val title =
                 if (isAchieved) {
                     stringLiteral(streak.title)
@@ -101,7 +100,6 @@ class StreakViewModel
                         )
                 }
 
-            // Determine status text
             val status =
                 when {
                     isAchieved -> pluralStringRes(R.plurals.streak_achieved_habits, habitsInRange, habitsInRange)
@@ -116,6 +114,8 @@ class StreakViewModel
                 status = status,
                 durationText = getDurationText(streak, longestStreak),
                 isAchieved = isAchieved,
+//                badgeIcon = streak.badgeIcon,
+                badgeIcon = "habit_logs", // TODO: Placeholder for badge icon, replace with actual icon logic
             )
         }
 
@@ -135,7 +135,6 @@ class StreakViewModel
                     val minDays = NumberFormat.getNumberInstance().format(streak.minDaysRequired)
                     stringRes(R.string.streak_partial_days_range, minDays)
                 }
-                // User hasn't made enough progress to reveal details
                 else -> stringRes(R.string.streak_unknown_days)
             }
         }
@@ -146,5 +145,6 @@ data class StreakSummary(
     val title: StringResource,
     val status: StringResource,
     val durationText: StringResource,
-    val isAchieved: Boolean, // Add isAchieved property
+    val isAchieved: Boolean,
+    val badgeIcon: String, // New property for streak badge icon
 )

@@ -29,7 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.track.habit.R
 import io.track.habit.domain.model.AllTimeStreak
 import io.track.habit.domain.model.HabitWithStreak
-import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.ui.screens.streaks.composables.HighestStreakCard
 import io.track.habit.ui.screens.streaks.composables.StatsLabel
 import io.track.habit.ui.screens.streaks.composables.StreakCard
@@ -37,7 +36,6 @@ import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
 import java.util.Date
-import kotlin.random.Random
 
 @Composable
 fun StreaksScreen(viewModel: StreakViewModel = hiltViewModel()) {
@@ -152,11 +150,8 @@ private fun StreaksScreenPreview() {
     val streakSummaries =
         remember {
             List(10) {
-                StreakSummary(
-                    title = stringLiteral("Streak ${it + 1}"),
-                    status = stringLiteral("${Random.nextInt(2, 10)} habits are in this streak"),
-                    durationText = stringLiteral("${it * 7} days - ${it * 7 + 6} days"),
-                    isAchieved = false,
+                PreviewMocks.getStreakSummary(
+                    streak = PreviewMocks.getStreak(suffix = it.toString()),
                 )
             }
         }
