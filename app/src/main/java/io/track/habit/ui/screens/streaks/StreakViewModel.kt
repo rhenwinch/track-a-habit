@@ -10,8 +10,10 @@ import io.track.habit.R
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.repository.StreakRepository
+import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.utils.SortOrder
 import io.track.habit.domain.utils.StringResource
+import io.track.habit.domain.utils.asStateFlow
 import io.track.habit.domain.utils.pluralStringRes
 import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.domain.utils.stringRes
@@ -19,6 +21,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import java.text.NumberFormat
 import javax.inject.Inject
@@ -32,6 +35,7 @@ class StreakViewModel
         streakRepository: StreakRepository,
         habitRepository: HabitRepository,
         habitLogsRepository: HabitLogsRepository,
+        getHabitsWithStreaksUseCase: GetHabitsWithStreaksUseCase,
     ) : ViewModel() {
         private val streaks = streakRepository.getAllStreaks()
         private val longestStreakInDays =
@@ -108,6 +112,15 @@ class StreakViewModel
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList(),
             )
+
+        // val highestAllTimeStreak = TODO("Implement logic to determine if all-time streak is achieved")
+
+        val highestOngoingStreak =
+            getHabitsWithStreaksUseCase(
+                sortOrder = SortOrder.Streak(ascending = false),
+            ).mapLatest {
+                it.firstOrNull()
+            }.asStateFlow(viewModelScope, initialValue = null)
     }
 
 @Stable

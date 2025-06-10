@@ -7,6 +7,8 @@ import io.track.habit.domain.model.Streak
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.repository.StreakRepository
+import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
+import io.track.habit.domain.usecase.GetStreakUseCase
 import io.track.habit.domain.utils.StringResource
 import io.track.habit.repository.fake.FakeHabitLogsRepository
 import io.track.habit.repository.fake.FakeHabitRepository
@@ -28,6 +30,8 @@ import strikt.assertions.hasSize
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
+import strikt.assertions.isNotNull
+import strikt.assertions.isNull
 import strikt.assertions.isTrue
 import java.util.Date
 
@@ -37,6 +41,7 @@ class StreakViewModelTest {
     private lateinit var habitRepository: HabitRepository
     private lateinit var habitLogsRepository: HabitLogsRepository
     private lateinit var streakRepository: StreakRepository
+    private lateinit var getHabitsWithStreaksUseCase: GetHabitsWithStreaksUseCase
     private val testDispatcher: TestDispatcher = StandardTestDispatcher()
 
     @Before
@@ -46,11 +51,15 @@ class StreakViewModelTest {
         habitLogsRepository = FakeHabitLogsRepository()
         streakRepository = FakeStreakRepository()
 
+        val getStreakUseCase = GetStreakUseCase(streakRepository)
+        getHabitsWithStreaksUseCase = GetHabitsWithStreaksUseCase(habitRepository, getStreakUseCase)
+
         viewModel =
             StreakViewModel(
                 streakRepository = streakRepository,
                 habitRepository = habitRepository,
                 habitLogsRepository = habitLogsRepository,
+                getHabitsWithStreaksUseCase = getHabitsWithStreaksUseCase,
             )
     }
 
@@ -204,6 +213,7 @@ class StreakViewModelTest {
                     streakRepository = customStreakRepository,
                     habitRepository = habitRepository,
                     habitLogsRepository = habitLogsRepository,
+                    getHabitsWithStreaksUseCase = getHabitsWithStreaksUseCase,
                 )
 
             advanceUntilIdle()
@@ -254,6 +264,7 @@ class StreakViewModelTest {
                     streakRepository = customStreakRepository,
                     habitRepository = habitRepository,
                     habitLogsRepository = habitLogsRepository,
+                    getHabitsWithStreaksUseCase = getHabitsWithStreaksUseCase,
                 )
 
             advanceUntilIdle()
@@ -270,6 +281,67 @@ class StreakViewModelTest {
                     // Check that durationText is of type Resource
                     get { durationText }.isA<StringResource.Resource>()
                     get { (durationText as StringResource.Resource).id }.isEqualTo(R.string.streak_days_range)
+                }
+            }
+        }
+
+    @Test
+    fun `when no habits exist then highestOngoingStreak should be null`() =
+        runTest(testDispatcher) {
+            advanceUntilIdle()
+
+            viewModel.highestOngoingStreak.test {
+                expectThat(awaitItem()).isNull()
+            }
+        }
+
+    @Test
+    fun `when habits exist then highestOngoingStreak should return habit with longest streak`() =
+        runTest(testDispatcher) {
+            // Add habits with different streak lengths
+            val today = Date()
+            val threeDaysAgo = Date(today.time - (3 * 24 * 60 * 60 * 1000))
+            val tenDaysAgo = Date(today.time - (10 * 24 * 60 * 60 * 1000))
+            val thirtyDaysAgo = Date(today.time - (30 * 24 * 60 * 60 * 1000L))
+
+            // Add habits with various streak values
+            habitRepository.insertHabit(Habit(habitId = 1, name = "3-day streak habit", lastResetAt = threeDaysAgo))
+            habitRepository.insertHabit(Habit(habitId = 2, name = "10-day streak habit", lastResetAt = tenDaysAgo))
+            habitRepository.insertHabit(Habit(habitId = 3, name = "30-day streak habit", lastResetAt = thirtyDaysAgo))
+
+            advanceUntilIdle()
+
+            viewModel.highestOngoingStreak.test {
+                skipItems(1) // Skip initial empty state
+                val highestStreak = awaitItem()
+
+                expectThat(highestStreak).isNotNull()
+                expectThat(highestStreak!!.habit) {
+                    get { habitId }.isEqualTo(3) // Should return the 30-day streak habit
+                    get { name }.isEqualTo("30-day streak habit")
+                    get { streakInDays }.isEqualTo(30)
+                }
+            }
+        }
+
+    @Test
+    fun `when multiple habits have same streak then highestOngoingStreak should return first one`() =
+        runTest(testDispatcher) {
+            // Add two habits with the same streak length (20 days)
+            val twentyDaysAgo = Date(Date().time - (20 * 24 * 60 * 60 * 1000L))
+
+            habitRepository.insertHabit(Habit(habitId = 1, name = "First 20-day streak", lastResetAt = twentyDaysAgo))
+            habitRepository.insertHabit(Habit(habitId = 2, name = "Second 20-day streak", lastResetAt = twentyDaysAgo))
+
+            viewModel.highestOngoingStreak.test {
+                skipItems(1) // Skip initial empty state
+                val highestStreak = awaitItem()
+
+                expectThat(highestStreak).isNotNull()
+                expectThat(highestStreak!!.habit) {
+                    get { habitId }.isEqualTo(1)
+                    get { name }.isEqualTo("First 20-day streak")
+                    get { streakInDays }.isEqualTo(20)
                 }
             }
         }
