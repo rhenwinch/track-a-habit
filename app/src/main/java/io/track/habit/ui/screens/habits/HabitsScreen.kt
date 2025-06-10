@@ -1,9 +1,6 @@
 package io.track.habit.ui.screens.habits
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,7 +25,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -140,21 +140,18 @@ fun HabitsScreenContent(
     var showResetProgressDialog by rememberSaveable { mutableStateOf(false) }
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
 
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
     LaunchedEffect(habitToShowcase) {
         gridState.animateScrollToItem(0)
     }
 
     Scaffold(
-        modifier =
-            modifier.fillMaxSize(),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            AnimatedVisibility(
-                visible = habits.isNotEmpty(),
-                label = "HabitsScreenTopAppBar",
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
+            if (habits.isNotEmpty()) {
                 TopAppBar(
+                    scrollBehavior = scrollBehavior,
                     title = {
                         Text(
                             text = "${getTimeOfDayGreeting()}, $username",
