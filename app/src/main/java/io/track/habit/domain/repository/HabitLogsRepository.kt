@@ -11,6 +11,8 @@ interface HabitLogsRepository {
 
     fun getLongestStreakInDays(): Flow<Int>
 
+    fun getHabitLogs(): Flow<List<HabitLog>>
+
     fun getHabitWithLogs(habitId: Long): Flow<HabitWithLogs?>
 
     suspend fun getHabitLogById(logId: Long): HabitLog?

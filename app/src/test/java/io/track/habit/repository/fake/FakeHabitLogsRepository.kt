@@ -52,6 +52,12 @@ class FakeHabitLogsRepository : HabitLogsRepository {
         }
     }
 
+    override fun getHabitLogs(): Flow<List<HabitLog>> {
+        return logsStateFlow.mapLatest {
+            it.sortedByDescending { log -> log.streakDuration }
+        }
+    }
+
     override fun getLongestStreakForHabit(habitId: Long): Flow<HabitLog?> {
         return logsStateFlow.map { logs ->
             logs

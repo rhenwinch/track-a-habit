@@ -376,21 +376,110 @@ class HabitLogsRepositoryTest {
             }
         }
 
+    @Test
+    fun `when getting all habit logs then returns logs sorted by streak duration in descending order`() =
+        runTest {
+            // Insert logs with different streak durations
+            val habit1Id = 1L
+            val habit2Id = 2L
+
+            repository.insertHabitLog(createTestHabitLog(habitId = habit1Id, streakDuration = 5))
+            repository.insertHabitLog(createTestHabitLog(habitId = habit1Id, streakDuration = 12))
+            repository.insertHabitLog(createTestHabitLog(habitId = habit2Id, streakDuration = 8))
+            repository.insertHabitLog(createTestHabitLog(habitId = habit2Id, streakDuration = 3))
+
+            repository.getHabitLogs().test {
+                val logs = expectMostRecentItem()
+
+                expectThat(logs) {
+                    hasSize(4)
+                    get { this[0].streakDuration }.isEqualTo(12) // Highest streak first
+                    get { this[1].streakDuration }.isEqualTo(8)
+                    get { this[2].streakDuration }.isEqualTo(5)
+                    get { this[3].streakDuration }.isEqualTo(3) // Lowest streak last
+                }
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `when no habit logs exist and getting all habit logs then returns empty list`() =
+        runTest {
+            repository.getHabitLogs().test {
+                val logs = expectMostRecentItem()
+                expectThat(logs).isEmpty()
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `when observing all habit logs flow and adding new logs then emits updated data`() =
+        runTest {
+            // Start observing the flow
+            repository.getHabitLogs().test {
+                // Initially should be empty
+                val initialLogs = expectMostRecentItem()
+                expectThat(initialLogs).isEmpty()
+
+                // Add first log
+                val habit1Id = 1L
+                val log1 = createTestHabitLog(habitId = habit1Id, streakDuration = 5)
+                repository.insertHabitLog(log1)
+
+                val logsAfterFirst = awaitItem()
+                expectThat(logsAfterFirst) {
+                    hasSize(1)
+                    get { this[0].streakDuration }.isEqualTo(5)
+                }
+
+                // Add second log with higher streak
+                val log2 = createTestHabitLog(habitId = habit1Id, streakDuration = 10)
+                repository.insertHabitLog(log2)
+
+                val logsAfterSecond = awaitItem()
+                expectThat(logsAfterSecond) {
+                    hasSize(2)
+                    get { this[0].streakDuration }.isEqualTo(10) // Should be first (highest)
+                    get { this[1].streakDuration }.isEqualTo(5)
+                }
+
+                // Update first log to have highest streak
+                val updatedLog =
+                    createTestHabitLog(
+                        logId = 1L,
+                        habitId = habit1Id,
+                        streakDuration = 15,
+                    )
+                repository.updateHabitLog(updatedLog)
+
+                val logsAfterUpdate = awaitItem()
+                expectThat(logsAfterUpdate) {
+                    hasSize(2)
+                    get { this[0].streakDuration }.isEqualTo(15) // Updated log should now be first
+                    get { this[1].streakDuration }.isEqualTo(10)
+                }
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
     private fun createTestHabitLog(
         logId: Long = 0,
         habitId: Long,
-        streakDuration: Int = 1,
+        streakDuration: Int,
         trigger: String? = null,
         notes: String? = null,
         createdAt: Date = Date(),
-        updatedAt: Date = Date(),
-    ) = HabitLog(
-        logId = logId,
-        habitId = habitId,
-        streakDuration = streakDuration,
-        trigger = trigger,
-        notes = notes,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-    )
+    ): HabitLog {
+        return HabitLog(
+            logId = logId,
+            habitId = habitId,
+            streakDuration = streakDuration,
+            trigger = trigger,
+            notes = notes,
+            createdAt = createdAt,
+            updatedAt = createdAt,
+        )
+    }
 }
