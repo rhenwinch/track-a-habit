@@ -183,4 +183,34 @@ class HabitLogDaoTest {
                 cancelAndIgnoreRemainingEvents()
             }
         }
+
+    @Test
+    fun getHabitLogsReturnsAllLogsOrderedByStreakDurationDesc() =
+        runTest(testDispatcher) {
+            habitLogDao.insertHabitLog(HabitLog(habitId = 1, streakDuration = 15, notes = "Log 1"))
+            habitLogDao.insertHabitLog(HabitLog(habitId = 2, streakDuration = 30, notes = "Log 2"))
+            habitLogDao.insertHabitLog(HabitLog(habitId = 1, streakDuration = 5, notes = "Log 3"))
+            habitLogDao.insertHabitLog(HabitLog(habitId = 3, streakDuration = 25, notes = "Log 4"))
+            habitLogDao.insertHabitLog(HabitLog(habitId = 2, streakDuration = 20, notes = "Log 5"))
+
+            habitLogDao.getHabitLogs().test {
+                val allLogs = awaitItem()
+
+                expectThat(allLogs).hasSize(5)
+
+                expectThat(allLogs[0].streakDuration).isEqualTo(30)
+                expectThat(allLogs[1].streakDuration).isEqualTo(25)
+                expectThat(allLogs[2].streakDuration).isEqualTo(20)
+                expectThat(allLogs[3].streakDuration).isEqualTo(15)
+                expectThat(allLogs[4].streakDuration).isEqualTo(5)
+
+                expectThat(allLogs[0].notes).isEqualTo("Log 2")
+                expectThat(allLogs[1].notes).isEqualTo("Log 4")
+                expectThat(allLogs[2].notes).isEqualTo("Log 5")
+                expectThat(allLogs[3].notes).isEqualTo("Log 1")
+                expectThat(allLogs[4].notes).isEqualTo("Log 3")
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
 }

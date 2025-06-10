@@ -27,6 +27,9 @@ interface HabitLogDao {
     @Query("SELECT * FROM habits WHERE habitId = :habitId")
     fun getHabitWithLogsFlow(habitId: Long): Flow<HabitWithLogs?>
 
+    @Query("SELECT * FROM habit_logs ORDER BY streakDuration DESC")
+    fun getHabitLogs(): Flow<List<HabitLog>>
+
     @Insert
     suspend fun insertHabitLog(habitLog: HabitLog): Long
 
