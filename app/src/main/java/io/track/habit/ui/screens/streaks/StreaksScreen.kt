@@ -2,6 +2,7 @@ package io.track.habit.ui.screens.streaks
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -62,9 +63,11 @@ private fun StreaksScreenContent(
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
+                windowInsets = WindowInsets(0.dp),
                 title = {
                     Text(
                         text = stringResource(R.string.streaks),
