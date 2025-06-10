@@ -45,6 +45,7 @@
     <string name="habit_name">Habit name</string>
     <string name="habit_name_privacy_message">Note: You can later choose to censor habit names in the settings for your privacy.</string>
     <string name="habit_start_time_explanation">If you\'ve already started this habit, you can customize when it began. This will be used to calculate your streak.</string>
+    <string name="insufficient_data_for_stats">Awe, you need more data to see your stats!</string>
     <string name="logs">Logs</string>
     <string name="longest_streaks">Longest streaks</string>
     <string name="longest_streaks_desc">The following are the details of your longest streaks on both on-going and all-time habits.</string>
@@ -75,6 +76,8 @@
     <string name="sort_by_streak">Streak</string>
     <string name="streak_days_range">%1$s - %2$s days</string>
     <string name="streak_milestone">Streak milestone</string>
+    <string name="streak_milestones">Streak milestones</string>
+    <string name="streak_milestones_desc">These are the streaks that you will and have achieved in the past. Keep going!</string>
     <string name="streak_mystery_title">Mystery milestone</string>
     <string name="streak_not_achieved">Not achieved yet</string>
     <string name="streak_partial_days_range">%1$s - ?? days</string>

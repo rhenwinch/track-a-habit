@@ -13,7 +13,7 @@ object PreviewMocks {
             title = "Mock Streak${if (suffix.isNotBlank()) " $suffix" else ""}",
             minDaysRequired = 0,
             maxDaysRequired = 7,
-            badgeIcon = "",
+            badgeIcon = "habit_logs",
             message = "",
         )
 

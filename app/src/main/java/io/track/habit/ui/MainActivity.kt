@@ -32,6 +32,7 @@ import io.track.habit.ui.navigation.SubNavRoute
 import io.track.habit.ui.navigation.TopLevelBackStack
 import io.track.habit.ui.screens.create.CreateScreen
 import io.track.habit.ui.screens.habits.HabitsScreen
+import io.track.habit.ui.screens.streaks.StreaksScreen
 import io.track.habit.ui.theme.TrackAHabitTheme
 
 @AndroidEntryPoint
@@ -113,7 +114,7 @@ private fun App(topLevelBackStack: TopLevelBackStack<NavKey>) {
                     }
 
                     entry<NavRoute.Companion.Streaks> {
-                        Greeting("Streaks")
+                        StreaksScreen()
                     }
 
                     entry<NavRoute.Companion.Pomodoro> {
