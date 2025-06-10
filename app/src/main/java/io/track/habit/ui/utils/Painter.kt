@@ -9,8 +9,8 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.ResourceResolutionException
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.vectorResource
@@ -24,14 +24,17 @@ import androidx.compose.ui.res.vectorResource
  * @return A painter for the resource.
  * @throws Exception If the resource is not found.
  * */
-@SuppressLint("DiscouragedApi")
+@SuppressLint("DiscouragedApi", "LocalContextConfigurationRead")
 @Composable
 fun painterResourceFromString(
     name: String,
     packageName: String = LocalContext.current.packageName,
 ): Painter {
-    val res = LocalResources.current
     val context = LocalContext.current
+
+    // Query the current configuration in order to recompose during configuration changes
+    LocalConfiguration.current
+    val res = context.resources
 
     val id = res.getIdentifier(name, "drawable", packageName)
     if (id == 0) {

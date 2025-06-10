@@ -1,33 +1,41 @@
 package io.track.habit.ui.composables
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation3.runtime.NavKey
-import io.track.habit.ui.navigation.NavRoute.Companion.TOP_LEVEL_ROUTES
-import io.track.habit.ui.navigation.TopLevelBackStack
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import io.track.habit.ui.navigation.TopNavRoute.Companion.TOP_LEVEL_ROUTES
+import io.track.habit.ui.navigation.isSelected
+import io.track.habit.ui.navigation.navigateIfResumed
 import io.track.habit.ui.theme.TrackAHabitTheme
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun BottomNavBar(
-    backStack: TopLevelBackStack<NavKey>,
     modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
     NavigationBar(
         modifier = modifier,
     ) {
         TOP_LEVEL_ROUTES.forEach { route ->
-            val isSelected = route == backStack.topLevelKey
+            val isSelected = currentDestination?.isSelected(route) ?: false
 
             NavigationBarItem(
                 selected = isSelected,
-                onClick = { backStack.addTopLevel(route) },
+                onClick = { navController.navigateIfResumed(route) },
                 label = {
                     Text(
                         text = route.name.asString(),
@@ -58,8 +66,6 @@ fun BottomNavBar(
 @Composable
 private fun BottomNavBarPreview() {
     TrackAHabitTheme {
-        val backStack = remember { TopLevelBackStack<NavKey>(TOP_LEVEL_ROUTES.first()) }
-
-        BottomNavBar(backStack = backStack)
+        BottomNavBar()
     }
 }

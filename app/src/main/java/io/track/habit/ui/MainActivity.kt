@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -13,23 +15,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.ui.NavDisplay
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
 import io.track.habit.R
 import io.track.habit.ui.composables.BottomNavBar
-import io.track.habit.ui.navigation.NavRoute
 import io.track.habit.ui.navigation.SubNavRoute
-import io.track.habit.ui.navigation.TopLevelBackStack
+import io.track.habit.ui.navigation.TopNavRoute
+import io.track.habit.ui.navigation.isSelected
+import io.track.habit.ui.navigation.navigateIfResumed
 import io.track.habit.ui.screens.create.CreateScreen
 import io.track.habit.ui.screens.habits.HabitsScreen
 import io.track.habit.ui.screens.streaks.StreaksScreen
@@ -41,10 +43,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val viewModel: MainViewModel = hiltViewModel()
-
             TrackAHabitTheme {
-                App(topLevelBackStack = viewModel.backStack)
+                App()
             }
         }
     }
@@ -62,28 +62,31 @@ fun Greeting(
 }
 
 @Composable
-private fun App(topLevelBackStack: TopLevelBackStack<NavKey>) {
-    val currentRoute by remember {
-        derivedStateOf { topLevelBackStack.backStack.lastOrNull() }
-    }
+private fun App() {
+    val navController = rememberNavController()
 
-    val showFab by remember {
-        derivedStateOf {
-            when (currentRoute) {
-                is NavRoute.Companion.Habits -> true
-                else -> false
-            }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    val showFab =
+        remember(currentDestination) {
+            currentDestination?.isSelected(TopNavRoute.Habits) == true
         }
-    }
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(backStack = topLevelBackStack)
+            BottomNavBar(navController = navController)
         },
         floatingActionButton = {
-            AnimatedVisibility(visible = showFab) {
+            AnimatedVisibility(
+                visible = showFab,
+                enter = scaleIn(),
+                exit = scaleOut(),
+            ) {
                 FloatingActionButton(
-                    onClick = { topLevelBackStack.add(SubNavRoute.Companion.HabitsCreate) },
+                    onClick = {
+                        navController.navigateIfResumed(SubNavRoute.HabitsCreate)
+                    },
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
@@ -93,39 +96,42 @@ private fun App(topLevelBackStack: TopLevelBackStack<NavKey>) {
             }
         },
     ) { innerPadding ->
-        NavDisplay(
+        NavHost(
             modifier = Modifier.padding(innerPadding),
-            backStack = topLevelBackStack.backStack,
-            onBack = { topLevelBackStack.removeLast() },
-            entryProvider =
-                entryProvider {
-                    entry<NavRoute.Companion.Habits> {
-                        HabitsScreen(
-                            onViewLogs = { topLevelBackStack.add(SubNavRoute.Companion.HabitsViewLogs) },
+            navController = navController,
+            startDestination = TopNavRoute.Habits,
+        ) {
+            composable<TopNavRoute.Habits> {
+                HabitsScreen(
+                    onViewLogs = {
+                        navController.navigateIfResumed(
+                            SubNavRoute.HabitsViewLogs(habitId = it.habitId),
                         )
-                    }
+                    },
+                )
+            }
 
-                    entry<SubNavRoute.Companion.HabitsCreate> {
-                        CreateScreen(onNavigateBack = { topLevelBackStack.removeLast() })
-                    }
+            composable<SubNavRoute.HabitsCreate> {
+                CreateScreen(onNavigateBack = navController::navigateUp)
+            }
 
-                    entry<SubNavRoute.Companion.HabitsViewLogs> {
-                        Greeting("View Habit Logs")
-                    }
+            composable<SubNavRoute.HabitsViewLogs> {
+                val habitId = it.toRoute<SubNavRoute.HabitsViewLogs>()
+                Greeting("Viewing Habit Logs for Habit ID: ${habitId.habitId}")
+            }
 
-                    entry<NavRoute.Companion.Streaks> {
-                        StreaksScreen()
-                    }
+            composable<TopNavRoute.Streaks> {
+                StreaksScreen()
+            }
 
-                    entry<NavRoute.Companion.Pomodoro> {
-                        Greeting("Pomodoro")
-                    }
+            composable<TopNavRoute.Pomodoro> {
+                Greeting("Pomodoro")
+            }
 
-                    entry<NavRoute.Companion.Settings> {
-                        Greeting("Settings")
-                    }
-                },
-        )
+            composable<TopNavRoute.Settings> {
+                Greeting("Settings")
+            }
+        }
     }
 }
 
@@ -133,8 +139,6 @@ private fun App(topLevelBackStack: TopLevelBackStack<NavKey>) {
 @Composable
 private fun AppPreview() {
     TrackAHabitTheme {
-        App(
-            topLevelBackStack = remember { TopLevelBackStack(NavRoute.Companion.Habits) },
-        )
+        App()
     }
 }
