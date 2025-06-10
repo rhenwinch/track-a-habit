@@ -1,13 +1,9 @@
 package io.track.habit.domain.model
 
-import android.os.Build
 import androidx.compose.runtime.Immutable
 import io.track.habit.data.local.database.entities.Habit
-import java.text.SimpleDateFormat
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import io.track.habit.domain.utils.formatActiveSinceDate
 import java.util.Date
-import java.util.Locale
 
 /**
  * Represents a data model that combines a Habit and its associated streak information.
@@ -28,25 +24,7 @@ data class HabitWithStreak(
      * @return A formatted string representing the date and time of the last reset.
      */
     val formattedActiveSinceDate: String
-        get() {
-            val format = "M/d/yyyy hh:mm a"
-            val date = habit.lastResetAt
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val formatter = DateTimeFormatter.ofPattern(format)
-
-                val localDateTime =
-                    date
-                        .toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime()
-
-                return localDateTime.format(formatter)
-            } else {
-                val formatter = SimpleDateFormat(format, Locale.getDefault())
-                return formatter.format(date)
-            }
-        }
+        get() = habit.lastResetAt.formatActiveSinceDate()
 
     /**
      * Calculates the duration since the habit was last reset and formats it into a human-readable string.
