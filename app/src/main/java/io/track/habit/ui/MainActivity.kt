@@ -7,6 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -73,9 +75,21 @@ private fun App() {
             currentDestination?.isSelected(TopNavRoute.Habits) == true
         }
 
+    val showBottomBar =
+        remember(currentDestination) {
+            currentDestination?.isSelected(SubNavRoute.HabitsCreate) == false &&
+                !currentDestination.isSelected(SubNavRoute.HabitsViewLogs(1))
+        }
+
     Scaffold(
         bottomBar = {
-            BottomNavBar(navController = navController)
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInVertically { it },
+                exit = slideOutVertically { it / 2 },
+            ) {
+                BottomNavBar(navController = navController)
+            }
         },
         floatingActionButton = {
             AnimatedVisibility(
