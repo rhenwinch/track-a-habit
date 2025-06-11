@@ -155,7 +155,7 @@ fun HabitsScreenHeader(
                 text = stringResource(R.string.reset_progress),
                 contentDescription = stringResource(R.string.reset_progress_icon_content_desc),
                 onClick = onResetProgress,
-                enabled = isResetProgressButtonLocked,
+                enabled = !isResetProgressButtonLocked,
             )
 
             CommonButton(
