@@ -39,13 +39,6 @@ sealed interface TopNavRoute : NavRoute {
     }
 
     @Serializable
-    data object Pomodoro : TopNavRoute {
-        override val unselectedIcon: DrawableResource = drawableRes(R.drawable.pomodoro_outlined)
-        override val selectedIcon: DrawableResource = drawableRes(R.drawable.pomodoro_filled)
-        override val name: StringResource = stringRes(R.string.pomodoro)
-    }
-
-    @Serializable
     data object Settings : TopNavRoute {
         override val unselectedIcon: DrawableResource = drawableRes(R.drawable.settings_outlined)
         override val selectedIcon: DrawableResource = drawableRes(R.drawable.settings_filled)
@@ -57,7 +50,6 @@ sealed interface TopNavRoute : NavRoute {
             listOf(
                 Habits,
                 Streaks,
-                Pomodoro,
                 Settings,
             )
     }

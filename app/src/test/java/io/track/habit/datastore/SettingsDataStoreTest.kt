@@ -6,8 +6,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import io.track.habit.data.local.datastore.entities.GeneralSettings
 import io.track.habit.data.local.datastore.entities.GeneralSettingsRegistry
-import io.track.habit.data.local.datastore.entities.PomodoroSettings
-import io.track.habit.data.local.datastore.entities.PomodoroSettingsRegistry
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingType
 import io.track.habit.domain.datastore.SettingsDataStore
@@ -60,9 +58,6 @@ class SettingsDataStoreTest {
             assertEquals("", settings.general.userName)
             assertFalse(settings.general.censorHabitNames)
             assertFalse(settings.general.lockResetProgressButton)
-
-            assertEquals(5 * (1000 * 60), settings.pomodoro.restTimeInMs)
-            assertEquals(25 * (1000 * 60), settings.pomodoro.workTimeInMs)
         }
 
     @Test
@@ -72,14 +67,6 @@ class SettingsDataStoreTest {
             assertEquals("", initialGeneral.userName)
             assertFalse(initialGeneral.censorHabitNames)
             assertFalse(initialGeneral.lockResetProgressButton)
-        }
-
-    @Test
-    fun `pomodoroSettingsFlow should emit only pomodoro settings`() =
-        runTest {
-            val initialPomodoro = settingsDataStore.pomodoroSettingsFlow.first()
-            assertEquals(5 * (1000 * 60), initialPomodoro.restTimeInMs)
-            assertEquals(25 * (1000 * 60), initialPomodoro.workTimeInMs)
         }
 
     @Test
@@ -120,15 +107,6 @@ class SettingsDataStoreTest {
         }
 
     @Test
-    fun `updateSetting should work for long settings`() =
-        runTest {
-            settingsDataStore.updateSetting(PomodoroSettingsRegistry.WORK_TIME_IN_MS, 5000L)
-
-            val settings = settingsDataStore.settingsFlow.first()
-            assertEquals(5000L, settings.pomodoro.workTimeInMs)
-        }
-
-    @Test
     fun `updateSettings should work with GeneralSettings entity`() =
         runTest {
             val newGeneralSettings =
@@ -147,22 +125,6 @@ class SettingsDataStoreTest {
         }
 
     @Test
-    fun `updateSettings should work with PomodoroSettings entity`() =
-        runTest {
-            val newPomodoroSettings =
-                createMockPomodoroSettings(
-                    restTimeInMs = 10,
-                    workTimeInMs = 45,
-                )
-
-            settingsDataStore.updateSettings(newPomodoroSettings)
-
-            val settings = settingsDataStore.settingsFlow.first()
-            assertEquals(10, settings.pomodoro.restTimeInMs)
-            assertEquals(45, settings.pomodoro.workTimeInMs)
-        }
-
-    @Test
     fun `resetAllSettings should clear all preferences`() =
         runTest {
             // First set some values
@@ -172,19 +134,12 @@ class SettingsDataStoreTest {
                     censorHabitNames = true,
                     lockResetProgressButton = true,
                 )
-            val pomodoroSettings =
-                createMockPomodoroSettings(
-                    restTimeInMs = 15,
-                    workTimeInMs = 50,
-                )
 
             settingsDataStore.updateSettings(generalSettings)
-            settingsDataStore.updateSettings(pomodoroSettings)
 
             // Verify settings were applied
             var settings = settingsDataStore.settingsFlow.first()
             assertEquals("Test User", settings.general.userName)
-            assertEquals(15, settings.pomodoro.restTimeInMs)
 
             // Reset all settings
             settingsDataStore.resetAllSettings()
@@ -194,8 +149,6 @@ class SettingsDataStoreTest {
             assertEquals("", settings.general.userName)
             assertFalse(settings.general.censorHabitNames)
             assertFalse(settings.general.lockResetProgressButton)
-            assertEquals(5 * (1000 * 60), settings.pomodoro.restTimeInMs)
-            assertEquals(25 * (1000 * 60), settings.pomodoro.workTimeInMs)
         }
 
     @Test
@@ -204,13 +157,11 @@ class SettingsDataStoreTest {
             // Simulate concurrent updates
             settingsDataStore.updateSetting(GeneralSettingsRegistry.USER_NAME, "Concurrent User")
             settingsDataStore.updateSetting(GeneralSettingsRegistry.CENSOR_HABIT_NAMES, true)
-            settingsDataStore.updateSetting(PomodoroSettingsRegistry.WORK_TIME_IN_MS, 35)
 
             val settings = settingsDataStore.settingsFlow.first()
 
             assertEquals("Concurrent User", settings.general.userName)
             assertTrue(settings.general.censorHabitNames)
-            assertEquals(35, settings.pomodoro.workTimeInMs)
         }
 
     @Test
@@ -279,16 +230,6 @@ class SettingsDataStoreTest {
             userName = userName,
             censorHabitNames = censorHabitNames,
             lockResetProgressButton = lockResetProgressButton,
-        )
-    }
-
-    private fun createMockPomodoroSettings(
-        restTimeInMs: Long = 5 * (1000 * 60),
-        workTimeInMs: Long = 25 * (1000 * 60),
-    ): PomodoroSettings {
-        return PomodoroSettings(
-            restTimeInMs = restTimeInMs,
-            workTimeInMs = workTimeInMs,
         )
     }
 }

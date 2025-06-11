@@ -9,7 +9,6 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.track.habit.data.local.datastore.AppSettings
 import io.track.habit.data.local.datastore.entities.GeneralSettings
-import io.track.habit.data.local.datastore.entities.PomodoroSettings
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingEntity
 import io.track.habit.domain.datastore.SettingType
@@ -22,14 +21,10 @@ class FakeSettingsDataStore(
 ) : SettingsDataStore {
     override val settingsFlow: Flow<AppSettings> =
         testDataStore.data.map { preferences ->
-            AppSettings(
-                general = GeneralSettings.fromPreferences(preferences),
-                pomodoro = PomodoroSettings.fromPreferences(preferences),
-            )
+            AppSettings(general = GeneralSettings.fromPreferences(preferences))
         }
 
     override val generalSettingsFlow: Flow<GeneralSettings> = settingsFlow.map { it.general }
-    override val pomodoroSettingsFlow: Flow<PomodoroSettings> = settingsFlow.map { it.pomodoro }
 
     override suspend fun <T> updateSetting(
         definition: SettingDefinition<T>,

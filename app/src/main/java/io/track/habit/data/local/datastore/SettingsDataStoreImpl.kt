@@ -11,7 +11,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.track.habit.data.local.datastore.entities.GeneralSettings
-import io.track.habit.data.local.datastore.entities.PomodoroSettings
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingEntity
 import io.track.habit.domain.datastore.SettingType
@@ -29,14 +28,10 @@ class SettingsDataStoreImpl
     ) : SettingsDataStore {
         override val settingsFlow: Flow<AppSettings> =
             context.dataStore.data.map { preferences ->
-                AppSettings(
-                    general = GeneralSettings.fromPreferences(preferences),
-                    pomodoro = PomodoroSettings.fromPreferences(preferences),
-                )
+                AppSettings(general = GeneralSettings.fromPreferences(preferences))
             }
 
         override val generalSettingsFlow: Flow<GeneralSettings> = settingsFlow.map { it.general }
-        override val pomodoroSettingsFlow: Flow<PomodoroSettings> = settingsFlow.map { it.pomodoro }
 
         /**
          * Updates a setting in the DataStore.

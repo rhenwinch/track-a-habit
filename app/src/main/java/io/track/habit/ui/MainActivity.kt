@@ -137,10 +137,6 @@ private fun App() {
                 StreaksScreen()
             }
 
-            composable<TopNavRoute.Pomodoro> {
-                Greeting("Pomodoro")
-            }
-
             composable<TopNavRoute.Settings> {
                 Greeting("Settings")
             }
