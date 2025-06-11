@@ -24,7 +24,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
 import io.track.habit.R
 import io.track.habit.ui.composables.BottomNavBar
@@ -34,6 +33,7 @@ import io.track.habit.ui.navigation.isSelected
 import io.track.habit.ui.navigation.navigateIfResumed
 import io.track.habit.ui.screens.create.CreateScreen
 import io.track.habit.ui.screens.habits.HabitsScreen
+import io.track.habit.ui.screens.logs.LogsScreen
 import io.track.habit.ui.screens.streaks.StreaksScreen
 import io.track.habit.ui.theme.TrackAHabitTheme
 
@@ -116,8 +116,7 @@ private fun App() {
             }
 
             composable<SubNavRoute.HabitsViewLogs> {
-                val habitId = it.toRoute<SubNavRoute.HabitsViewLogs>()
-                Greeting("Viewing Habit Logs for Habit ID: ${habitId.habitId}")
+                LogsScreen(onNavigateBack = navController::navigateUp)
             }
 
             composable<TopNavRoute.Streaks> {

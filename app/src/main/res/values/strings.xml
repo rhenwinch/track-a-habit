@@ -11,6 +11,7 @@
     <string name="delete_icon_content_desc">Delete icon</string>
     <string name="descending_icon_content_desc">Descending icon</string>
     <string name="edit_icon_content_desc">Edit icon</string>
+    <string name="edit_log_content_desc">Edit log</string>
     <string name="empty_data_icon_content_desc">Empty data icon</string>
     <string name="filter_icon_content_desc">Filter icon</string>
     <string name="habit_logs_icon_content_desc">Habit logs icon</string>
@@ -33,9 +34,12 @@
     <string name="delete_habit">Delete habit</string>
     <string name="delete_habit_confirmation">Are you sure you want to delete this habit?</string>
     <string name="dismiss">Dismiss</string>
+    <string name="duration">Duration</string>
     <string name="edit">Edit</string>
     <string name="edit_habit">Edit habit</string>
+    <string name="edit_log">Edit log</string>
     <string name="empty_habits_message">Start by adding a new habit!</string>
+    <string name="empty_logs_message">This is good! You haven\'t relapsed yet.</string>
     <string name="empty_title">Seems empty here…</string><string name="loading_message">Counting your streaks and motivating electrons…</string>
     <string name="error_create_habit">Failed to create habit</string>
     <string name="error_empty_habit_name">Habit name cannot be empty</string>
@@ -50,6 +54,9 @@
     <string name="longest_streaks">Longest streaks</string>
     <string name="longest_streaks_desc">The following are the details of your longest streaks on both on-going and all-time habits.</string>
     <string name="my_other_habits">My other habits</string>
+    <string name="no_notes_provided">No notes provided</string>
+    <string name="no_trigger_provided">No trigger provided</string>
+    <string name="notes">Notes</string>
     <string name="ongoing">Ongoing</string>
     <string name="placeholder_habit_name">Enter habit name</string>
     <string name="placeholder_notes">Notes (optional)</string>
@@ -74,6 +81,7 @@
     <string name="sort_by_creation_date">Date created</string>
     <string name="sort_by_name">Name</string>
     <string name="sort_by_streak">Streak</string>
+    <string name="streak">Streak</string>
     <string name="streak_days_range">%1$s - %2$s days</string>
     <string name="streak_milestone">Streak milestone</string>
     <string name="streak_milestones">Streak milestones</string>
@@ -85,6 +93,7 @@
     <string name="streak_unknown_title">Next milestone</string>
     <string name="streak_very_close">You\'re almost there!</string>
     <string name="time">Time</string>
+    <string name="trigger">Trigger</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
 
     <plurals name="streak_achieved_habits">
