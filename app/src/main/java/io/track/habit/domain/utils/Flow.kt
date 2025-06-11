@@ -1,5 +1,6 @@
 package io.track.habit.domain.utils
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 
 private val io = Dispatchers.IO
 
-fun <T> Flow<T>.awaitFirst() = runBlocking(context = io) { this@awaitFirst.first() }
+fun <T> Flow<T>.awaitFirst(context: CoroutineDispatcher = io) = runBlocking(context) { this@awaitFirst.first() }
 
 fun <T> Flow<T>.asStateFlow(
     scope: CoroutineScope,
