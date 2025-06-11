@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
@@ -119,12 +118,14 @@ private fun HighestStreakCardContent(
         verticalArrangement = Arrangement.spacedBy(41.dp),
         modifier =
             modifier
-                .padding(14.dp),
+                .padding(14.dp)
+                .height(152.dp),
     ) {
         Headline(
             title = title,
             streakTitle = streakTitle,
             streakBadge = streakBadge,
+            modifier = Modifier.weight(1f),
         )
 
         Footer(
@@ -136,25 +137,23 @@ private fun HighestStreakCardContent(
 
 @Composable
 private fun NeedMoreDataCard(modifier: Modifier = Modifier) {
-    OutlinedCard(modifier) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.heightIn(152.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.insufficient_data_for_stats),
-                style =
-                    MaterialTheme.typography.labelLarge.copy(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = LocalContentColor.current.copy(0.8f),
-                        textAlign = TextAlign.Center,
-                    ),
-                modifier =
-                    Modifier
-                        .padding(horizontal = 12.dp),
-            )
-        }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.height(152.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.insufficient_data_for_stats),
+            style =
+                MaterialTheme.typography.labelLarge.copy(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = LocalContentColor.current.copy(0.8f),
+                    textAlign = TextAlign.Center,
+                ),
+            modifier =
+                Modifier
+                    .padding(horizontal = 12.dp),
+        )
     }
 }
 
@@ -177,7 +176,7 @@ private fun Headline(
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
             Icon(
                 // TODO: Replace with actual icon from streakBadge
@@ -252,7 +251,7 @@ private fun HighestStreakCardPreview() {
             startDate = Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 420L),
             streak =
                 PreviewMocks.getStreak().copy(
-                    title = "Grinner",
+                    title = "Marathon Runner",
                     badgeIcon = "grin_with_sweat_emoji",
                 ),
         )
