@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -38,7 +37,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
@@ -57,6 +55,7 @@ import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.utils.SortOrder
 import io.track.habit.ui.composables.AlertDialog
+import io.track.habit.ui.composables.EmptyDataScreen
 import io.track.habit.ui.screens.habits.composables.EditHabitDialog
 import io.track.habit.ui.screens.habits.composables.FilterBottomSheet
 import io.track.habit.ui.screens.habits.composables.HabitCard
@@ -335,51 +334,6 @@ private fun getTimeOfDayGreeting(): String {
         in 0..11 -> stringResource(R.string.good_morning)
         in 12..17 -> stringResource(R.string.good_afternoon)
         else -> stringResource(R.string.good_evening)
-    }
-}
-
-@Composable
-private fun EmptyDataScreen() {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier =
-            Modifier
-                .padding(UiConstants.ScreenPaddingHorizontal)
-                .heightIn(400.dp)
-                .fillMaxSize(),
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.grin_with_sweat_emoji),
-            contentDescription = stringResource(R.string.empty_data_icon_content_desc),
-            modifier = Modifier.size(100.dp),
-            tint = Color.Unspecified,
-        )
-
-        Text(
-            text = stringResource(R.string.empty_title),
-            style =
-                LocalTextStyle.current.copy(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = LocalContentColor.current.copy(alpha = 0.8f),
-                ),
-            modifier =
-                Modifier
-                    .padding(top = 16.dp),
-        )
-
-        Text(
-            text = stringResource(R.string.empty_habits_message),
-            modifier = Modifier.fillMaxWidth(0.85F),
-            style =
-                LocalTextStyle.current.copy(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = LocalContentColor.current.copy(alpha = 0.6f),
-                    textAlign = TextAlign.Center,
-                ),
-        )
     }
 }
 
