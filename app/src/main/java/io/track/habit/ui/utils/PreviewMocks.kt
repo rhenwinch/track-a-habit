@@ -1,6 +1,7 @@
 package io.track.habit.ui.utils
 
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.local.database.entities.HabitLog
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.model.Streak
 import io.track.habit.domain.utils.stringLiteral
@@ -46,5 +47,20 @@ object PreviewMocks {
         durationText = stringLiteral(durationText),
         isAchieved = isAchieved,
         badgeIcon = streak.badgeIcon,
+    )
+
+    fun getHabitLog(
+        habitId: Long = 0,
+        streakDuration: Int = 10,
+        date: Date = Date(),
+        notes: String = "Mock log notes",
+    ) = HabitLog(
+        logId = 0,
+        habitId = habitId,
+        streakDuration = streakDuration,
+        createdAt = date,
+        updatedAt = date,
+        trigger = null,
+        notes = notes,
     )
 }
