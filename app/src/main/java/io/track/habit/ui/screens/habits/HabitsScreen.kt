@@ -14,8 +14,11 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,8 +33,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -72,6 +77,7 @@ import java.util.Calendar
 @Composable
 fun HabitsScreen(
     onViewLogs: (Habit) -> Unit,
+    onAddHabit: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HabitsViewModel = hiltViewModel(),
 ) {
@@ -106,6 +112,7 @@ fun HabitsScreen(
                 onSortOrderSelect = viewModel::onSortOrderSelect,
                 onEditHabit = viewModel::updateHabit,
                 onViewLogs = onViewLogs,
+                onAddHabit = onAddHabit,
             )
         }
     }
@@ -130,10 +137,20 @@ fun HabitsScreenContent(
     onResetProgress: (ResetDetails) -> Unit,
     onDeleteHabit: (Habit) -> Unit,
     onToggleCensorship: () -> Unit,
+    onAddHabit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
+
+    // Track if the FAB should be extended based on scroll direction
+    val isFabExtended =
+        remember {
+            derivedStateOf {
+                // Show extended FAB when at the top of the list or scrolling up
+                gridState.firstVisibleItemIndex == 0 || !gridState.canScrollBackward
+            }
+        }
 
     var showEditDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -172,6 +189,21 @@ fun HabitsScreenContent(
                     },
                 )
             }
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onAddHabit,
+                expanded = isFabExtended.value,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = stringResource(R.string.add_a_habit),
+                    )
+                },
+                text = {
+                    Text(text = stringResource(R.string.add_a_habit))
+                },
+            )
         },
     ) { innerPadding ->
         AnimatedContent(
@@ -402,6 +434,7 @@ private fun HabitsScreenPreview() {
                 onResetProgress = {},
                 onToggleCensorship = {},
                 onSortOrderSelect = {},
+                onAddHabit = {},
             )
         }
     }
