@@ -8,8 +8,14 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 
-fun NavController.navigate(route: NavRoute) {
-    navigate(route) {
+private fun NavBackStackEntry.lifecycleIsResumed() = lifecycle.currentState == Lifecycle.State.RESUMED
+
+fun NavController.navigateIfResumed(navRoute: NavRoute) {
+    if (currentBackStackEntry?.lifecycleIsResumed() == false) {
+        return
+    }
+
+    navigate(navRoute) {
         // Pop up to the start destination of the graph to
         // avoid building up a large stack of destinations
         // on the back stack as users select items
@@ -22,16 +28,6 @@ fun NavController.navigate(route: NavRoute) {
         // Restore state when reselecting a previously selected item
         restoreState = true
     }
-}
-
-private fun NavBackStackEntry.lifecycleIsResumed() = lifecycle.currentState == Lifecycle.State.RESUMED
-
-fun NavController.navigateIfResumed(route: NavRoute) {
-    if (currentBackStackEntry?.lifecycleIsResumed() == false) {
-        return
-    }
-
-    navigate(route)
 }
 
 fun NavDestination?.isSelected(route: NavRoute): Boolean {
