@@ -11,6 +11,7 @@ import io.mockk.slot
 import io.track.habit.data.local.datastore.AppSettings
 import io.track.habit.data.local.datastore.entities.GeneralSettings
 import io.track.habit.data.local.datastore.entities.GeneralSettingsRegistry
+import io.track.habit.data.local.datastore.entities.UserAppState
 import io.track.habit.datastore.FakeSettingsDataStore
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingsDataStore
@@ -54,14 +55,16 @@ class SettingsViewModelTest {
     private val generalSettings =
         GeneralSettings(
             userName = "Test User",
-            lastShowcasedHabitId = 123L,
             censorHabitNames = true,
             lockResetProgressButton = false,
             notificationsEnabled = true,
         )
 
     private val generalSettingsFlow = MutableStateFlow(generalSettings)
-    private val appSettingsFlow = MutableStateFlow(AppSettings(general = generalSettings))
+    private val appSettingsFlow =
+        MutableStateFlow(
+            AppSettings(general = generalSettings, appState = UserAppState()),
+        )
 
     @Before
     fun setup() {
@@ -153,7 +156,6 @@ class SettingsViewModelTest {
             val updatedSettings =
                 GeneralSettings(
                     userName = "Persisted User",
-                    lastShowcasedHabitId = 456L,
                     censorHabitNames = false,
                     lockResetProgressButton = true,
                     notificationsEnabled = false,
@@ -167,7 +169,6 @@ class SettingsViewModelTest {
                 val emittedSettings = awaitItem()
                 expectThat(emittedSettings) {
                     get { userName }.isEqualTo("Persisted User")
-                    get { lastShowcasedHabitId }.isEqualTo(456L)
                     get { censorHabitNames }.isFalse()
                     get { lockResetProgressButton }.isTrue()
                     get { notificationsEnabled }.isFalse()

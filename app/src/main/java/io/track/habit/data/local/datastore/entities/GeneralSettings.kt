@@ -2,14 +2,13 @@ package io.track.habit.data.local.datastore.entities
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.track.habit.R
+import io.track.habit.data.local.datastore.entities.GeneralSettings.Companion.fromPreferences
+import io.track.habit.data.local.datastore.entities.GeneralSettingsRegistry.getAllSettings
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingEntity
 import io.track.habit.domain.datastore.SettingType
-import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.domain.utils.stringRes
 
 /**
@@ -31,7 +30,6 @@ import io.track.habit.domain.utils.stringRes
  */
 data class GeneralSettings(
     val userName: String = GeneralSettingsRegistry.USER_NAME.defaultValue,
-    val lastShowcasedHabitId: Long = GeneralSettingsRegistry.LAST_SHOWCASED_HABIT_ID.defaultValue,
     val censorHabitNames: Boolean = GeneralSettingsRegistry.CENSOR_HABIT_NAMES.defaultValue,
     val lockResetProgressButton: Boolean = GeneralSettingsRegistry.LOCK_RESET_PROGRESS.defaultValue,
     val notificationsEnabled: Boolean = GeneralSettingsRegistry.NOTIFICATIONS_ENABLED.defaultValue,
@@ -42,9 +40,6 @@ data class GeneralSettings(
                 userName =
                     preferences[stringPreferencesKey(GeneralSettingsRegistry.USER_NAME.key)]
                         ?: GeneralSettingsRegistry.USER_NAME.defaultValue,
-                lastShowcasedHabitId =
-                    preferences[longPreferencesKey(GeneralSettingsRegistry.LAST_SHOWCASED_HABIT_ID.key)]
-                        ?: GeneralSettingsRegistry.LAST_SHOWCASED_HABIT_ID.defaultValue,
                 censorHabitNames =
                     preferences[booleanPreferencesKey(GeneralSettingsRegistry.CENSOR_HABIT_NAMES.key)]
                         ?: GeneralSettingsRegistry.CENSOR_HABIT_NAMES.defaultValue,
@@ -61,7 +56,6 @@ data class GeneralSettings(
     override fun toPreferencesMap(): Map<Preferences.Key<*>, Any> {
         return mapOf(
             Pair(stringPreferencesKey(GeneralSettingsRegistry.USER_NAME.key), userName),
-            Pair(intPreferencesKey(GeneralSettingsRegistry.LAST_SHOWCASED_HABIT_ID.key), lastShowcasedHabitId),
             Pair(booleanPreferencesKey(GeneralSettingsRegistry.CENSOR_HABIT_NAMES.key), censorHabitNames),
             Pair(booleanPreferencesKey(GeneralSettingsRegistry.LOCK_RESET_PROGRESS.key), lockResetProgressButton),
             Pair(booleanPreferencesKey(GeneralSettingsRegistry.NOTIFICATIONS_ENABLED.key), notificationsEnabled),
@@ -81,15 +75,6 @@ data class GeneralSettings(
  * - Retrieve all settings for UI generation or other purposes using [getAllSettings].
  */
 object GeneralSettingsRegistry {
-    val LAST_SHOWCASED_HABIT_ID =
-        SettingDefinition(
-            key = "last_showcased_habit_id",
-            defaultValue = 0,
-            type = SettingType.LongType,
-            displayName = stringLiteral(""),
-            description = null,
-        )
-
     val USER_NAME =
         SettingDefinition(
             key = "user_name",

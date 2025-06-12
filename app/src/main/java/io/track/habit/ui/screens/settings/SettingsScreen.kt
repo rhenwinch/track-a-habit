@@ -76,11 +76,7 @@ private fun SettingsScreenContent(
                     .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // Filter out lastShowcasedHabitId from the settings list
-            val settingDefinitions =
-                GeneralSettingsRegistry.getAllSettings().filter {
-                    it != GeneralSettingsRegistry.LAST_SHOWCASED_HABIT_ID
-                }
+            val settingDefinitions = GeneralSettingsRegistry.getAllSettings()
 
             settingDefinitions.forEach { definition ->
                 when (definition) {

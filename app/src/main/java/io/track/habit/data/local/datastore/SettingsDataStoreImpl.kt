@@ -11,11 +11,13 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.track.habit.data.local.datastore.entities.GeneralSettings
+import io.track.habit.data.local.datastore.entities.UserAppState
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingEntity
 import io.track.habit.domain.datastore.SettingType
 import io.track.habit.domain.datastore.SettingsDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -28,10 +30,21 @@ class SettingsDataStoreImpl
     ) : SettingsDataStore {
         override val settingsFlow: Flow<AppSettings> =
             context.dataStore.data.map { preferences ->
-                AppSettings(general = GeneralSettings.fromPreferences(preferences))
+                AppSettings(
+                    general = GeneralSettings.fromPreferences(preferences),
+                    appState = UserAppState.fromPreferences(preferences),
+                )
             }
 
-        override val generalSettingsFlow: Flow<GeneralSettings> = settingsFlow.map { it.general }
+        override val appState: Flow<UserAppState> =
+            settingsFlow
+                .map { it.appState }
+                .distinctUntilChanged()
+
+        override val generalSettingsFlow: Flow<GeneralSettings> =
+            settingsFlow
+                .map { it.general }
+                .distinctUntilChanged()
 
         /**
          * Updates a setting in the DataStore.
@@ -50,7 +63,6 @@ class SettingsDataStoreImpl
             value: T,
         ) {
             context.dataStore.edit { preferences ->
-                @Suppress("UNCHECKED_CAST")
                 when (definition.type) {
                     is SettingType.StringType -> {
                         preferences[stringPreferencesKey(definition.key)] = value as String
@@ -75,7 +87,7 @@ class SettingsDataStoreImpl
          * Updates settings in a batch using a generic SettingEntity.
          *
          * This function takes any object that implements the `SettingEntity` interface
-         * (like [GeneralSettings] or [PomodoroSettings]) and updates all the corresponding
+         * (like [GeneralSettings] or [UserAppState]) and updates all the corresponding
          * preferences in the DataStore. It utilizes the `toPreferencesMap()` method from the
          * `SettingEntity` to convert the settings object into a map of preference keys and values.
          * This allows for a flexible way to update different groups of settings.

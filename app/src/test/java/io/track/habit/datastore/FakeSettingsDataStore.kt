@@ -9,11 +9,13 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.track.habit.data.local.datastore.AppSettings
 import io.track.habit.data.local.datastore.entities.GeneralSettings
+import io.track.habit.data.local.datastore.entities.UserAppState
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingEntity
 import io.track.habit.domain.datastore.SettingType
 import io.track.habit.domain.datastore.SettingsDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 class FakeSettingsDataStore(
@@ -21,17 +23,27 @@ class FakeSettingsDataStore(
 ) : SettingsDataStore {
     override val settingsFlow: Flow<AppSettings> =
         testDataStore.data.map { preferences ->
-            AppSettings(general = GeneralSettings.fromPreferences(preferences))
+            AppSettings(
+                general = GeneralSettings.fromPreferences(preferences),
+                appState = UserAppState.fromPreferences(preferences),
+            )
         }
 
-    override val generalSettingsFlow: Flow<GeneralSettings> = settingsFlow.map { it.general }
+    override val appState: Flow<UserAppState> =
+        settingsFlow
+            .map { it.appState }
+            .distinctUntilChanged()
+
+    override val generalSettingsFlow: Flow<GeneralSettings> =
+        settingsFlow
+            .map { it.general }
+            .distinctUntilChanged()
 
     override suspend fun <T> updateSetting(
         definition: SettingDefinition<T>,
         value: T,
     ) {
         testDataStore.edit { preferences ->
-            @Suppress("UNCHECKED_CAST")
             when (definition.type) {
                 is SettingType.StringType -> {
                     preferences[stringPreferencesKey(definition.key)] = value as String

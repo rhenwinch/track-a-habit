@@ -1,5 +1,6 @@
 package io.track.habit.domain.datastore
 
+import androidx.compose.runtime.Immutable
 import io.track.habit.domain.utils.StringResource
 import io.track.habit.domain.utils.stringLiteral
 
@@ -18,6 +19,7 @@ import io.track.habit.domain.utils.stringLiteral
  * @property description An optional detailed description of what the setting does, displayed in the UI. Defaults to `null`.
  * @property category A string used to group related settings in the UI. Defaults to "general".
  */
+@Immutable
 data class SettingDefinition<T>(
     val key: String,
     val defaultValue: T,
