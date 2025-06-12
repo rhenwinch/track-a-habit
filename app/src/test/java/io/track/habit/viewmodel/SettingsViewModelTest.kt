@@ -129,15 +129,22 @@ class SettingsViewModelTest {
         }
 
     @Test
-    fun `updateSettingsDefinition calls settings datastore with correct parameters`() =
+    fun `updateSettingWithCast calls settings datastore with correct parameters`() =
         runTest(testDispatcher) {
             val setting = GeneralSettingsRegistry.USER_NAME
             val value = "New Username"
 
-            mockViewModel.updateSettingsDefinition(setting, value)
+            mockViewModel.updateSettingWithCast(setting, value)
             advanceUntilIdle()
 
-            coVerify { mockSettingsDataStore.updateSetting(setting, value) }
+            coVerify {
+                mockSettingsDataStore.updateSetting(
+                    withArg { definition ->
+                        expectThat(definition).get { key }.isEqualTo(setting.key)
+                    },
+                    value,
+                )
+            }
         }
 
     @Test
@@ -169,9 +176,9 @@ class SettingsViewModelTest {
         }
 
     @Test
-    fun `updateSettingsDefinition persists changes to datastore`() =
+    fun `updateSettingWithCast persists changes to datastore`() =
         runTest(testDispatcher) {
-            viewModel.updateSettingsDefinition(GeneralSettingsRegistry.USER_NAME, "Definition User")
+            viewModel.updateSettingWithCast(GeneralSettingsRegistry.USER_NAME, "Definition User")
             advanceUntilIdle()
 
             viewModel.general.test {
@@ -202,7 +209,7 @@ class SettingsViewModelTest {
         }
 
     @Test
-    fun `updateSettingsDefinition ignores call when previous job is active`() =
+    fun `updateSettingWithCast ignores call when previous job is active`() =
         runTest(testDispatcher) {
             val settingSlot = slot<SettingDefinition<String>>()
             val valueSlot = slot<String>()
@@ -218,8 +225,8 @@ class SettingsViewModelTest {
                 // Don't complete immediately to simulate a job that's still running
             }
 
-            mockViewModel.updateSettingsDefinition(GeneralSettingsRegistry.USER_NAME, "First Call")
-            mockViewModel.updateSettingsDefinition(GeneralSettingsRegistry.USER_NAME, "Second Call")
+            mockViewModel.updateSettingWithCast(GeneralSettingsRegistry.USER_NAME, "First Call")
+            mockViewModel.updateSettingWithCast(GeneralSettingsRegistry.USER_NAME, "Second Call")
 
             advanceUntilIdle()
 

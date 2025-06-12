@@ -36,6 +36,7 @@ import io.track.habit.ui.navigation.navigateIfResumed
 import io.track.habit.ui.screens.create.CreateScreen
 import io.track.habit.ui.screens.habits.HabitsScreen
 import io.track.habit.ui.screens.logs.LogsScreen
+import io.track.habit.ui.screens.settings.SettingsScreen
 import io.track.habit.ui.screens.streaks.StreaksScreen
 import io.track.habit.ui.theme.TrackAHabitTheme
 
@@ -138,7 +139,7 @@ private fun App() {
             }
 
             composable<TopNavRoute.Settings> {
-                Greeting("Settings")
+                SettingsScreen()
             }
         }
     }

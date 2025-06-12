@@ -65,6 +65,9 @@
     <string name="save">Save</string>
     <string name="settings_censor_habit_names">Censor habit names</string>
     <string name="settings_censor_habit_names_desc">Hide habit names for privacy</string>
+    <string name="settings_dialog_cancel">Cancel</string>
+    <string name="settings_dialog_confirm">Save</string>
+    <string name="settings_dialog_input_label">Value</string>
     <string name="settings_lock_reset_progress">Lock reset progress</string>
     <string name="settings_lock_reset_progress_desc">Prevent accidental progress resets</string>
     <string name="settings_notifications">Enable notifications</string>

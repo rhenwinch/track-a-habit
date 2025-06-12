@@ -7,6 +7,7 @@ import io.track.habit.data.local.datastore.entities.GeneralSettings
 import io.track.habit.di.IoDispatcher
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingEntity
+import io.track.habit.domain.datastore.SettingType
 import io.track.habit.domain.datastore.SettingsDataStore
 import io.track.habit.domain.utils.asStateFlow
 import kotlinx.coroutines.CoroutineDispatcher
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class SettingsViewModel
+class SettingsViewModel
     @Inject
     constructor(
         private val settingsDataStore: SettingsDataStore,
@@ -44,15 +45,49 @@ internal class SettingsViewModel
                 }
         }
 
-        fun <T> updateSettingsDefinition(
-            setting: SettingDefinition<T>,
-            value: T,
+        /**
+         * Updates a setting with proper type casting from the UI layer.
+         * This function safely handles the wildcard type projection by checking
+         * the setting type and casting the value appropriately.
+         *
+         * @param definition The setting definition with wildcard type
+         * @param value The value to update the setting with
+         */
+        fun updateSettingWithCast(
+            definition: SettingDefinition<*>,
+            value: Any,
         ) {
             if (updateSettingsDefinitionJob?.isActive == true) return
 
             updateSettingsDefinitionJob =
                 scope.launch {
-                    settingsDataStore.updateSetting(setting, value)
+                    @Suppress("UNCHECKED_CAST")
+                    when (definition.type) {
+                        is SettingType.StringType -> {
+                            settingsDataStore.updateSetting(
+                                definition as SettingDefinition<String>,
+                                value as String,
+                            )
+                        }
+                        is SettingType.BooleanType -> {
+                            settingsDataStore.updateSetting(
+                                definition as SettingDefinition<Boolean>,
+                                value as Boolean,
+                            )
+                        }
+                        is SettingType.IntType -> {
+                            settingsDataStore.updateSetting(
+                                definition as SettingDefinition<Int>,
+                                value as Int,
+                            )
+                        }
+                        is SettingType.LongType -> {
+                            settingsDataStore.updateSetting(
+                                definition as SettingDefinition<Long>,
+                                value as Long,
+                            )
+                        }
+                    }
                 }
         }
     }
