@@ -61,7 +61,7 @@ class HabitsViewModel
                         .first()
                 val appState =
                     settingsDataStore
-                        .appState
+                        .appStateFlow
                         .first()
 
                 val initialCensorSetting = generalSettings.censorHabitNames
@@ -193,7 +193,7 @@ class HabitsViewModel
 
             changeShowcaseJob =
                 ioScope.launch {
-                    val currentSettings = settingsDataStore.appState.first()
+                    val currentSettings = settingsDataStore.appStateFlow.first()
 
                     settingsDataStore.updateSettings(
                         currentSettings.copy(lastShowcasedHabitId = habitWithStreak.habit.habitId),

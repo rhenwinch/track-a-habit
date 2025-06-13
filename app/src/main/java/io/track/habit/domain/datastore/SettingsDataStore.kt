@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 interface SettingsDataStore {
     val settingsFlow: Flow<AppSettings>
     val generalSettingsFlow: Flow<GeneralSettings>
-    val appState: Flow<UserAppState>
+    val appStateFlow: Flow<UserAppState>
 
     suspend fun <T> updateSetting(
         definition: SettingDefinition<T>,

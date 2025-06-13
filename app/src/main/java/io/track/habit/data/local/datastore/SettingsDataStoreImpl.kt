@@ -36,7 +36,7 @@ class SettingsDataStoreImpl
                 )
             }
 
-        override val appState: Flow<UserAppState> =
+        override val appStateFlow: Flow<UserAppState> =
             settingsFlow
                 .map { it.appState }
                 .distinctUntilChanged()
