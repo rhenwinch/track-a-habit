@@ -193,9 +193,9 @@ private fun OnboardingScreenContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     AnimatedContent(
-                        targetState = step,
+                        targetState = step(),
                     ) {
-                        when (it.invoke()) {
+                        when (it) {
                             OnboardingStep.Step2 ->
                                 NotificationPermissionStep(
                                     requestPermissions = requestPermissions,
