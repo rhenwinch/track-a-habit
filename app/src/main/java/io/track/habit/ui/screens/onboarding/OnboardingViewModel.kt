@@ -35,7 +35,7 @@ class OnboardingViewModel
         private var onboardingJob: Job? = null
 
         fun onNext() {
-            if (_uiState.value.username.isEmpty() || onboardingJob?.isActive == true) {
+            if (_uiState.value.usernameError || onboardingJob?.isActive == true) {
                 return
             }
 
@@ -47,7 +47,7 @@ class OnboardingViewModel
                         _uiState.value = _uiState.value.copy(currentStep = newStep)
                     } else if (updateJob?.isActive == false) {
                         updateJob =
-                            ioScope.launch {
+                            launch {
                                 settingsDataStore.updateSetting(
                                     definition = UserAppStateRegistry.IS_FIRST_RUN,
                                     value = false,
@@ -91,6 +91,8 @@ data class OnboardingUiState(
     private val isFirstStep: Boolean get() = currentStep == steps.first()
 
     private val isLastStep: Boolean get() = currentStep == steps.last()
+
+    val usernameError get() = currentStep is OnboardingStep.Step3 && username.trim().isEmpty()
 
     fun goToNextStep(): OnboardingStep? {
         return if (!isLastStep) {
