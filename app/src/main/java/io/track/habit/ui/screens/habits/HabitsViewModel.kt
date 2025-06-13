@@ -22,6 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -55,29 +56,40 @@ class HabitsViewModel
 
         init {
             viewModelScope.launch {
-                val generalSettings =
-                    settingsDataStore
-                        .generalSettingsFlow
-                        .first()
-                val appState =
-                    settingsDataStore
-                        .appStateFlow
-                        .first()
+                launch {
+                    val generalSettings =
+                        settingsDataStore
+                            .generalSettingsFlow
+                            .first()
+                    val appState =
+                        settingsDataStore
+                            .appStateFlow
+                            .first()
 
-                val initialCensorSetting = generalSettings.censorHabitNames
-                val initialShowcasedHabitId = appState.lastShowcasedHabitId
+                    val initialCensorSetting = generalSettings.censorHabitNames
+                    val initialShowcasedHabitId = appState.lastShowcasedHabitId
 
-                val habits = getHabitsWithStreaksUseCase().first()
-                val habit =
-                    habits.fastFirstOrNull { it.habit.habitId == initialShowcasedHabitId }
-                        ?: habits.firstOrNull()
+                    val habits = getHabitsWithStreaksUseCase().first()
+                    val habit =
+                        habits.fastFirstOrNull { it.habit.habitId == initialShowcasedHabitId }
+                            ?: habits.firstOrNull()
 
-                _uiState.update {
-                    it.copy(
-                        isCensoringHabitNames = initialCensorSetting,
-                        habitToShowcase = habit,
-                        isInitialized = true,
-                    )
+                    _uiState.update {
+                        it.copy(
+                            isCensoringHabitNames = initialCensorSetting,
+                            habitToShowcase = habit,
+                            isInitialized = true,
+                        )
+                    }
+                }
+
+                launch {
+                    settingsDataStore.generalSettingsFlow
+                        .map { it.censorHabitNames }
+                        .distinctUntilChanged()
+                        .collectLatest {
+                            toggleCensorshipOnNames(it)
+                        }
                 }
             }
         }
