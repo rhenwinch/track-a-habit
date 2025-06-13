@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.track.habit.R
+import io.track.habit.data.local.datastore.entities.GeneralSettingsRegistry
 import io.track.habit.data.local.datastore.entities.UserAppStateRegistry
 import io.track.habit.di.IoDispatcher
 import io.track.habit.domain.datastore.SettingsDataStore
@@ -51,6 +52,11 @@ class OnboardingViewModel
                                 settingsDataStore.updateSetting(
                                     definition = UserAppStateRegistry.IS_FIRST_RUN,
                                     value = false,
+                                )
+
+                                settingsDataStore.updateSetting(
+                                    definition = GeneralSettingsRegistry.USER_NAME,
+                                    value = _uiState.value.username,
                                 )
                             }
                     }
