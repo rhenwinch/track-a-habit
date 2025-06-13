@@ -104,7 +104,7 @@ data class OnboardingUiState(
 
     fun goToPreviousStep(): OnboardingStep? {
         return if (!isFirstStep) {
-            steps[steps.indexOf(currentStep) + 1]
+            steps[steps.indexOf(currentStep) - 1]
         } else {
             null
         }
