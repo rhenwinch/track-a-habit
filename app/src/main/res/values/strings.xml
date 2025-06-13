@@ -5,6 +5,22 @@
     <string name="streaks">Streaks</string>
     <string name="settings">Settings</string>
 
+    <!-- Onboarding Step 1: Welcome -->
+    <string name="onboarding_step1_headline">Build Better Habits, One Day at a Time!</string>
+    <string name="onboarding_step1_subtext">Ready to transform small daily actions into life-changing habits? Your journey to a better you starts now!</string>
+
+    <!-- Onboarding Step 2: Notifications -->
+    <string name="onboarding_step2_headline">Never Break Your Streak!</string>
+    <string name="onboarding_step2_subtext">Would you like friendly nudges to keep your habit chain unbroken? Don\'t worry, this is completely optional.</string>
+
+    <!-- Onboarding Step 3: Username -->
+    <string name="onboarding_step3_headline">What\'s Your Habit Hero Name?</string>
+    <string name="onboarding_step3_subtext">Choose a name that will inspire you throughout your habit-building journey!</string>
+
+    <!-- Onboarding Step 4: All Set -->
+    <string name="onboarding_step4_headline">You\'re Ready to Rock, %1$s!</string>
+    <string name="onboarding_step4_subtext">Small steps lead to big changes. Your habit journey starts now - let\'s make every day count!</string>
+
     <string name="ascending_icon_content_desc">Ascending icon</string>
     <string name="date_icon_content_desc">Select date</string>
     <string name="delete_icon_content_desc">Delete icon</string>
@@ -96,6 +112,8 @@
     <string name="streak_very_close">You\'re almost there!</string>
     <string name="time">Time</string>
     <string name="trigger">Trigger</string>
+    <string name="understood">Understood</string>
+    <string name="username">Username</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
 
     <plurals name="streak_achieved_habits">
