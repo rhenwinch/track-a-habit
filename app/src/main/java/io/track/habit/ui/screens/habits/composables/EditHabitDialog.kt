@@ -70,7 +70,7 @@ private fun EditHabitDialogContent(
                     isError = isError,
                     supportingText =
                         if (isError) {
-                            { Text(stringResource(R.string.error_empty_habit_name)) }
+                            { Text(stringResource(R.string.error_empty_field)) }
                         } else {
                             null
                         },

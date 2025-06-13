@@ -126,7 +126,7 @@ private fun CreateScreenContent(
                 isError = isNameError,
                 supportingText =
                     if (isNameError) {
-                        { Text(stringResource(R.string.error_empty_habit_name)) }
+                        { Text(stringResource(R.string.error_empty_field)) }
                     } else {
                         null
                     },
