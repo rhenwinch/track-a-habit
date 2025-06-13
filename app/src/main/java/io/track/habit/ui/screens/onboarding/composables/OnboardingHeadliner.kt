@@ -55,7 +55,7 @@ fun OnboardingHeadliner(
         ) {
             // Image with bounce effect animation
             AnimatedContent(
-                targetState = step,
+                targetState = step(),
                 transitionSpec = {
                     // Custom transition for the image - slide in from right with bounce
                     ContentTransform(
@@ -80,14 +80,14 @@ fun OnboardingHeadliner(
                 modifier = Modifier.fillMaxWidth(0.4f),
             ) { currentStep ->
                 Image(
-                    painter = currentStep().icon.asPainter(),
+                    painter = currentStep.icon.asPainter(),
                     contentDescription = stringResource(R.string.onboarding_step_icon_content_desc),
                 )
             }
 
             // Headline with slide in from left animation
             AnimatedContent(
-                targetState = step,
+                targetState = step(),
                 transitionSpec = {
                     // Delay by offsetting the animation duration
                     val enterDelay = 150
@@ -111,7 +111,7 @@ fun OnboardingHeadliner(
                 modifier = Modifier.fillMaxWidth(),
             ) { currentStep ->
                 Text(
-                    text = currentStep().headline.asString(),
+                    text = currentStep.headline.asString(),
                     style =
                         LocalTextStyle.current.copy(
                             fontSize = 36.sp,
@@ -124,7 +124,7 @@ fun OnboardingHeadliner(
 
             // SubText with combination of slide and expand animation
             AnimatedContent(
-                targetState = step,
+                targetState = step(),
                 transitionSpec = {
                     // Further delay with longer animation duration
                     val enterDelay = 250
@@ -152,7 +152,7 @@ fun OnboardingHeadliner(
                 modifier = Modifier.fillMaxWidth(),
             ) { currentStep ->
                 Text(
-                    text = currentStep().subText.asString(),
+                    text = currentStep.subText.asString(),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Right,
                 )
