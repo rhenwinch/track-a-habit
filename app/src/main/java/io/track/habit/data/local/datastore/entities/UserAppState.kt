@@ -47,7 +47,7 @@ object UserAppStateRegistry {
     val IS_FIRST_RUN =
         SettingDefinition(
             key = "is_first_run",
-            defaultValue = false,
+            defaultValue = true,
             type = SettingType.BooleanType,
             displayName = stringLiteral(""),
             description = null,
