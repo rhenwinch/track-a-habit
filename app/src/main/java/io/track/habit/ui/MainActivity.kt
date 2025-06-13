@@ -9,18 +9,20 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.track.habit.ui.composables.BottomNavBar
+import io.track.habit.ui.navigation.NavRoute
 import io.track.habit.ui.navigation.SubNavRoute
 import io.track.habit.ui.navigation.TopNavRoute
 import io.track.habit.ui.navigation.isSelected
@@ -46,18 +48,21 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(
-    name: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier,
+private fun App(viewModel: MainViewModel = hiltViewModel()) {
+    val isFirstRun by viewModel.isFirstRun.collectAsStateWithLifecycle()
+
+    AppContent(
+        startDestination =
+            if (isFirstRun) {
+                TopNavRoute.Onboarding
+            } else {
+                TopNavRoute.Habits
+            },
     )
 }
 
 @Composable
-private fun App() {
+private fun AppContent(startDestination: NavRoute) {
     val navController = rememberNavController()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -66,7 +71,8 @@ private fun App() {
     val showBottomBar =
         remember(currentDestination) {
             currentDestination?.isSelected(SubNavRoute.HabitsCreate) == false &&
-                !currentDestination.isSelected(SubNavRoute.HabitsViewLogs(1))
+                !currentDestination.isSelected(SubNavRoute.HabitsViewLogs(1)) &&
+                startDestination !is TopNavRoute.Onboarding
         }
 
     Scaffold(
@@ -83,8 +89,12 @@ private fun App() {
         NavHost(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
-            startDestination = TopNavRoute.Habits,
+            startDestination = startDestination,
         ) {
+            composable<TopNavRoute.Onboarding> {
+                // TODO: Implement OnboardingScreen
+            }
+
             composable<TopNavRoute.Habits> {
                 HabitsScreen(
                     onViewLogs = {
@@ -119,8 +129,20 @@ private fun App() {
 
 @Preview(showBackground = true)
 @Composable
-private fun AppPreview() {
+private fun AppOnHabitsPreview() {
     TrackAHabitTheme {
-        App()
+        AppContent(
+            startDestination = TopNavRoute.Habits,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AppOnOnboardingPreview() {
+    TrackAHabitTheme {
+        AppContent(
+            startDestination = TopNavRoute.Onboarding,
+        )
     }
 }

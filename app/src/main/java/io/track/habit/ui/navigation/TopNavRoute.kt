@@ -2,6 +2,7 @@ package io.track.habit.ui.navigation
 
 import io.track.habit.R
 import io.track.habit.domain.utils.StringResource
+import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.domain.utils.stringRes
 import io.track.habit.ui.utils.DrawableResource
 import io.track.habit.ui.utils.drawableRes
@@ -43,6 +44,13 @@ sealed interface TopNavRoute : NavRoute {
         override val unselectedIcon: DrawableResource = drawableRes(R.drawable.settings_outlined)
         override val selectedIcon: DrawableResource = drawableRes(R.drawable.settings_filled)
         override val name: StringResource = stringRes(R.string.settings)
+    }
+
+    @Serializable
+    data object Onboarding : TopNavRoute {
+        override val unselectedIcon: DrawableResource = drawableRes(-1)
+        override val selectedIcon: DrawableResource = drawableRes(-1)
+        override val name: StringResource = stringLiteral("")
     }
 
     companion object {
