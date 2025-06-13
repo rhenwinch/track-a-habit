@@ -10,6 +10,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -93,6 +94,14 @@ private fun AppContent(startDestination: NavRoute) {
             startDestination = startDestination,
         ) {
             composable<TopNavRoute.Onboarding> {
+                // Navigate to the onboarding screen only if the start destination is Habits
+                // This is to prevent navigating to Onboarding when the user is already onboarded.
+                LaunchedEffect(startDestination) {
+                    if (startDestination is TopNavRoute.Habits) {
+                        navController.navigateIfResumed(TopNavRoute.Habits)
+                    }
+                }
+
                 OnboardingScreen()
             }
 
