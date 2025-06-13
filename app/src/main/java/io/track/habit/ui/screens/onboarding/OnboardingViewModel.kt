@@ -37,7 +37,7 @@ class OnboardingViewModel
         private var onboardingJob: Job? = null
 
         fun onNext() {
-            if (_uiState.value.usernameError || onboardingJob?.isActive == true) {
+            if (_uiState.value.usernameError || onboardingJob?.isActive == true || updateJob?.isActive == true) {
                 return
             }
 
@@ -48,7 +48,7 @@ class OnboardingViewModel
                     if (newStep != null) {
                         _uiState.value = _uiState.value.copy(currentStep = newStep)
                         delay(800)
-                    } else if (updateJob?.isActive == false) {
+                    } else {
                         updateJob =
                             launch {
                                 settingsDataStore.updateSetting(
