@@ -15,6 +15,7 @@ import io.track.habit.ui.utils.drawableRes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -46,6 +47,7 @@ class OnboardingViewModel
 
                     if (newStep != null) {
                         _uiState.value = _uiState.value.copy(currentStep = newStep)
+                        delay(800)
                     } else if (updateJob?.isActive == false) {
                         updateJob =
                             launch {
@@ -74,6 +76,7 @@ class OnboardingViewModel
                     if (newStep != null) {
                         _uiState.value = _uiState.value.copy(currentStep = newStep)
                     }
+                    delay(800)
                 }
         }
 
