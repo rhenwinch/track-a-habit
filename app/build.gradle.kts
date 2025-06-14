@@ -86,6 +86,8 @@ dependencies {
 
     implementation(libs.datastore.preferences)
 
+    implementation(libs.androidx.biometric)
+
     implementation(libs.androidx.navigation)
 //    TODO: Re-enable navigation once androidx.navigation3 is stable
 //    implementation(libs.androidx.navigation3.runtime)
