@@ -119,6 +119,11 @@
     <string name="understood">Understood</string>
     <string name="username">Username</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
+    <string name="biometrics_prompt_title">Uncensor habits with biometrics</string>
+    <string name="biometrics_prompt_subtitle">Authenticate to view habit names</string>
+    <string name="biometrics_prompt_fallback">Use your password, PIN, or pattern instead</string>
+    <string name="biometrics_auth_success">Habit names are now visible</string>
+    <string name="biometrics_auth_failed">Authentication failed</string>
 
     <plurals name="streak_achieved_habits">
         <item quantity="one">%d habit in this streak</item>

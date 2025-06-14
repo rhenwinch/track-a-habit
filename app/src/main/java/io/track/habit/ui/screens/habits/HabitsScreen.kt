@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -25,6 +28,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +78,9 @@ import io.track.habit.ui.screens.habits.composables.ResetProgressDialog
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
+import io.track.habit.ui.utils.getBiometricsPromptInfo
+import io.track.habit.ui.utils.isBiometricAvailable
+import io.track.habit.ui.utils.showHabitNames
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -81,7 +91,21 @@ fun HabitsScreen(
     modifier: Modifier = Modifier,
     viewModel: HabitsViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val scope = rememberCoroutineScope()
+
+    val canAuthenticate = remember { context.isBiometricAvailable() }
+    val biometricsPromptInfo = remember {
+        getBiometricsPromptInfo(
+            title = context.getString(R.string.biometrics_prompt_title),
+            subtitle = context.getString(R.string.biometrics_prompt_subtitle),
+            negativeButtonText = context.getString(R.string.biometrics_prompt_fallback),
+        )
+    }
 
     AnimatedContent(
         targetState = uiState.isInitialized,
@@ -104,15 +128,44 @@ fun HabitsScreen(
                 sortOrder = uiState.sortOrder,
                 isResetProgressButtonLocked = isResetProgressButtonLocked,
                 isCensoringHabitNames = uiState.isCensoringHabitNames,
+                snackbarHostState = snackbarHostState,
                 onHabitClick = viewModel::toggleShowcaseHabit,
                 onDeleteHabit = viewModel::deleteHabit,
-                onToggleCensorship = { viewModel.toggleCensorshipOnNames(!uiState.isCensoringHabitNames) },
                 onHabitLongClick = viewModel::onHabitLongClick,
                 onResetProgress = viewModel::resetProgress,
                 onSortOrderSelect = viewModel::onSortOrderSelect,
                 onEditHabit = viewModel::updateHabit,
                 onViewLogs = onViewLogs,
                 onAddHabit = onAddHabit,
+                onToggleCensorship = {
+                    val isCensored = !uiState.isCensoringHabitNames
+                    if (!isCensored && canAuthenticate) {
+                        context.showHabitNames(
+                            prompt = biometricsPromptInfo,
+                            onAuthSucceed = {
+                                viewModel.toggleCensorshipOnNames(isCensored)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.biometrics_auth_success),
+                                        withDismissAction = true,
+                                        duration = SnackbarDuration.Long,
+                                    )
+                                }
+                            },
+                            onAuthFailed = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.biometrics_auth_failed),
+                                        withDismissAction = true,
+                                        duration = SnackbarDuration.Long,
+                                    )
+                                }
+                            },
+                        )
+                    } else {
+                        viewModel.toggleCensorshipOnNames(isCensored)
+                    }
+                },
             )
         }
     }
@@ -139,6 +192,7 @@ fun HabitsScreenContent(
     onToggleCensorship: () -> Unit,
     onAddHabit: () -> Unit,
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val scope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
@@ -166,6 +220,14 @@ fun HabitsScreenContent(
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0.dp),
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(Alignment.Bottom),
+            )
+        },
         topBar = {
             if (habits.isNotEmpty()) {
                 TopAppBar(
@@ -203,6 +265,12 @@ fun HabitsScreenContent(
                 text = {
                     Text(text = stringResource(R.string.add_a_habit))
                 },
+                modifier =
+                    if (snackbarHostState.currentSnackbarData != null) {
+                        Modifier.windowInsetsPadding(WindowInsets.safeContent)
+                    } else {
+                        Modifier
+                    },
             )
         },
     ) { innerPadding ->
