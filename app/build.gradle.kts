@@ -1,4 +1,5 @@
 import io.gitlab.arturbosch.detekt.Detekt
+import org.jetbrains.kotlin.konan.properties.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -39,6 +40,10 @@ android {
         versionName = ProjectConfig.APP_VERSION_NAME
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        buildConfigField("String", "WEB_CLIENT_ID", "\"${properties.getProperty("WEB_CLIENT_ID")}\"")
     }
 
     buildTypes {
@@ -62,6 +67,10 @@ android {
 
     room {
         schemaDirectory("$projectDir/schemas")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     packaging {

@@ -36,5 +36,19 @@ abstract class AppDatabase : RoomDatabase() {
                     INSTANCE = db
                 }
         }
+
+        /**
+         * Closes the database instance if it's open.
+         * This is necessary for backup and restore operations to ensure
+         * the database isn't in use during these critical operations.
+         */
+        fun closeDatabase() {
+            INSTANCE?.let { db ->
+                if (db.isOpen) {
+                    db.close()
+                }
+                INSTANCE = null
+            }
+        }
     }
 }
