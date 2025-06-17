@@ -1,4 +1,4 @@
-package io.track.habit.ui.screens.settings.components
+package io.track.habit.ui.screens.settings.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.track.habit.ui.screens.settings.components.dialog.StringSettingDialog
+import io.track.habit.ui.screens.settings.composables.dialog.StringSettingDialog
 import io.track.habit.ui.theme.TrackAHabitTheme
 
 /**

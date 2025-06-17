@@ -1,6 +1,7 @@
 package io.track.habit.data.remote.backup
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.track.habit.data.local.database.AppDatabase
 import io.track.habit.data.remote.drive.GoogleDriveService
 import io.track.habit.di.IoDispatcher
@@ -27,15 +28,13 @@ import kotlin.concurrent.write
  * @param context Application context used to access database files
  * @param driveService Service for Google Drive operations
  * @param dispatcher IO dispatcher for performing backup operations
- * @param databaseName The name of the database file to backup
  */
 class RemoteBackupManager
     @Inject
     constructor(
-        private val context: Context,
+        @ApplicationContext private val context: Context,
         private val driveService: GoogleDriveService,
         @IoDispatcher private val dispatcher: CoroutineDispatcher,
-        private val databaseName: String = AppDatabase.APP_DATABASE_NAME,
     ) : BackupManager {
         private val lock = ReentrantReadWriteLock()
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
@@ -65,7 +64,7 @@ class RemoteBackupManager
                         }
 
                         // Get source database file
-                        val dbFile = context.getDatabasePath(databaseName)
+                        val dbFile = context.getDatabasePath(AppDatabase.APP_DATABASE_NAME)
                         if (!dbFile.exists()) {
                             return@withContext Result.failure(
                                 IllegalStateException("Database file does not exist"),
@@ -131,7 +130,7 @@ class RemoteBackupManager
                         AppDatabase.closeDatabase()
 
                         // Get destination database file
-                        val dbFile = context.getDatabasePath(databaseName)
+                        val dbFile = context.getDatabasePath(AppDatabase.APP_DATABASE_NAME)
 
                         // Write backup data to database file
                         FileOutputStream(dbFile).use { fileOutputStream ->

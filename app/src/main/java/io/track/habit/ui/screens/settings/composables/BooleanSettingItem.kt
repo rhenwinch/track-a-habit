@@ -1,4 +1,4 @@
-package io.track.habit.ui.screens.settings.components
+package io.track.habit.ui.screens.settings.composables
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

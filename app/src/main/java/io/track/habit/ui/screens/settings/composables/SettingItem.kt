@@ -1,4 +1,4 @@
-package io.track.habit.ui.screens.settings.components
+package io.track.habit.ui.screens.settings.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

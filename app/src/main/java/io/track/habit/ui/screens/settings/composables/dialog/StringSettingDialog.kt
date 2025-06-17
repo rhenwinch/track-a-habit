@@ -1,4 +1,4 @@
-package io.track.habit.ui.screens.settings.components.dialog
+package io.track.habit.ui.screens.settings.composables.dialog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
