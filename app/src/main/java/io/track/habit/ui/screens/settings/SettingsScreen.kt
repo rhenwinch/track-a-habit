@@ -31,6 +31,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,11 +39,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.track.habit.R
 import io.track.habit.data.local.datastore.entities.GeneralSettings
 import io.track.habit.data.local.datastore.entities.GeneralSettingsRegistry
@@ -69,28 +69,35 @@ import io.track.habit.ui.theme.TrackAHabitTheme
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val context = LocalContext.current
-    val generalSettings by viewModel.general.collectAsState()
-    val isSignedIn by viewModel.isSignedIn.collectAsState()
-    val lastBackupDate by viewModel.lastBackupDate.collectAsState()
-    val backupOperationState by viewModel.backupOperationState.collectAsState()
-    val availableBackups by viewModel.availableBackups.collectAsState()
-    val authorizationState by viewModel.authorizationState.collectAsState()
+    val generalSettings by viewModel.general.collectAsStateWithLifecycle()
+    val isSignedIn by viewModel.isSignedIn.collectAsStateWithLifecycle()
+    val lastBackupDate by viewModel.lastBackupDate.collectAsStateWithLifecycle()
+    val backupOperationState by viewModel.backupOperationState.collectAsStateWithLifecycle()
+    val availableBackups by viewModel.availableBackups.collectAsStateWithLifecycle()
+    val authorizationState by viewModel.authorizationState.collectAsStateWithLifecycle()
 
-    val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle backup operation state changes
     LaunchedEffect(backupOperationState) {
         when (backupOperationState) {
             is BackupOperationState.Success -> {
-                snackbarHostState.showSnackbar(
+                val result = snackbarHostState.showSnackbar(
                     (backupOperationState as BackupOperationState.Success).message.asString(context),
                 )
+                // Reset state after snackbar is shown and consumed
+                if (result == SnackbarResult.Dismissed || result == SnackbarResult.ActionPerformed) {
+                    viewModel.resetBackupOperationState()
+                }
             }
             is BackupOperationState.Error -> {
-                snackbarHostState.showSnackbar(
+                val result = snackbarHostState.showSnackbar(
                     (backupOperationState as BackupOperationState.Error).message.asString(context),
                 )
+                // Reset state after snackbar is shown and consumed
+                if (result == SnackbarResult.Dismissed || result == SnackbarResult.ActionPerformed) {
+                    viewModel.resetBackupOperationState()
+                }
             }
             else -> {}
         }

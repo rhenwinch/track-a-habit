@@ -268,6 +268,15 @@ class SettingsViewModel
                     _availableBackups.value = emptyList()
                 }
         }
+
+        /**
+         * Resets the backup operation state back to idle.
+         * Called after a snackbar message is shown and dismissed to prevent
+         * the same message from appearing again on recomposition.
+         */
+        fun resetBackupOperationState() {
+            _backupOperationState.value = BackupOperationState.Idle
+        }
     }
 
 /**
