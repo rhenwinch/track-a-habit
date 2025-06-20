@@ -29,6 +29,11 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history for proper commit counting
 
+      - name: Set up local.properties
+        run: |
+          echo "WEB_CLIENT_ID=${{ secrets.WEB_CLIENT_ID }}" > local.properties
+          echo "Created local.properties"
+
       - name: Set version info based on tag
         id: version_info
         run: |
