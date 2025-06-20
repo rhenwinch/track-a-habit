@@ -45,8 +45,16 @@ class SettingsViewModel
         private val scope = CoroutineScope(ioDispatcher)
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
+        // Existing job guards for settings updates
         private var updateSettingsEntityJob: Job? = null
         private var updateSettingsDefinitionJob: Job? = null
+
+        // Add job guards for backup and authentication operations
+        private var signInJob: Job? = null
+        private var signOutJob: Job? = null
+        private var createBackupJob: Job? = null
+        private var restoreBackupJob: Job? = null
+        private var deleteBackupJob: Job? = null
 
         // Backup operation state
         private val _backupOperationState = MutableStateFlow<BackupOperationState>(BackupOperationState.Idle)
@@ -118,18 +126,21 @@ class SettingsViewModel
                                 value as String,
                             )
                         }
+
                         is SettingType.BooleanType -> {
                             settingsDataStore.updateSetting(
                                 definition as SettingDefinition<Boolean>,
                                 value as Boolean,
                             )
                         }
+
                         is SettingType.IntType -> {
                             settingsDataStore.updateSetting(
                                 definition as SettingDefinition<Int>,
                                 value as Int,
                             )
                         }
+
                         is SettingType.LongType -> {
                             settingsDataStore.updateSetting(
                                 definition as SettingDefinition<Long>,
@@ -144,58 +155,69 @@ class SettingsViewModel
          * Initiates sign-in to Google Drive.
          */
         fun signInToGoogleDrive() {
-            scope.launch {
-                _backupOperationState.value = BackupOperationState.SigningIn
+            if (signInJob?.isActive == true) return
 
-                try {
-                    googleDriveService.signIn()
-                    _backupOperationState.value = BackupOperationState.Idle
-                    fetchAvailableBackups()
-                } catch (error: Exception) {
-                    _backupOperationState.value =
-                        BackupOperationState.Error(
-                            stringRes(R.string.error_auth_failed_with_reason, error.message ?: ""),
-                        )
+            signInJob =
+                scope.launch {
+                    _backupOperationState.value = BackupOperationState.SigningIn
+
+                    try {
+                        googleDriveService.signIn()
+                        _backupOperationState.value = BackupOperationState.Idle
+                        fetchAvailableBackups()
+                    } catch (error: Exception) {
+                        _backupOperationState.value =
+                            BackupOperationState.Error(
+                                stringRes(R.string.error_auth_failed_with_reason, error.message ?: ""),
+                            )
+                    }
                 }
-            }
         }
 
         /**
          * Signs out from Google Drive.
          */
         fun signOutFromGoogleDrive() {
-            scope.launch {
-                googleDriveService.signOut()
-                _availableBackups.value = emptyList()
-                _lastBackupDate.value = null
-            }
+            if (signOutJob?.isActive == true) return
+
+            signOutJob =
+                scope.launch {
+                    googleDriveService.signOut()
+                    _availableBackups.value = emptyList()
+                    _lastBackupDate.value = null
+                }
         }
 
         /**
          * Creates a backup of the database to Google Drive.
          */
         fun createBackup() {
-            scope.launch {
-                if (authorizationState.value != AuthorizationState.Authorized) {
-                    _backupOperationState.value =
-                        BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
-                    return@launch
-                }
+            if (createBackupJob?.isActive == true) return
 
-                _backupOperationState.value = BackupOperationState.BackingUp
-                backupManager
-                    .createBackup()
-                    .onSuccess {
-                        val timestamp = dateFormat.format(Date())
-                        _lastBackupDate.value = timestamp
+            createBackupJob =
+                scope.launch {
+                    if (authorizationState.value != AuthorizationState.Authorized) {
                         _backupOperationState.value =
-                            BackupOperationState.Success(stringRes(R.string.success_backup_created))
-                        fetchAvailableBackups()
-                    }.onFailure { error ->
-                        _backupOperationState.value =
-                            BackupOperationState.Error(stringRes(R.string.error_backup_general, error.message ?: ""))
+                            BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
+                        return@launch
                     }
-            }
+
+                    _backupOperationState.value = BackupOperationState.BackingUp
+                    backupManager
+                        .createBackup()
+                        .onSuccess {
+                            val timestamp = dateFormat.format(Date())
+                            _lastBackupDate.value = timestamp
+                            _backupOperationState.value =
+                                BackupOperationState.Success(stringRes(R.string.success_backup_created))
+                            fetchAvailableBackups()
+                        }.onFailure { error ->
+                            _backupOperationState.value =
+                                BackupOperationState.Error(
+                                    stringRes(R.string.error_backup_general, error.message ?: ""),
+                                )
+                        }
+                }
         }
 
         /**
@@ -204,24 +226,29 @@ class SettingsViewModel
          * @param backupId The ID of the backup to restore from
          */
         fun restoreFromBackup(backupId: String) {
-            scope.launch {
-                if (authorizationState.value != AuthorizationState.Authorized) {
-                    _backupOperationState.value =
-                        BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
-                    return@launch
-                }
+            if (restoreBackupJob?.isActive == true) return
 
-                _backupOperationState.value = BackupOperationState.Restoring
-                backupManager
-                    .restoreFromBackup(backupId)
-                    .onSuccess {
+            restoreBackupJob =
+                scope.launch {
+                    if (authorizationState.value != AuthorizationState.Authorized) {
                         _backupOperationState.value =
-                            BackupOperationState.Success(stringRes(R.string.success_restore_completed))
-                    }.onFailure { error ->
-                        _backupOperationState.value =
-                            BackupOperationState.Error(stringRes(R.string.error_restore_general, error.message ?: ""))
+                            BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
+                        return@launch
                     }
-            }
+
+                    _backupOperationState.value = BackupOperationState.Restoring
+                    backupManager
+                        .restoreFromBackup(backupId)
+                        .onSuccess {
+                            _backupOperationState.value =
+                                BackupOperationState.Success(stringRes(R.string.success_restore_completed))
+                        }.onFailure { error ->
+                            _backupOperationState.value =
+                                BackupOperationState.Error(
+                                    stringRes(R.string.error_restore_general, error.message ?: ""),
+                                )
+                        }
+                }
         }
 
         /**
@@ -230,25 +257,30 @@ class SettingsViewModel
          * @param backupId The ID of the backup to delete
          */
         fun deleteBackup(backupId: String) {
-            scope.launch {
-                if (authorizationState.value != AuthorizationState.Authorized) {
-                    _backupOperationState.value =
-                        BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
-                    return@launch
-                }
+            if (deleteBackupJob?.isActive == true) return
 
-                _backupOperationState.value = BackupOperationState.Deleting
-                backupManager
-                    .deleteBackup(backupId)
-                    .onSuccess {
+            deleteBackupJob =
+                scope.launch {
+                    if (authorizationState.value != AuthorizationState.Authorized) {
                         _backupOperationState.value =
-                            BackupOperationState.Success(stringRes(R.string.success_backup_deleted))
-                        fetchAvailableBackups()
-                    }.onFailure { error ->
-                        _backupOperationState.value =
-                            BackupOperationState.Error(stringRes(R.string.error_delete_general, error.message ?: ""))
+                            BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
+                        return@launch
                     }
-            }
+
+                    _backupOperationState.value = BackupOperationState.Deleting
+                    backupManager
+                        .deleteBackup(backupId)
+                        .onSuccess {
+                            _backupOperationState.value =
+                                BackupOperationState.Success(stringRes(R.string.success_backup_deleted))
+                            fetchAvailableBackups()
+                        }.onFailure { error ->
+                            _backupOperationState.value =
+                                BackupOperationState.Error(
+                                    stringRes(R.string.error_delete_general, error.message ?: ""),
+                                )
+                        }
+                }
         }
 
         /**
