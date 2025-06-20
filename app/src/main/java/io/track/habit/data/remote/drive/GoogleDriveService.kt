@@ -72,7 +72,6 @@ class GoogleDriveService
             private const val APP_NAME = "Track-A-Habit Backup"
             private const val TAG = "GoogleDriveService"
 
-            // Scopes required for Google Drive access
             private val DRIVE_SCOPES = listOf(
                 DriveScopes.DRIVE_FILE,
                 DriveScopes.DRIVE_APPDATA,
@@ -120,23 +119,18 @@ class GoogleDriveService
          */
         suspend fun isAuthenticated(): Boolean =
             withContext(dispatcher) {
-                // First check if we already have a valid credential
                 if (googleAccountToken != null && authorizationState.value == AuthorizationState.Authorized) {
                     return@withContext true
                 }
 
-                // If not, try to sign in silently
                 try {
-                    // Try to get Google credentials with existing accounts only
                     signIn()
                         .onSuccess {
                             return@withContext true
                         }
 
-                    // If we reach here, silent sign-in failed but didn't throw
                     return@withContext false
                 } catch (e: Exception) {
-                    // Silent sign-in failed with exception
                     Log.d(TAG, "Silent authentication check failed: ${e.message}")
                     return@withContext false
                 }
@@ -167,7 +161,6 @@ class GoogleDriveService
                     getDriveService()
                         ?: throw IllegalStateException(context.getString(R.string.error_drive_service_unavailable))
 
-                // Check if folder exists
                 val query = "name = '$folderName' and mimeType = '$FOLDER_MIME_TYPE' and trashed = false"
                 val result = drive
                     .files()
@@ -180,10 +173,8 @@ class GoogleDriveService
                 val files = result.files
 
                 if (files != null && files.isNotEmpty()) {
-                    // Folder exists, return its ID
                     return@withContext files[0].id
                 } else {
-                    // Create folder
                     val folderMetadata = DriveFile()
                         .setName(folderName)
                         .setMimeType(FOLDER_MIME_TYPE)
@@ -220,13 +211,11 @@ class GoogleDriveService
                     getDriveService()
                         ?: throw IllegalStateException(context.getString(R.string.error_drive_service_unavailable))
 
-                // Create file metadata
                 val fileMetadata = DriveFile()
                     .setName(fileName)
                     .setMimeType(mimeType)
                     .setParents(Collections.singletonList(folderId))
 
-                // Upload file to Drive
                 val fileContent = FileContent(mimeType, file)
                 val uploadedFile = drive
                     .files()
@@ -343,12 +332,8 @@ class GoogleDriveService
                         credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
                     ) {
                         try {
-                            // Checks only if the credential is valid
                             GoogleIdTokenCredential.createFrom(credential.data)
-
-                            // Now that we have authentication, request authorization
                             requestGoogleDriveAuthorization()
-
                             return@withContext Result.success(Unit)
                         } catch (e: GoogleIdTokenParsingException) {
                             return@withContext Result.failure(e)
@@ -367,7 +352,6 @@ class GoogleDriveService
         /**
          * Requests authorization for Google Drive access using the Identity Authorization API.
          * This must be called from a context that can handle the authorization resolution.
-         *
          */
         private suspend fun requestGoogleDriveAuthorization() {
             _authorizationState.value = AuthorizationState.Authorizing
@@ -383,7 +367,6 @@ class GoogleDriveService
                     .await()
             }.onSuccess { authResult ->
                 if (authResult.hasResolution() && authResult.pendingIntent != null) {
-                    // User needs to grant permission
                     try {
                         val intentSenderRequest = IntentSenderRequest
                             .Builder(authResult.pendingIntent!!.intentSender)
@@ -395,7 +378,6 @@ class GoogleDriveService
                             AuthorizationState.Error(stringRes(R.string.error_launch_auth_failed, e.message ?: ""))
                     }
                 } else {
-                    // Already authorized, proceed with Drive setup
                     setupGoogleAccountCredential(authResult)
                 }
             }.onFailure { e ->
@@ -465,24 +447,12 @@ data class DriveFileMetadata(
  * Represents the state of the Google Drive authorization process.
  */
 sealed class AuthorizationState {
-    /**
-     * User has not been authorized yet.
-     */
     data object NotAuthorized : AuthorizationState()
 
-    /**
-     * Authorization process is in progress.
-     */
     data object Authorizing : AuthorizationState()
 
-    /**
-     * User has been successfully authorized.
-     */
     data object Authorized : AuthorizationState()
 
-    /**
-     * An error occurred during the authorization process.
-     */
     data class Error(
         val message: StringResource,
     ) : AuthorizationState()
