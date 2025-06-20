@@ -137,6 +137,14 @@
     <string name="username">Username</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
 
+    <!-- Backup restoration dialogs -->
+    <string name="confirm_restore_title">Confirm Restoration</string>
+    <string name="confirm_restore_message">Are you sure you want to restore from this backup? Current data will be replaced with the backup data.</string>
+    <string name="proceed">Proceed</string>
+    <string name="restart_required_title">Restart Required</string>
+    <string name="restart_required_message">Your data has been successfully restored. Please restart the app to see the changes.</string>
+    <string name="restart">Restart</string>
+
     <!-- Google Drive Authorization & Backup Error Messages -->
     <string name="error_auth_failed">Authorization failed</string>
     <string name="error_auth_denied">Authorization was denied</string>

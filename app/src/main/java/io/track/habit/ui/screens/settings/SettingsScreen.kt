@@ -1,5 +1,6 @@
 package io.track.habit.ui.screens.settings
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.track.habit.R
@@ -151,8 +154,20 @@ private fun SettingsScreenContent(
     onDeleteBackupClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var showRestoreDialog by remember { mutableStateOf(false) }
+    var selectedBackupForRestore by remember { mutableStateOf<BackupFile?>(null) }
+    var showRestoreConfirmationDialog by remember { mutableStateOf(false) }
+    var showRestartRequiredDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(backupOperationState) {
+        if (backupOperationState is BackupOperationState.Success &&
+            backupOperationState.message.asString(context) == context.getString(R.string.success_restore_completed)
+        ) {
+            showRestartRequiredDialog = true
+        }
+    }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -251,11 +266,92 @@ private fun SettingsScreenContent(
             BackupRestoreDialog(
                 backups = availableBackups,
                 onDismiss = { showRestoreDialog = false },
-                onRestore = { backupId ->
-                    onRestoreClick(backupId)
-                    showRestoreDialog = false
+                onRestore = { backupFile ->
+                    selectedBackupForRestore = backupFile
+                    showRestoreConfirmationDialog = true
                 },
                 onDeleteBackup = onDeleteBackupClick,
+            )
+        }
+
+        // Confirmation dialog before restore
+        if (showRestoreConfirmationDialog && selectedBackupForRestore != null) {
+            AlertDialog(
+                onDismissRequest = { showRestoreConfirmationDialog = false },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.confirm_restore_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                text = {
+                    Column {
+                        Text(stringResource(id = R.string.confirm_restore_message))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = selectedBackupForRestore!!.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onRestoreClick(selectedBackupForRestore!!.id)
+                            showRestoreConfirmationDialog = false
+                            showRestoreDialog = false
+                        },
+                    ) {
+                        Text(stringResource(id = R.string.proceed))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showRestoreConfirmationDialog = false
+                        },
+                    ) {
+                        Text(stringResource(id = R.string.cancel))
+                    }
+                },
+            )
+        }
+
+        if (showRestartRequiredDialog) {
+            AlertDialog(
+                onDismissRequest = { /* Do nothing */ },
+                properties = DialogProperties(
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false,
+                ),
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.restart_required_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                text = {
+                    Text(stringResource(id = R.string.restart_required_message))
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                            intent?.addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                                    Intent.FLAG_ACTIVITY_NEW_TASK,
+                            )
+                            context.startActivity(intent)
+                            Runtime.getRuntime().exit(0)
+                        },
+                    ) {
+                        Text(stringResource(id = R.string.restart))
+                    }
+                },
             )
         }
 
@@ -303,7 +399,6 @@ private fun GoogleDriveBackupSection(
                 fontWeight = FontWeight.Bold,
             )
 
-            // Show authorization error if present
             if (authorizationState is AuthorizationState.Error) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -326,7 +421,6 @@ private fun GoogleDriveBackupSection(
             }
 
             if (isSignedIn) {
-                // User is signed in - show backup options
                 Text(
                     text = stringResource(id = R.string.connected_to_google_drive),
                     style = MaterialTheme.typography.bodyMedium,
@@ -345,7 +439,6 @@ private fun GoogleDriveBackupSection(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    // Backup button
                     Button(
                         onClick = onBackupClick,
                         modifier = Modifier.weight(1f),
@@ -362,7 +455,6 @@ private fun GoogleDriveBackupSection(
                         Text(text = stringResource(id = R.string.backup_now))
                     }
 
-                    // Restore button
                     OutlinedButton(
                         onClick = onRestoreClick,
                         modifier = Modifier.weight(1f),
@@ -380,7 +472,6 @@ private fun GoogleDriveBackupSection(
                     }
                 }
 
-                // Sign out button
                 TextButton(
                     onClick = onSignOutClick,
                     modifier = Modifier.align(Alignment.End),
@@ -388,7 +479,6 @@ private fun GoogleDriveBackupSection(
                     Text(text = stringResource(id = R.string.sign_out))
                 }
             } else {
-                // User is not signed in - show sign in button
                 Text(
                     text = stringResource(id = R.string.google_drive_backup_description),
                     style = MaterialTheme.typography.bodyMedium,
@@ -422,7 +512,7 @@ private fun GoogleDriveBackupSection(
 private fun BackupRestoreDialog(
     backups: List<BackupFile>,
     onDismiss: () -> Unit,
-    onRestore: (String) -> Unit,
+    onRestore: (BackupFile) -> Unit,
     onDeleteBackup: (String) -> Unit,
 ) {
     ModalBottomSheet(
@@ -436,7 +526,7 @@ private fun BackupRestoreDialog(
         ) {
             Text(
                 text = stringResource(id = R.string.select_backup_to_restore),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp),
             )
@@ -457,7 +547,7 @@ private fun BackupRestoreDialog(
                     items(backups) { backup ->
                         BackupItem(
                             backup = backup,
-                            onRestore = { onRestore(backup.id) },
+                            onRestore = { onRestore(backup) },
                             onDelete = { onDeleteBackup(backup.id) },
                         )
                     }
@@ -475,7 +565,6 @@ private fun BackupRestoreDialog(
                 Text(text = stringResource(id = R.string.cancel))
             }
 
-            // Add extra padding at the bottom for better UX
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -497,7 +586,6 @@ private fun BackupItem(
                 .fillMaxWidth()
                 .padding(start = 16.dp, top = 12.dp, end = 8.dp, bottom = 8.dp),
         ) {
-            // Display backup filename with better formatting
             Text(
                 text = backup.name,
                 style = MaterialTheme.typography.bodyLarge,
@@ -507,7 +595,6 @@ private fun BackupItem(
                 modifier = Modifier.padding(bottom = 8.dp),
             )
 
-            // Extract and display date from filename if possible
             backup.name
                 .substringAfter(RemoteBackupManager.BACKUP_FILE_PREFIX)
                 .substringBefore(RemoteBackupManager.BACKUP_FILE_EXTENSION)
