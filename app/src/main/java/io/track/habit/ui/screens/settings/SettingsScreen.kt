@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,16 +18,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -90,6 +91,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                     viewModel.resetBackupOperationState()
                 }
             }
+
             is BackupOperationState.Error -> {
                 val result = snackbarHostState.showSnackbar(
                     (backupOperationState as BackupOperationState.Error).message.asString(context),
@@ -99,6 +101,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                     viewModel.resetBackupOperationState()
                 }
             }
+
             else -> {}
         }
     }
@@ -212,6 +215,7 @@ private fun SettingsScreenContent(
                                 },
                             )
                         }
+
                         GeneralSettingsRegistry.CENSOR_HABIT_NAMES -> {
                             SettingItem(
                                 definition = definition,
@@ -219,6 +223,7 @@ private fun SettingsScreenContent(
                                 onValueChange = { onSettingChange(definition, it) },
                             )
                         }
+
                         GeneralSettingsRegistry.LOCK_RESET_PROGRESS -> {
                             SettingItem(
                                 definition = definition,
@@ -226,6 +231,7 @@ private fun SettingsScreenContent(
                                 onValueChange = { onSettingChange(definition, it) },
                             )
                         }
+
                         GeneralSettingsRegistry.NOTIFICATIONS_ENABLED -> {
                             SettingItem(
                                 definition = definition,
@@ -409,6 +415,7 @@ private fun GoogleDriveBackupSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BackupRestoreDialog(
     backups: List<BackupFile>,
@@ -416,20 +423,33 @@ private fun BackupRestoreDialog(
     onRestore: (String) -> Unit,
     onDeleteBackup: (String) -> Unit,
 ) {
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
+        sheetState = rememberModalBottomSheetState(),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
             Text(
                 text = stringResource(id = R.string.select_backup_to_restore),
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp),
             )
-        },
-        text = {
+
             if (backups.isEmpty()) {
-                Text(text = stringResource(id = R.string.no_backups_available))
+                Text(
+                    text = stringResource(id = R.string.no_backups_available),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(vertical = 16.dp),
+                )
             } else {
                 LazyColumn(
-                    modifier = Modifier.height(300.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(backups) { backup ->
@@ -441,14 +461,22 @@ private fun BackupRestoreDialog(
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+            ) {
                 Text(text = stringResource(id = R.string.cancel))
             }
-        },
-        dismissButton = null,
-    )
+
+            // Add extra padding at the bottom for better UX
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
 }
 
 @Composable
@@ -457,28 +485,79 @@ private fun BackupItem(
     onRestore: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
     ) {
-        Text(
-            text = backup.name,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-
-        TextButton(onClick = onRestore) {
-            Text(text = stringResource(id = R.string.restore))
-        }
-
-        IconButton(onClick = onDelete) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(id = R.string.delete_backup_content_desc),
-                tint = MaterialTheme.colorScheme.error,
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, top = 12.dp, end = 8.dp, bottom = 8.dp),
+        ) {
+            // Display backup filename with better formatting
+            Text(
+                text = backup.name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(bottom = 8.dp),
             )
+
+            // Extract and display date from filename if possible
+            backup.name.substringAfter("backup_").substringBefore(".db").let { dateString ->
+                if (dateString.contains("-")) {
+                    val formattedDate = dateString.replace("-", "/").replace("_", " ")
+                    Text(
+                        text = formattedDate,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
+            }
+
+            // Action buttons in a row at the bottom
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // Restore button
+                TextButton(
+                    onClick = onRestore,
+                    modifier = Modifier.padding(end = 8.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.restore),
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.restore),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+
+                // Delete button
+                TextButton(
+                    onClick = onDelete,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(id = R.string.delete_backup_content_desc),
+                        modifier = Modifier.padding(end = 8.dp),
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.delete),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
         }
     }
 }
