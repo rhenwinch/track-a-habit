@@ -137,6 +137,25 @@
     <string name="username">Username</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
 
+    <!-- Google Drive Authorization & Backup Error Messages -->
+    <string name="error_auth_failed">Authorization failed</string>
+    <string name="error_auth_denied">Authorization was denied</string>
+    <string name="error_auth_failed_with_reason">Authorization failed: %1$s</string>
+    <string name="error_launch_auth_failed">Failed to launch authorization: %1$s</string>
+    <string name="error_account_info_failed">Failed to get account information</string>
+    <string name="error_not_signed_in">Not signed in to Google Drive</string>
+    <string name="error_drive_service_unavailable">Drive service is not available</string>
+    <string name="error_invalid_credential">Invalid credential type</string>
+    <string name="error_database_not_exists">Database file does not exist</string>
+    <string name="error_backup_general">Failed to backup: %1$s</string>
+    <string name="error_restore_general">Failed to restore: %1$s</string>
+    <string name="error_delete_general">Failed to delete backup: %1$s</string>
+
+    <!-- Backup Operation Success Messages -->
+    <string name="success_backup_created">Backup created successfully</string>
+    <string name="success_restore_completed">Restore completed successfully</string>
+    <string name="success_backup_deleted">Backup deleted successfully</string>
+
     <plurals name="streak_achieved_habits">
         <item quantity="one">%d habit in this streak</item>
         <item quantity="other">%d habits in this streak</item>

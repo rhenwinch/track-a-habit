@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -41,11 +42,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,30 +59,47 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import io.track.habit.R
 import io.track.habit.data.local.datastore.entities.GeneralSettings
 import io.track.habit.data.local.datastore.entities.GeneralSettingsRegistry
+import io.track.habit.data.remote.drive.AuthorizationState
 import io.track.habit.domain.datastore.SettingDefinition
+import io.track.habit.domain.model.BackupFile
+import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.ui.screens.settings.composables.SettingItem
 import io.track.habit.ui.theme.TrackAHabitTheme
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
+    val context = LocalContext.current
     val generalSettings by viewModel.general.collectAsState()
     val isSignedIn by viewModel.isSignedIn.collectAsState()
     val lastBackupDate by viewModel.lastBackupDate.collectAsState()
-    val backupState by viewModel.backupState.collectAsState()
+    val backupOperationState by viewModel.backupOperationState.collectAsState()
     val availableBackups by viewModel.availableBackups.collectAsState()
+    val authorizationState by viewModel.authorizationState.collectAsState()
 
+    val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Handle backup state changes
-    LaunchedEffect(backupState) {
-        when (backupState) {
-            is BackupState.Success -> {
-                snackbarHostState.showSnackbar((backupState as BackupState.Success).message)
+    // Handle backup operation state changes
+    LaunchedEffect(backupOperationState) {
+        when (backupOperationState) {
+            is BackupOperationState.Success -> {
+                snackbarHostState.showSnackbar(
+                    (backupOperationState as BackupOperationState.Success).message.asString(context),
+                )
             }
-            is BackupState.Error -> {
-                snackbarHostState.showSnackbar((backupState as BackupState.Error).message)
+            is BackupOperationState.Error -> {
+                snackbarHostState.showSnackbar(
+                    (backupOperationState as BackupOperationState.Error).message.asString(context),
+                )
             }
             else -> {}
+        }
+    }
+
+    // Handle authorization state errors separately
+    LaunchedEffect(authorizationState) {
+        if (authorizationState is AuthorizationState.Error) {
+            snackbarHostState.showSnackbar((authorizationState as AuthorizationState.Error).message.asString(context))
         }
     }
 
@@ -87,7 +107,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         generalSettings = generalSettings,
         isSignedIn = isSignedIn,
         lastBackupDate = lastBackupDate,
-        backupState = backupState,
+        backupOperationState = backupOperationState,
+        authorizationState = authorizationState,
         availableBackups = availableBackups,
         snackbarHostState = snackbarHostState,
         onSettingChange = { definition, value ->
@@ -107,7 +128,8 @@ private fun SettingsScreenContent(
     generalSettings: GeneralSettings,
     isSignedIn: Boolean,
     lastBackupDate: String?,
-    backupState: BackupState,
+    backupOperationState: BackupOperationState,
+    authorizationState: AuthorizationState,
     availableBackups: List<BackupFile>,
     snackbarHostState: SnackbarHostState,
     onSettingChange: (definition: SettingDefinition<*>, value: Any) -> Unit,
@@ -150,7 +172,8 @@ private fun SettingsScreenContent(
             GoogleDriveBackupSection(
                 isSignedIn = isSignedIn,
                 lastBackupDate = lastBackupDate,
-                backupState = backupState,
+                backupOperationState = backupOperationState,
+                authorizationState = authorizationState,
                 onSignInClick = onSignInClick,
                 onSignOutClick = onSignOutClick,
                 onBackupClick = onBackupClick,
@@ -222,10 +245,11 @@ private fun SettingsScreenContent(
         }
 
         // Loading indicator for various states
-        if (backupState == BackupState.SigningIn ||
-            backupState == BackupState.BackingUp ||
-            backupState == BackupState.Restoring ||
-            backupState == BackupState.Deleting
+        if (backupOperationState == BackupOperationState.SigningIn ||
+            backupOperationState == BackupOperationState.BackingUp ||
+            backupOperationState == BackupOperationState.Restoring ||
+            backupOperationState == BackupOperationState.Deleting ||
+            authorizationState == AuthorizationState.Authorizing
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -241,7 +265,8 @@ private fun SettingsScreenContent(
 private fun GoogleDriveBackupSection(
     isSignedIn: Boolean,
     lastBackupDate: String?,
-    backupState: BackupState,
+    backupOperationState: BackupOperationState,
+    authorizationState: AuthorizationState,
     onSignInClick: () -> Unit,
     onSignOutClick: () -> Unit,
     onBackupClick: () -> Unit,
@@ -262,6 +287,28 @@ private fun GoogleDriveBackupSection(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
             )
+
+            // Show authorization error if present
+            if (authorizationState is AuthorizationState.Error) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        text = authorizationState.message.asString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
 
             if (isSignedIn) {
                 // User is signed in - show backup options
@@ -287,9 +334,9 @@ private fun GoogleDriveBackupSection(
                     Button(
                         onClick = onBackupClick,
                         modifier = Modifier.weight(1f),
-                        enabled = backupState == BackupState.Idle ||
-                            backupState is BackupState.Success ||
-                            backupState is BackupState.Error,
+                        enabled = backupOperationState == BackupOperationState.Idle ||
+                            backupOperationState is BackupOperationState.Success ||
+                            backupOperationState is BackupOperationState.Error,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.backup),
@@ -304,9 +351,9 @@ private fun GoogleDriveBackupSection(
                     OutlinedButton(
                         onClick = onRestoreClick,
                         modifier = Modifier.weight(1f),
-                        enabled = backupState == BackupState.Idle ||
-                            backupState is BackupState.Success ||
-                            backupState is BackupState.Error,
+                        enabled = backupOperationState == BackupOperationState.Idle ||
+                            backupOperationState is BackupOperationState.Success ||
+                            backupOperationState is BackupOperationState.Error,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.restore),
@@ -337,9 +384,9 @@ private fun GoogleDriveBackupSection(
                 Button(
                     onClick = onSignInClick,
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = backupState == BackupState.Idle ||
-                        backupState is BackupState.Success ||
-                        backupState is BackupState.Error,
+                    enabled = backupOperationState == BackupOperationState.Idle ||
+                        backupOperationState is BackupOperationState.Success ||
+                        backupOperationState is BackupOperationState.Error,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.gdrive),
@@ -443,11 +490,41 @@ private fun SettingsScreenPreview() {
                 ),
                 isSignedIn = true,
                 lastBackupDate = "2025-06-17 15:30:22",
-                backupState = BackupState.Idle,
+                backupOperationState = BackupOperationState.Idle,
+                authorizationState = AuthorizationState.Authorized,
                 availableBackups = listOf(
                     BackupFile("id1", "backup_2025-06-17_15-30-22.db"),
                     BackupFile("id2", "backup_2025-06-16_10-15-33.db"),
                 ),
+                snackbarHostState = SnackbarHostState(),
+                onSettingChange = { _, _ -> },
+                onSignInClick = { },
+                onSignOutClick = { },
+                onBackupClick = { },
+                onRestoreClick = { },
+                onDeleteBackupClick = { },
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsScreenWithAuthorizationErrorPreview() {
+    TrackAHabitTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            SettingsScreenContent(
+                generalSettings = GeneralSettings(
+                    userName = "John Doe",
+                    censorHabitNames = true,
+                    lockResetProgressButton = false,
+                    notificationsEnabled = true,
+                ),
+                isSignedIn = false,
+                lastBackupDate = null,
+                backupOperationState = BackupOperationState.Idle,
+                authorizationState = AuthorizationState.Error(stringLiteral("Toast authorization error")),
+                availableBackups = emptyList(),
                 snackbarHostState = SnackbarHostState(),
                 onSettingChange = { _, _ -> },
                 onSignInClick = { },
@@ -468,7 +545,8 @@ private fun GoogleDriveBackupSectionSignedInPreview() {
             GoogleDriveBackupSection(
                 isSignedIn = true,
                 lastBackupDate = "2025-06-17 15:30:22",
-                backupState = BackupState.Idle,
+                backupOperationState = BackupOperationState.Idle,
+                authorizationState = AuthorizationState.Authorized,
                 onSignInClick = { },
                 onSignOutClick = { },
                 onBackupClick = { },
@@ -486,7 +564,8 @@ private fun GoogleDriveBackupSectionSignedOutPreview() {
             GoogleDriveBackupSection(
                 isSignedIn = false,
                 lastBackupDate = null,
-                backupState = BackupState.Idle,
+                backupOperationState = BackupOperationState.Idle,
+                authorizationState = AuthorizationState.NotAuthorized,
                 onSignInClick = { },
                 onSignOutClick = { },
                 onBackupClick = { },

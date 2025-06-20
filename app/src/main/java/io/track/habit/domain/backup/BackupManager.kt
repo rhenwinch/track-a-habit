@@ -1,5 +1,6 @@
 package io.track.habit.domain.backup
 
+import io.track.habit.domain.model.BackupFile
 import java.io.File
 
 /**
@@ -34,7 +35,7 @@ interface BackupManager {
      * For remote implementations, this could be a remote path or empty.
      * @return Result containing a list of available backups or error details.
      */
-    suspend fun listAvailableBackups(directory: String = ""): Result<List<File>>
+    suspend fun listAvailableBackups(directory: String = ""): Result<List<BackupFile>>
 
     /**
      * Deletes a specific backup.

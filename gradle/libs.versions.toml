@@ -32,6 +32,7 @@ nav = "2.9.0"
 nav3Core = "1.0.0-alpha01"
 nav3LifecycleViewmodel = "1.0.0-alpha01"
 nav3M3Adaptive = "1.0.0-SNAPSHOT"
+playServicesAuth = "21.3.0"
 room = "2.7.1"
 rules = "1.6.1"
 runner = "1.6.2"
@@ -41,12 +42,14 @@ versions = "0.52.0"
 
 
 [libraries]
-# Drive
+# Google/Drive
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 google-api-client-android = { module = "com.google.api-client:google-api-client-android", version.ref = "googleApiClientAndroid" }
 google-api-services-drive = { module = "com.google.apis:google-api-services-drive", version.ref = "googleApiServicesDrive" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 
 # Biometric
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }

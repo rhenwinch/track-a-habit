@@ -3,22 +3,28 @@ package io.track.habit.ui.screens.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.track.habit.R
 import io.track.habit.data.local.datastore.entities.GeneralSettings
-import io.track.habit.data.remote.backup.RemoteBackupManager
+import io.track.habit.data.remote.drive.AuthorizationState
+import io.track.habit.data.remote.drive.GoogleDriveService
 import io.track.habit.di.IoDispatcher
+import io.track.habit.domain.backup.BackupManager
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.datastore.SettingEntity
 import io.track.habit.domain.datastore.SettingType
 import io.track.habit.domain.datastore.SettingsDataStore
+import io.track.habit.domain.model.BackupFile
+import io.track.habit.domain.utils.StringResource
 import io.track.habit.domain.utils.asStateFlow
+import io.track.habit.domain.utils.stringRes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -32,7 +38,8 @@ class SettingsViewModel
     @Inject
     constructor(
         private val settingsDataStore: SettingsDataStore,
-        private val remoteBackupManager: RemoteBackupManager,
+        private val backupManager: BackupManager,
+        private val googleDriveService: GoogleDriveService,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val scope = CoroutineScope(ioDispatcher)
@@ -41,19 +48,28 @@ class SettingsViewModel
         private var updateSettingsEntityJob: Job? = null
         private var updateSettingsDefinitionJob: Job? = null
 
-        // Google Drive backup state
-        private val _backupState = MutableStateFlow<BackupState>(BackupState.Idle)
-        val backupState: StateFlow<BackupState> = _backupState.asStateFlow()
+        // Backup operation state
+        private val _backupOperationState = MutableStateFlow<BackupOperationState>(BackupOperationState.Idle)
+        val backupOperationState: StateFlow<BackupOperationState> = _backupOperationState.asStateFlow()
 
-        private val _isSignedIn = MutableStateFlow(false)
-        val isSignedIn: StateFlow<Boolean> = _isSignedIn.asStateFlow()
-
+        // Last backup date
         private val _lastBackupDate = MutableStateFlow<String?>(null)
         val lastBackupDate: StateFlow<String?> = _lastBackupDate.asStateFlow()
 
+        // Available backups
         private val _availableBackups = MutableStateFlow<List<BackupFile>>(emptyList())
         val availableBackups: StateFlow<List<BackupFile>> = _availableBackups.asStateFlow()
 
+        // Direct access to authorization state from GoogleDriveService
+        val authorizationState: StateFlow<AuthorizationState> = googleDriveService.authorizationState
+
+        // Derived isSignedIn state from authorizationState
+        val isSignedIn = authorizationState
+            .map { state ->
+                state == AuthorizationState.Authorized
+            }.asStateFlow(viewModelScope, initialValue = false)
+
+        // General settings
         val general =
             settingsDataStore
                 .generalSettingsFlow
@@ -64,7 +80,7 @@ class SettingsViewModel
 
         init {
             viewModelScope.launch {
-                checkSignInStatus()
+                googleDriveService.signIn()
                 fetchAvailableBackups()
             }
         }
@@ -128,17 +144,19 @@ class SettingsViewModel
          * Initiates sign-in to Google Drive.
          */
         fun signInToGoogleDrive() {
-            viewModelScope.launch {
-                _backupState.value = BackupState.SigningIn
-                remoteBackupManager
-                    .signIn()
-                    .onSuccess {
-                        _isSignedIn.value = true
-                        _backupState.value = BackupState.Idle
-                        fetchAvailableBackups()
-                    }.onFailure { error ->
-                        _backupState.value = BackupState.Error(error.message ?: "Sign-in failed")
-                    }
+            scope.launch {
+                _backupOperationState.value = BackupOperationState.SigningIn
+
+                try {
+                    googleDriveService.signIn()
+                    _backupOperationState.value = BackupOperationState.Idle
+                    fetchAvailableBackups()
+                } catch (error: Exception) {
+                    _backupOperationState.value =
+                        BackupOperationState.Error(
+                            stringRes(R.string.error_auth_failed_with_reason, error.message ?: ""),
+                        )
+                }
             }
         }
 
@@ -146,9 +164,8 @@ class SettingsViewModel
          * Signs out from Google Drive.
          */
         fun signOutFromGoogleDrive() {
-            viewModelScope.launch {
-                remoteBackupManager.signOut()
-                _isSignedIn.value = false
+            scope.launch {
+                googleDriveService.signOut()
                 _availableBackups.value = emptyList()
                 _lastBackupDate.value = null
             }
@@ -158,22 +175,25 @@ class SettingsViewModel
          * Creates a backup of the database to Google Drive.
          */
         fun createBackup() {
-            viewModelScope.launch {
-                if (!remoteBackupManager.hasGoogleDrivePermission()) {
-                    _backupState.value = BackupState.Error("Not signed in to Google Drive")
+            scope.launch {
+                if (authorizationState.value != AuthorizationState.Authorized) {
+                    _backupOperationState.value =
+                        BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
                     return@launch
                 }
 
-                _backupState.value = BackupState.BackingUp
-                remoteBackupManager
+                _backupOperationState.value = BackupOperationState.BackingUp
+                backupManager
                     .createBackup()
-                    .onSuccess { file ->
+                    .onSuccess {
                         val timestamp = dateFormat.format(Date())
                         _lastBackupDate.value = timestamp
-                        _backupState.value = BackupState.Success("Backup created successfully")
+                        _backupOperationState.value =
+                            BackupOperationState.Success(stringRes(R.string.success_backup_created))
                         fetchAvailableBackups()
                     }.onFailure { error ->
-                        _backupState.value = BackupState.Error(error.message ?: "Backup failed")
+                        _backupOperationState.value =
+                            BackupOperationState.Error(stringRes(R.string.error_backup_general, error.message ?: ""))
                     }
             }
         }
@@ -184,19 +204,22 @@ class SettingsViewModel
          * @param backupId The ID of the backup to restore from
          */
         fun restoreFromBackup(backupId: String) {
-            viewModelScope.launch {
-                if (!remoteBackupManager.hasGoogleDrivePermission()) {
-                    _backupState.value = BackupState.Error("Not signed in to Google Drive")
+            scope.launch {
+                if (authorizationState.value != AuthorizationState.Authorized) {
+                    _backupOperationState.value =
+                        BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
                     return@launch
                 }
 
-                _backupState.value = BackupState.Restoring
-                remoteBackupManager
+                _backupOperationState.value = BackupOperationState.Restoring
+                backupManager
                     .restoreFromBackup(backupId)
                     .onSuccess {
-                        _backupState.value = BackupState.Success("Restore completed successfully")
+                        _backupOperationState.value =
+                            BackupOperationState.Success(stringRes(R.string.success_restore_completed))
                     }.onFailure { error ->
-                        _backupState.value = BackupState.Error(error.message ?: "Restore failed")
+                        _backupOperationState.value =
+                            BackupOperationState.Error(stringRes(R.string.error_restore_general, error.message ?: ""))
                     }
             }
         }
@@ -207,52 +230,40 @@ class SettingsViewModel
          * @param backupId The ID of the backup to delete
          */
         fun deleteBackup(backupId: String) {
-            viewModelScope.launch {
-                if (!remoteBackupManager.hasGoogleDrivePermission()) {
-                    _backupState.value = BackupState.Error("Not signed in to Google Drive")
+            scope.launch {
+                if (authorizationState.value != AuthorizationState.Authorized) {
+                    _backupOperationState.value =
+                        BackupOperationState.Error(stringRes(R.string.error_not_signed_in))
                     return@launch
                 }
 
-                _backupState.value = BackupState.Deleting
-                remoteBackupManager
+                _backupOperationState.value = BackupOperationState.Deleting
+                backupManager
                     .deleteBackup(backupId)
                     .onSuccess {
-                        _backupState.value = BackupState.Success("Backup deleted successfully")
+                        _backupOperationState.value =
+                            BackupOperationState.Success(stringRes(R.string.success_backup_deleted))
                         fetchAvailableBackups()
                     }.onFailure { error ->
-                        _backupState.value = BackupState.Error(error.message ?: "Delete failed")
+                        _backupOperationState.value =
+                            BackupOperationState.Error(stringRes(R.string.error_delete_general, error.message ?: ""))
                     }
             }
-        }
-
-        /**
-         * Checks if the user is signed in to Google Drive.
-         */
-        private suspend fun checkSignInStatus() {
-            _isSignedIn.value = remoteBackupManager.hasGoogleDrivePermission()
         }
 
         /**
          * Fetches the list of available backups from Google Drive.
          */
         private suspend fun fetchAvailableBackups() {
-            if (!remoteBackupManager.hasGoogleDrivePermission()) {
+            // Only proceed if we have Google Drive authorization
+            if (authorizationState.value != AuthorizationState.Authorized) {
                 return
             }
 
-            remoteBackupManager
+            backupManager
                 .listAvailableBackups()
                 .onSuccess { files ->
-                    _availableBackups.value = files.mapNotNull { file ->
-                        val parts = file.absolutePath.split("::")
-                        if (parts.size == 2) {
-                            val id = parts[0]
-                            val name = File(parts[1]).name
-                            BackupFile(id, name)
-                        } else {
-                            null
-                        }
-                    }
+                    _availableBackups.value = files
                 }.onFailure {
                     _availableBackups.value = emptyList()
                 }
@@ -262,30 +273,22 @@ class SettingsViewModel
 /**
  * Represents the state of backup operations.
  */
-sealed class BackupState {
-    object Idle : BackupState()
+sealed class BackupOperationState {
+    data object Idle : BackupOperationState()
 
-    object SigningIn : BackupState()
+    data object SigningIn : BackupOperationState()
 
-    object BackingUp : BackupState()
+    data object BackingUp : BackupOperationState()
 
-    object Restoring : BackupState()
+    data object Restoring : BackupOperationState()
 
-    object Deleting : BackupState()
+    data object Deleting : BackupOperationState()
 
     data class Success(
-        val message: String,
-    ) : BackupState()
+        val message: StringResource,
+    ) : BackupOperationState()
 
     data class Error(
-        val message: String,
-    ) : BackupState()
+        val message: StringResource,
+    ) : BackupOperationState()
 }
-
-/**
- * Represents a backup file with its ID and name.
- */
-data class BackupFile(
-    val id: String,
-    val name: String,
-)

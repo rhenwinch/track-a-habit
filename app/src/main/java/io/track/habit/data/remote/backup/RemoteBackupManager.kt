@@ -6,6 +6,7 @@ import io.track.habit.data.local.database.AppDatabase
 import io.track.habit.data.remote.drive.GoogleDriveService
 import io.track.habit.di.IoDispatcher
 import io.track.habit.domain.backup.BackupManager
+import io.track.habit.domain.model.BackupFile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -17,6 +18,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
@@ -29,6 +31,7 @@ import kotlin.concurrent.write
  * @param driveService Service for Google Drive operations
  * @param dispatcher IO dispatcher for performing backup operations
  */
+@Singleton
 class RemoteBackupManager
     @Inject
     constructor(
@@ -40,7 +43,7 @@ class RemoteBackupManager
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
 
         companion object {
-            private const val BACKUP_FOLDER_NAME = "TAH-Backups"
+            private const val BACKUP_FOLDER_NAME = "Track a Habit-Backups"
             private const val BACKUP_FILE_PREFIX = "backup_"
             private const val BACKUP_FILE_EXTENSION = ".db"
             private const val BACKUP_MIME_TYPE = "application/octet-stream"
@@ -150,7 +153,7 @@ class RemoteBackupManager
          * @param directory Optional custom folder name in Google Drive
          * @return Result containing a list of file metadata for available backups
          */
-        override suspend fun listAvailableBackups(directory: String): Result<List<File>> =
+        override suspend fun listAvailableBackups(directory: String): Result<List<BackupFile>> =
             withContext(dispatcher) {
                 try {
                     // Ensure user is signed in
@@ -161,7 +164,7 @@ class RemoteBackupManager
                     }
 
                     // Find the folder
-                    val folderName = if (directory.isNotEmpty()) directory else BACKUP_FOLDER_NAME
+                    val folderName = directory.ifEmpty { BACKUP_FOLDER_NAME }
                     val folderId = driveService.findOrCreateFolder(folderName)
 
                     // List files in the folder
@@ -169,10 +172,10 @@ class RemoteBackupManager
 
                     // Convert Drive files to local File representations
                     val fileList = driveFiles.map { driveFile ->
-                        // Create a temporary local file that represents the remote file
-                        val localFile = File(context.cacheDir, driveFile.name)
-                        // Store the Drive file ID in the file path for later use
-                        File(driveFile.id + "::" + localFile.absolutePath)
+                        BackupFile(
+                            id = driveFile.id,
+                            name = driveFile.name,
+                        )
                     }
 
                     return@withContext Result.success(fileList)
@@ -212,23 +215,4 @@ class RemoteBackupManager
                     Result.failure(e)
                 }
             }
-
-        /**
-         * Checks if the user has granted permission for Google Drive access.
-         *
-         * @return true if the user has granted permission, false otherwise
-         */
-        suspend fun hasGoogleDrivePermission(): Boolean = driveService.isAuthenticated()
-
-        /**
-         * Starts the Google Sign-In flow.
-         *
-         * @return Result indicating success or failure
-         */
-        suspend fun signIn(): Result<Unit> = driveService.signIn()
-
-        /**
-         * Signs out the current user.
-         */
-        suspend fun signOut() = driveService.signOut()
     }

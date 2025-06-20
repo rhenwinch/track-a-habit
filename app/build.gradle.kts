@@ -32,6 +32,16 @@ android {
     namespace = ProjectConfig.APP_ID
     compileSdk = ProjectConfig.APP_COMPILE_SDK
 
+    // TODO: Remove this before pushing to repo
+    signingConfigs {
+        getByName("debug") {
+            storePassword = "!Zg!!8XT"
+            keyAlias = "key0"
+            keyPassword = "!Zg!!8XT"
+            storeFile = file("/home/shirodoggerino/dont_touch/keystores/TrackAHabit/tah-ketstore.jks")
+        }
+    }
+
     defaultConfig {
         applicationId = ProjectConfig.APP_ID
         minSdk = ProjectConfig.APP_MIN_SDK
@@ -106,11 +116,13 @@ dependencies {
 //    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.kotlinx.serialization.core)
 
-    implementation(libs.google.api.client.android)
-    implementation(libs.google.api.services.drive)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.google.api.client.android)
+    implementation(libs.google.api.services.drive)
     implementation(libs.googleid)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.play.services.auth)
 
     implementation(libs.coroutines)
     implementation(libs.gson)

@@ -1,10 +1,22 @@
 package io.track.habit.data.remote.drive
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.IntentSender
+import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.NoCredentialException
+import com.google.android.gms.auth.api.identity.AuthorizationClient
+import com.google.android.gms.auth.api.identity.AuthorizationRequest
+import com.google.android.gms.auth.api.identity.AuthorizationResult
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.common.api.Scope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -12,124 +24,122 @@ import com.google.api.client.http.FileContent
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
+import com.google.api.services.drive.DriveScopes
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.AccessToken
 import com.google.auth.oauth2.GoogleCredentials
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.track.habit.BuildConfig
+import io.track.habit.R
 import io.track.habit.di.IoDispatcher
+import io.track.habit.domain.utils.StringResource
+import io.track.habit.domain.utils.stringRes
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.OutputStream
 import java.util.Collections
 import javax.inject.Inject
+import javax.inject.Singleton
 import com.google.api.services.drive.model.File as DriveFile
 
 /**
  * Service for interacting with Google Drive API.
  * Handles authentication, file operations, and folder management.
  */
+@Singleton
 class GoogleDriveService
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
         @IoDispatcher private val dispatcher: CoroutineDispatcher,
     ) {
-        private val credentialManager = CredentialManager.create(context)
-        private var currentIdToken: String? = null
+        private val credentialManager by lazy { CredentialManager.create(context) }
+        private var googleAccountToken: AccessToken? = null
+
+        private val _authorizationState = MutableStateFlow<AuthorizationState>(AuthorizationState.NotAuthorized)
+        val authorizationState: StateFlow<AuthorizationState> = _authorizationState.asStateFlow()
+
+        private lateinit var activityResultLauncher: ActivityResultLauncher<IntentSenderRequest>
+        private lateinit var authClient: AuthorizationClient
 
         companion object {
             private const val FOLDER_MIME_TYPE = "application/vnd.google-apps.folder"
             private const val APP_NAME = "Track-A-Habit Backup"
+            private const val TAG = "GoogleDriveService"
+
+            // Scopes required for Google Drive access
+            private val DRIVE_SCOPES = listOf(
+                DriveScopes.DRIVE_FILE,
+                DriveScopes.DRIVE_APPDATA,
+            )
         }
 
         /**
-         * Gets a Google Drive service instance if the user is authenticated.
+         * Initializes the Google Drive service with the required context and activity result launcher.
+         *
+         * @param activity The activity context used for authorization
+         * @param launcher The ActivityResultLauncher to handle authorization results
+         */
+        fun initialize(
+            activity: Activity,
+            launcher: ActivityResultLauncher<IntentSenderRequest>,
+        ) {
+            activityResultLauncher = launcher
+            authClient = Identity.getAuthorizationClient(activity)
+        }
+
+        /**
+         * Gets a Google Drive service instance if the user is authenticated and authorized.
          *
          * @return Drive service or null if authentication fails
          */
-        private suspend fun getDriveService(): Drive? {
-            val idToken = getGoogleIdToken() ?: return null
+        private fun getDriveService(): Drive? {
+            return googleAccountToken?.let {
+                val credentials = GoogleCredentials.create(it)
 
-            val accessToken = AccessToken
-                .newBuilder()
-                .setTokenValue(idToken)
-                .build()
-
-            val credentials = GoogleCredentials
-                .newBuilder()
-                .setAccessToken(accessToken)
-                .build()
-
-            val requestInitializer = HttpCredentialsAdapter(credentials)
-
-            return Drive
-                .Builder(
-                    NetHttpTransport(),
-                    GsonFactory.getDefaultInstance(),
-                    requestInitializer,
-                ).setApplicationName(APP_NAME)
-                .build()
+                Drive
+                    .Builder(
+                        NetHttpTransport(),
+                        GsonFactory.getDefaultInstance(),
+                        HttpCredentialsAdapter(credentials),
+                    ).setApplicationName(APP_NAME)
+                    .build()
+            }
         }
 
         /**
-         * Gets a Google ID token using the Credential Manager API.
-         *
-         * @return ID token or null if authentication fails
-         */
-        private suspend fun getGoogleIdToken(): String? =
-            withContext(dispatcher) {
-                if (currentIdToken != null) {
-                    return@withContext currentIdToken
-                }
-
-                try {
-                    val googleIdOption = GetGoogleIdOption
-                        .Builder()
-                        .setServerClientId(BuildConfig.WEB_CLIENT_ID)
-                        .setFilterByAuthorizedAccounts(true)
-                        .setAutoSelectEnabled(true)
-                        .setNonce(System.currentTimeMillis().toString())
-                        .build()
-
-                    val request = GetCredentialRequest
-                        .Builder()
-                        .addCredentialOption(googleIdOption)
-                        .build()
-
-                    val response = credentialManager.getCredential(
-                        request = request,
-                        context = context,
-                    )
-
-                    val credential = response.credential
-                    if (credential is CustomCredential &&
-                        credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-                    ) {
-                        try {
-                            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                            val idToken = googleIdTokenCredential.idToken
-                            currentIdToken = idToken
-                            return@withContext idToken
-                        } catch (e: GoogleIdTokenParsingException) {
-                            return@withContext null
-                        }
-                    }
-                    return@withContext null
-                } catch (e: Exception) {
-                    return@withContext null
-                }
-            }
-
-        /**
          * Checks if the user is authenticated with Google.
+         * This method will attempt to ensure authentication if possible.
          *
          * @return true if authenticated, false otherwise
          */
         suspend fun isAuthenticated(): Boolean =
             withContext(dispatcher) {
-                getGoogleIdToken() != null
+                // First check if we already have a valid credential
+                if (googleAccountToken != null && authorizationState.value == AuthorizationState.Authorized) {
+                    return@withContext true
+                }
+
+                // If not, try to sign in silently
+                try {
+                    // Try to get Google credentials with existing accounts only
+                    signIn()
+                        .onSuccess {
+                            return@withContext true
+                        }
+
+                    // If we reach here, silent sign-in failed but didn't throw
+                    return@withContext false
+                } catch (e: Exception) {
+                    // Silent sign-in failed with exception
+                    Log.d(TAG, "Silent authentication check failed: ${e.message}")
+                    return@withContext false
+                }
             }
 
         /**
@@ -139,7 +149,7 @@ class GoogleDriveService
          */
         private suspend fun requireAuthentication() {
             if (!isAuthenticated()) {
-                throw IllegalStateException("User is not signed in to Google account")
+                throw IllegalStateException(context.getString(R.string.error_not_signed_in))
             }
         }
 
@@ -153,7 +163,9 @@ class GoogleDriveService
         suspend fun findOrCreateFolder(folderName: String): String =
             withContext(dispatcher) {
                 requireAuthentication()
-                val drive = getDriveService() ?: throw IllegalStateException("Drive service is not available")
+                val drive =
+                    getDriveService()
+                        ?: throw IllegalStateException(context.getString(R.string.error_drive_service_unavailable))
 
                 // Check if folder exists
                 val query = "name = '$folderName' and mimeType = '$FOLDER_MIME_TYPE' and trashed = false"
@@ -204,7 +216,9 @@ class GoogleDriveService
         ): String =
             withContext(dispatcher) {
                 requireAuthentication()
-                val drive = getDriveService() ?: throw IllegalStateException("Drive service is not available")
+                val drive =
+                    getDriveService()
+                        ?: throw IllegalStateException(context.getString(R.string.error_drive_service_unavailable))
 
                 // Create file metadata
                 val fileMetadata = DriveFile()
@@ -291,7 +305,7 @@ class GoogleDriveService
          * @param fileId ID of the file to delete
          * @throws IllegalStateException if Drive service is unavailable
          */
-        suspend fun deleteFile(fileId: String) =
+        suspend fun deleteFile(fileId: String): Void =
             withContext(dispatcher) {
                 requireAuthentication()
                 val drive = getDriveService() ?: throw IllegalStateException("Drive service is not available")
@@ -300,33 +314,24 @@ class GoogleDriveService
             }
 
         /**
-         * Creates a credential request for Google Sign-In that can be used with Credential Manager.
-         *
-         * @return The credential request
-         */
-        private fun createGoogleSignInRequest(): GetCredentialRequest {
-            val googleIdOption = GetGoogleIdOption
-                .Builder()
-                .setServerClientId(BuildConfig.WEB_CLIENT_ID)
-                .setFilterByAuthorizedAccounts(false) // Show all accounts in selector
-                .setAutoSelectEnabled(true)
-                .build()
-
-            return GetCredentialRequest
-                .Builder()
-                .addCredentialOption(googleIdOption)
-                .build()
-        }
-
-        /**
          * Starts the Google Sign-In flow.
          *
          * @return Result indicating success or failure
          */
-        suspend fun signIn(): Result<Unit> =
+        suspend fun signIn(filterByAuthorizedAccounts: Boolean = true): Result<Unit> =
             withContext(dispatcher) {
                 try {
-                    val request = createGoogleSignInRequest()
+                    val googleIdOption = GetGoogleIdOption
+                        .Builder()
+                        .setServerClientId(BuildConfig.WEB_CLIENT_ID)
+                        .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
+                        .setAutoSelectEnabled(filterByAuthorizedAccounts)
+                        .build()
+
+                    val request = GetCredentialRequest
+                        .Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build()
 
                     val response = credentialManager.getCredential(
                         request = request,
@@ -338,8 +343,12 @@ class GoogleDriveService
                         credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
                     ) {
                         try {
-                            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                            currentIdToken = googleIdTokenCredential.idToken
+                            // Checks only if the credential is valid
+                            GoogleIdTokenCredential.createFrom(credential.data)
+
+                            // Now that we have authentication, request authorization
+                            requestGoogleDriveAuthorization()
+
                             return@withContext Result.success(Unit)
                         } catch (e: GoogleIdTokenParsingException) {
                             return@withContext Result.failure(e)
@@ -347,17 +356,98 @@ class GoogleDriveService
                     }
                     return@withContext Result.failure(IllegalStateException("Invalid credential type"))
                 } catch (e: Exception) {
+                    if (e is NoCredentialException && filterByAuthorizedAccounts) {
+                        return@withContext signIn(filterByAuthorizedAccounts = false)
+                    }
+
                     Result.failure(e)
                 }
             }
 
         /**
-         * Signs out the current user by clearing the stored token.
+         * Requests authorization for Google Drive access using the Identity Authorization API.
+         * This must be called from a context that can handle the authorization resolution.
+         *
+         */
+        private suspend fun requestGoogleDriveAuthorization() {
+            _authorizationState.value = AuthorizationState.Authorizing
+
+            val authRequest = AuthorizationRequest
+                .builder()
+                .setRequestedScopes(DRIVE_SCOPES.map { Scope(it) })
+                .build()
+
+            runCatching {
+                authClient
+                    .authorize(authRequest)
+                    .await()
+            }.onSuccess { authResult ->
+                if (authResult.hasResolution() && authResult.pendingIntent != null) {
+                    // User needs to grant permission
+                    try {
+                        val intentSenderRequest = IntentSenderRequest
+                            .Builder(authResult.pendingIntent!!.intentSender)
+                            .build()
+                        activityResultLauncher.launch(intentSenderRequest)
+                    } catch (e: IntentSender.SendIntentException) {
+                        Log.e(TAG, "Couldn't start Authorization UI: ${e.localizedMessage}")
+                        _authorizationState.value =
+                            AuthorizationState.Error(stringRes(R.string.error_launch_auth_failed, e.message ?: ""))
+                    }
+                } else {
+                    // Already authorized, proceed with Drive setup
+                    setupGoogleAccountCredential(authResult)
+                }
+            }.onFailure { e ->
+                Log.e(TAG, "Failed to authorize", e)
+                _authorizationState.value =
+                    AuthorizationState.Error(stringRes(R.string.error_auth_failed_with_reason, e.message ?: ""))
+            }
+        }
+
+        /**
+         * Should be called from the activity that handles the authorization result.
+         *
+         * @param resultCode The result code from onActivityResult
+         * @param data The intent data from onActivityResult
+         */
+        fun handleAuthorizationResult(
+            resultCode: Int,
+            data: Intent?,
+        ) {
+            if (resultCode == Activity.RESULT_OK) {
+                setupGoogleAccountCredential(authClient.getAuthorizationResultFromIntent(data))
+            } else {
+                _authorizationState.value = AuthorizationState.Error(stringRes(R.string.error_auth_denied))
+            }
+        }
+
+        /**
+         * Sets up the Google Account Credential after successful authorization.
+         */
+        private fun setupGoogleAccountCredential(authResult: AuthorizationResult) {
+            val token = authResult.accessToken
+
+            if (token != null) {
+                googleAccountToken = AccessToken
+                    .newBuilder()
+                    .setTokenValue(token)
+                    .build()
+
+                _authorizationState.value = AuthorizationState.Authorized
+            } else {
+                _authorizationState.value = AuthorizationState.Error(stringRes(R.string.error_account_info_failed))
+            }
+        }
+
+        /**
+         * Signs out the current user by clearing the stored token and credentials.
          */
         suspend fun signOut() =
             withContext(dispatcher) {
                 credentialManager.clearCredentialState(ClearCredentialStateRequest())
-                currentIdToken = null
+                googleAccountToken = null
+                _authorizationState.value = AuthorizationState.NotAuthorized
             }
     }
 
@@ -370,3 +460,30 @@ data class DriveFileMetadata(
     val modifiedTime: Long? = null,
     val size: Long? = null,
 )
+
+/**
+ * Represents the state of the Google Drive authorization process.
+ */
+sealed class AuthorizationState {
+    /**
+     * User has not been authorized yet.
+     */
+    data object NotAuthorized : AuthorizationState()
+
+    /**
+     * Authorization process is in progress.
+     */
+    data object Authorizing : AuthorizationState()
+
+    /**
+     * User has been successfully authorized.
+     */
+    data object Authorized : AuthorizationState()
+
+    /**
+     * An error occurred during the authorization process.
+     */
+    data class Error(
+        val message: StringResource,
+    ) : AuthorizationState()
+}
