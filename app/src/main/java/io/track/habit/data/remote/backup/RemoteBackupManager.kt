@@ -51,8 +51,8 @@ class RemoteBackupManager
 
         companion object {
             private const val BACKUP_FOLDER_NAME = "Track a Habit-Backups"
-            private const val BACKUP_FILE_PREFIX = "backup_"
-            private const val BACKUP_FILE_EXTENSION = ".zip"
+            const val BACKUP_FILE_PREFIX = "backup_"
+            const val BACKUP_FILE_EXTENSION = ".zip"
             private const val BACKUP_MIME_TYPE = "application/zip"
 
             private const val WAL_EXTENSION = "-wal"

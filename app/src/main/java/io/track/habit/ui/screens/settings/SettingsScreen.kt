@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.track.habit.R
 import io.track.habit.data.local.datastore.entities.GeneralSettings
 import io.track.habit.data.local.datastore.entities.GeneralSettingsRegistry
+import io.track.habit.data.remote.backup.RemoteBackupManager
 import io.track.habit.data.remote.drive.AuthorizationState
 import io.track.habit.domain.datastore.SettingDefinition
 import io.track.habit.domain.model.BackupFile
@@ -155,6 +156,7 @@ private fun SettingsScreenContent(
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(0.dp),
@@ -434,7 +436,7 @@ private fun BackupRestoreDialog(
         ) {
             Text(
                 text = stringResource(id = R.string.select_backup_to_restore),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp),
             )
@@ -506,25 +508,26 @@ private fun BackupItem(
             )
 
             // Extract and display date from filename if possible
-            backup.name.substringAfter("backup_").substringBefore(".db").let { dateString ->
-                if (dateString.contains("-")) {
-                    val formattedDate = dateString.replace("-", "/").replace("_", " ")
-                    Text(
-                        text = formattedDate,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                    )
+            backup.name
+                .substringAfter(RemoteBackupManager.BACKUP_FILE_PREFIX)
+                .substringBefore(RemoteBackupManager.BACKUP_FILE_EXTENSION)
+                .let { dateString ->
+                    if (dateString.contains("-")) {
+                        val formattedDate = dateString.replace("-", "/").replace("_", " ")
+                        Text(
+                            text = formattedDate,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                    }
                 }
-            }
 
-            // Action buttons in a row at the bottom
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Restore button
                 TextButton(
                     onClick = onRestore,
                     modifier = Modifier.padding(end = 8.dp),
@@ -541,7 +544,6 @@ private fun BackupItem(
                     )
                 }
 
-                // Delete button
                 TextButton(
                     onClick = onDelete,
                 ) {
