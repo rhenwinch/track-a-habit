@@ -32,16 +32,6 @@ android {
     namespace = ProjectConfig.APP_ID
     compileSdk = ProjectConfig.APP_COMPILE_SDK
 
-    // TODO: Remove this before pushing to repo
-    signingConfigs {
-        getByName("debug") {
-            storePassword = "!Zg!!8XT"
-            keyAlias = "key0"
-            keyPassword = "!Zg!!8XT"
-            storeFile = file("/home/shirodoggerino/dont_touch/keystores/TrackAHabit/tah-ketstore.jks")
-        }
-    }
-
     defaultConfig {
         applicationId = ProjectConfig.APP_ID
         minSdk = ProjectConfig.APP_MIN_SDK
