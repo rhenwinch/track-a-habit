@@ -601,8 +601,10 @@ private fun BackupItem(
                 .let { dateString ->
                     if (dateString.contains("-")) {
                         val formattedDate = dateString.replace("-", "/").replace("_", " ")
+                        val formattedTime = formattedDate.substringAfterLast(" ").replace("/", ":")
+
                         Text(
-                            text = formattedDate,
+                            text = "$formattedDate $formattedTime",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(bottom = 8.dp),
