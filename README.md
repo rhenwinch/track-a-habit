@@ -1,4 +1,4 @@
-# Track-a-Habit
+# Track a Habit
 
 <div align="center">
   <!-- You can replace this with your actual app icon -->
@@ -16,7 +16,7 @@
   </p>
 </div>
 
-> *This README was crafted with assistance from GitHub Copilot to provide a comprehensive overview of the Track-a-Habit application architecture, features, and development approach.*
+> *This README is written by an AI!!!!*
 
 ## Overview
 
