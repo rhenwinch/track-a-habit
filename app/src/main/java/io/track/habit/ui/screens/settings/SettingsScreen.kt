@@ -126,6 +126,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         availableBackups = availableBackups,
         snackbarHostState = snackbarHostState,
         onSettingChange = { definition, value ->
+            // TODO: Add permission check here for POST_NOTIFICATIONS
             viewModel.updateSettingWithCast(definition, value)
         },
         onSignInClick = viewModel::signInToGoogleDrive,

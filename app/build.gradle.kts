@@ -39,7 +39,7 @@ android {
         versionCode = ProjectConfig.APP_VERSION_CODE
         versionName = ProjectConfig.APP_VERSION_NAME
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "io.track.habit.workers.CustomTestRunner"
 
         val properties = Properties()
         runCatching {
@@ -131,6 +131,9 @@ dependencies {
 
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.android)
+    implementation(libs.hilt.work)
+
+    implementation(libs.androidx.work.runtime.ktx)
 
     detektPlugins(libs.detekt.twitter.compose.rules)
     detektPlugins(libs.detekt.formatting)
@@ -146,11 +149,15 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit.ktx)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.work.testing)
     androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.strikt)
     androidTestImplementation(libs.turbine)
+
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.android.testing)
 }
 
 tasks.withType<Detekt> {

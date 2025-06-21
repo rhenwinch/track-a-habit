@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
+import io.track.habit.data.local.database.entities.Habit.Companion.getName
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.ui.composables.StreakCounter
 import io.track.habit.ui.theme.TrackAHabitTheme
@@ -112,7 +113,7 @@ internal fun HabitCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = habitWithStreak.getName(isCensored = isCensored),
+                    text = habitWithStreak.habit.getName(isCensored = isCensored),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style =

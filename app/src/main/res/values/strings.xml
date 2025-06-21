@@ -163,9 +163,19 @@
     <string name="success_backup_created">Backup created successfully</string>
     <string name="success_restore_completed">Restore completed successfully</string>
     <string name="success_backup_deleted">Backup deleted successfully</string>
+    <string name="notification_channel_name">Track a Habit streak notifications</string>
+    <string name="notification_channel_description">This channel is used for streak tracking notifications.</string>
 
     <plurals name="streak_achieved_habits">
         <item quantity="one">%d habit in this streak</item>
         <item quantity="other">%d habits in this streak</item>
+    </plurals>
+    <plurals name="streak_notification_text">
+        <item quantity="one">%1$s is about to reach a new milestone, keep it up!</item>
+        <item quantity="other">You have %1$s habits that\'s about to reach a new milestone, keep it up!</item>
+    </plurals>
+    <plurals name="streak_notification_title">
+        <item quantity="one">Habit streak update 🔥</item>
+        <item quantity="other">Habit streaks update 🔥</item>
     </plurals>
 </resources>

@@ -63,6 +63,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.local.database.entities.Habit.Companion.getName
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.utils.SortOrder
@@ -353,7 +354,7 @@ fun HabitsScreenContent(
     if (habitToShowcase != null) {
         if (showEditDialog) {
             EditHabitDialog(
-                initialHabitName = habitToShowcase.getName(isCensoringHabitNames),
+                initialHabitName = habitToShowcase.habit.getName(isCensoringHabitNames),
                 onDismissRequest = { showEditDialog = false },
                 onSaveClick = { updatedHabit ->
                     onEditHabit(habitToShowcase.habit.copy(name = updatedHabit))

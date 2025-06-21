@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
+import io.track.habit.data.local.database.entities.Habit.Companion.getName
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.ui.composables.StreakCounter
@@ -59,7 +60,7 @@ fun HabitsScreenHeader(
     modifier: Modifier = Modifier,
 ) {
     val (_, streak) = habitWithStreak
-    val habitName = habitWithStreak.getName(isCensored = isCensored)
+    val habitName = habitWithStreak.habit.getName(isCensored = isCensored)
     val formattedActiveSinceDate by remember {
         derivedStateOf {
             habitWithStreak.formattedActiveSinceDate

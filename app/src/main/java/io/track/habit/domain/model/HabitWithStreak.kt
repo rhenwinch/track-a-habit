@@ -160,37 +160,39 @@ data class HabitWithStreak(
             }
         }
 
-    fun getName(isCensored: Boolean): String {
-        return if (isCensored) {
-            val censoredName =
-                when {
-                    habit.name.length <= 2 -> {
-                        buildString {
-                            append(habit.name)
-                            while (length < 3) {
-                                val lastChar = lastOrNull() ?: 'A'
-                                val shiftedChar =
-                                    when {
-                                        lastChar.isLetter() -> {
-                                            val base = if (lastChar.isUpperCase()) 'A' else 'a'
-                                            ((lastChar.code - base.code + 3) % 26 + base.code).toChar()
+    companion object {
+        fun HabitWithStreak.getName(isCensored: Boolean): String {
+            return if (isCensored) {
+                val censoredName =
+                    when {
+                        habit.name.length <= 2 -> {
+                            buildString {
+                                append(habit.name)
+                                while (length < 3) {
+                                    val lastChar = lastOrNull() ?: 'A'
+                                    val shiftedChar =
+                                        when {
+                                            lastChar.isLetter() -> {
+                                                val base = if (lastChar.isUpperCase()) 'A' else 'a'
+                                                ((lastChar.code - base.code + 3) % 26 + base.code).toChar()
+                                            }
+
+                                            else -> 'A'
                                         }
 
-                                        else -> 'A'
-                                    }
+                                    append(shiftedChar)
+                                }
+                            }.take(2)
+                        }
 
-                                append(shiftedChar)
-                            }
-                        }.take(2)
+                        else -> habit.name.take(2)
                     }
+                val paddedName = censoredName.padEnd(8, '*')
 
-                    else -> habit.name.take(2)
-                }
-            val paddedName = censoredName.padEnd(8, '*')
-
-            paddedName
-        } else {
-            habit.name
+                paddedName
+            } else {
+                habit.name
+            }
         }
     }
 }

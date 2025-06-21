@@ -2,6 +2,7 @@ package io.track.habit.model
 
 import io.mockk.mockk
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.local.database.entities.Habit.Companion.getName
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Streak
 import junit.framework.TestCase.assertEquals
@@ -34,7 +35,7 @@ class HabitWithStreakTest {
             val streak = mockk<Streak>()
             val original = HabitWithStreak(habit, streak)
 
-            val censored = original.getName(true)
+            val censored = original.habit.getName(true)
 
             println("Actual habit name: $name")
             println("Censored habit name: $censored")
@@ -49,7 +50,7 @@ class HabitWithStreakTest {
         val streak = mockk<Streak>()
         val original = HabitWithStreak(habit, streak)
 
-        val censored = original.getName(true)
+        val censored = original.habit.getName(true)
 
         // Take 2 characters and pad to 8
         println("Censored habit name: $censored")
@@ -62,7 +63,7 @@ class HabitWithStreakTest {
         val streak = mockk<Streak>()
         val original = HabitWithStreak(habit, streak)
 
-        val censored = original.getName(false)
+        val censored = original.habit.getName(false)
 
         println("Censored habit name: $censored")
         assertEquals("ExerciseDaily", censored)
