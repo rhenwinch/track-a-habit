@@ -105,7 +105,7 @@ object GeneralSettingsRegistry {
     val NOTIFICATIONS_ENABLED =
         SettingDefinition(
             key = "notifications_enabled",
-            defaultValue = true,
+            defaultValue = false,
             type = SettingType.BooleanType,
             displayName = stringRes(R.string.settings_notifications),
             description = stringRes(R.string.settings_notifications_desc),
