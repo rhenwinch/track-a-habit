@@ -288,7 +288,7 @@ fun HabitsScreenContent(
                         ),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        val habit = habitToShowcase ?: habits.firstOrNull() ?: return@item
+                        val habit = habitToShowcase ?: return@item
 
                         HabitsScreenHeader(
                             quote = quote,

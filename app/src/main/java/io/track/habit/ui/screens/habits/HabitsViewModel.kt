@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.data.local.database.entities.HabitLog
+import io.track.habit.data.local.datastore.entities.UserAppStateRegistry
 import io.track.habit.di.IoDispatcher
 import io.track.habit.domain.datastore.SettingsDataStore
 import io.track.habit.domain.model.HabitWithStreak
@@ -54,6 +55,38 @@ class HabitsViewModel
         private var resetProgressJob: Job? = null
         private var changeShowcaseJob: Job? = null
 
+        val username = settingsDataStore
+            .generalSettingsFlow
+            .map { it.userName }
+            .distinctUntilChanged()
+            .asStateFlow(
+                scope = viewModelScope,
+                initialValue = "",
+            )
+
+        val isResetProgressButtonLocked =
+            settingsDataStore
+                .generalSettingsFlow
+                .map { it.lockResetProgressButton }
+                .distinctUntilChanged()
+                .asStateFlow(
+                    scope = viewModelScope,
+                    initialValue = false,
+                )
+
+        val habits = uiState
+            .map { it.sortOrder }
+            .distinctUntilChanged()
+            .flatMapLatest { sortOrder ->
+                getHabitsWithStreaksUseCase(sortOrder = sortOrder).map { habits ->
+                    updateShowcasedHabit(habits)
+                    habits
+                }
+            }.asStateFlow(
+                scope = viewModelScope,
+                initialValue = emptyList(),
+            )
+
         init {
             viewModelScope.launch {
                 launch {
@@ -91,43 +124,13 @@ class HabitsViewModel
                             toggleCensorshipOnNames(it)
                         }
                 }
-            }
-        }
 
-        val username by lazy {
-            settingsDataStore
-                .generalSettingsFlow
-                .map { it.userName }
-                .distinctUntilChanged()
-                .asStateFlow(
-                    scope = viewModelScope,
-                    initialValue = "",
-                )
-        }
-
-        val isResetProgressButtonLocked =
-            settingsDataStore
-                .generalSettingsFlow
-                .map { it.lockResetProgressButton }
-                .distinctUntilChanged()
-                .asStateFlow(
-                    scope = viewModelScope,
-                    initialValue = false,
-                )
-
-        val habits by lazy {
-            uiState
-                .map { it.sortOrder }
-                .distinctUntilChanged()
-                .flatMapLatest { sortOrder ->
-                    getHabitsWithStreaksUseCase(sortOrder = sortOrder).map { habits ->
-                        updateShowcasedHabit(habits)
-                        habits
+                launch {
+                    habits.collectLatest {
+                        toggleShowcaseHabit(it.firstOrNull())
                     }
-                }.asStateFlow(
-                    scope = viewModelScope,
-                    initialValue = emptyList(),
-                )
+                }
+            }
         }
 
         private fun updateShowcasedHabit(habits: List<HabitWithStreak>) {
@@ -196,7 +199,7 @@ class HabitsViewModel
             }
         }
 
-        fun toggleShowcaseHabit(habitWithStreak: HabitWithStreak) {
+        fun toggleShowcaseHabit(habitWithStreak: HabitWithStreak?) {
             _uiState.update { it.copy(habitToShowcase = habitWithStreak) }
 
             if (changeShowcaseJob?.isActive == true) {
@@ -206,10 +209,10 @@ class HabitsViewModel
             changeShowcaseJob =
                 ioScope.launch {
                     val currentSettings = settingsDataStore.appStateFlow.first()
+                    val id = habitWithStreak?.habit?.habitId
+                        ?: UserAppStateRegistry.LAST_SHOWCASED_HABIT_ID.defaultValue
 
-                    settingsDataStore.updateSettings(
-                        currentSettings.copy(lastShowcasedHabitId = habitWithStreak.habit.habitId),
-                    )
+                    settingsDataStore.updateSettings(currentSettings.copy(lastShowcasedHabitId = id))
                 }
         }
     }
