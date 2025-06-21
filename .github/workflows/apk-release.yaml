@@ -21,42 +21,24 @@ jobs:
     outputs:
       release_sha: ${{ steps.prepare_artifact.outputs.release_sha }}
       short_sha: ${{ steps.prepare_artifact.outputs.short_sha }}
-      version_code: ${{ steps.version_info.outputs.version_code }}
-      version_name: ${{ steps.version_info.outputs.version_name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for proper commit counting
+          fetch-depth: 0
 
       - name: Set up local.properties
         run: |
           echo "WEB_CLIENT_ID=${{ secrets.WEB_CLIENT_ID }}" > local.properties
           echo "Created local.properties"
 
-      - name: Set version info based on tag
-        id: version_info
+      - name: Set pre-release version name based on tag
+        if: startsWith(github.ref, 'refs/tags/PRE-')
         run: |
-          if [[ "${{ github.ref_name }}" == PRE-* ]]; then
-            # For pre-release tags: use commit count as version code and tag as version name
-            echo "version_code=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
-            echo "version_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          VERSION_NAME="${{ github.ref_name }}"
+          sed -i "s/const val APP_VERSION_NAME = .*/const val APP_VERSION_NAME = \"$VERSION_NAME\"/" app/build.gradle.kts
 
-            # Update version in build.gradle.kts
-            VERSION_CODE=$(git rev-list --count HEAD)
-            VERSION_NAME="${{ github.ref_name }}"
-
-            # Update build.gradle.kts with sed
-            sed -i "s/const val APP_VERSION_CODE = .*/const val APP_VERSION_CODE = $VERSION_CODE/" app/build.gradle.kts
-            sed -i "s/const val APP_VERSION_NAME = .*/const val APP_VERSION_NAME = \"$VERSION_NAME\"/" app/build.gradle.kts
-
-            echo "Updated version to $VERSION_NAME (code: $VERSION_CODE)"
-          else
-            # For stable releases: keep the version as defined in build.gradle.kts
-            echo "Using version defined in build.gradle.kts"
-            echo "version_code=0" >> $GITHUB_OUTPUT
-            echo "version_name=regular" >> $GITHUB_OUTPUT
-          fi
+          echo "Updated version name to $VERSION_NAME"
 
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v3
@@ -116,9 +98,17 @@ jobs:
       - name: Get previous tag
         id: previousTag
         run: |
-          name=$(git --no-pager tag --sort=creatordate --merged ${{ github.ref_name }} | tail -2 | head -1)
-          echo "previousTag: $name"
-          echo "previousTag=$name" >> $GITHUB_ENV
+          # For regular semver release tags, only consider previous semver tags (not PRE-*)
+          if [[ "${{ github.ref_name }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # Find previous semver tag that matches the pattern
+            previous_tag=$(git --no-pager tag --sort=-creatordate | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "${{ github.ref_name }}" | head -1 || echo "")
+          else
+            # For PRE tags, consider all tags
+            previous_tag=$(git --no-pager tag --sort=-creatordate | grep -v "${{ github.ref_name }}" | head -1 || echo "")
+          fi
+
+          echo "Found previous tag: $previous_tag"
+          echo "previousTag=$previous_tag" >> $GITHUB_ENV
 
       - name: Generate changelogs
         id: changelog
@@ -126,7 +116,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fromTag: ${{ github.ref_name }}
-          toTag: ${{ env.previousTag || 'HEAD' }}
+          toTag: ${{ env.previousTag }}
           excludeTypes: ${{ !startsWith(github.ref, 'refs/tags/PRE-') && 'build,docs,other,style' || '' }}
           writeToFile: true
           filename: 'CHANGELOG.md'
