@@ -216,8 +216,6 @@ class HabitsViewModelTest {
             habitRepository.insertHabit(habit2)
 
             viewModel.habits.test {
-                skipItems(1)
-
                 val result = awaitItem()
                 expectThat(result.size).isEqualTo(2)
                 expectThat(result[0].habit.habitId).isEqualTo(1L)
