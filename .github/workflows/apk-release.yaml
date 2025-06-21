@@ -18,9 +18,6 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
-    outputs:
-      release_sha: ${{ steps.prepare_artifact.outputs.release_sha }}
-      short_sha: ${{ steps.prepare_artifact.outputs.short_sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,10 +49,14 @@ jobs:
           java-version: 19
           distribution: 'temurin'
 
-      - name: Assemble release APK
-        uses: gradle/gradle-command-action@v3
-        with:
-          arguments: :app:assembleRelease
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Run gradle tests
+        run: ./gradlew test
+
+      - name: Build gradle project
+        run: ./gradlew assembleRelease
 
       - name: Sign release APK
         uses: r0adkll/sign-android-release@v1
@@ -70,8 +71,6 @@ jobs:
         id: prepare_artifact
         run: |
           mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app-release.apk
-          echo "release_sha=$(sha256sum app-release.apk | cut -d ' ' -f1)" >> $GITHUB_OUTPUT
-          echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
