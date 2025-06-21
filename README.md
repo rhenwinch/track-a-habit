@@ -2,7 +2,7 @@
 
 <div align="center">
   <!-- You can replace this with your actual app icon -->
-  <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="Track-a-Habit Logo" width="250" height="250" style="border-radius: 50%;" />
+  <img src="app/src/main/ic_launcher-playstore.png" alt="Track-a-Habit Logo" width="250" height="250" style="border-radius: 50%;" />
   
   <h3>A modern habit tracking app for Android</h3>
   
