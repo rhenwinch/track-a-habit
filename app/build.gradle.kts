@@ -42,7 +42,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         val properties = Properties()
-        properties.load(project.rootProject.file("local.properties").inputStream())
+        runCatching {
+            properties.load(project.rootProject.file("local.properties").inputStream())
+        }
         buildConfigField("String", "WEB_CLIENT_ID", "\"${properties.getProperty("WEB_CLIENT_ID")}\"")
     }
 
