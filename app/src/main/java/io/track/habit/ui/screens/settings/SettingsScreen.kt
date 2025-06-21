@@ -1,6 +1,11 @@
 package io.track.habit.ui.screens.settings
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.track.habit.R
@@ -117,6 +123,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
     }
 
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                viewModel.updateSettingWithCast(GeneralSettingsRegistry.NOTIFICATIONS_ENABLED, true)
+            }
+        }
+
     SettingsScreenContent(
         generalSettings = generalSettings,
         isSignedIn = isSignedIn,
@@ -126,7 +139,21 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         availableBackups = availableBackups,
         snackbarHostState = snackbarHostState,
         onSettingChange = { definition, value ->
-            // TODO: Add permission check here for POST_NOTIFICATIONS
+            if (definition == GeneralSettingsRegistry.NOTIFICATIONS_ENABLED && value as Boolean) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val isPermissionGranted =
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.POST_NOTIFICATIONS,
+                        )
+
+                    if (isPermissionGranted != PackageManager.PERMISSION_GRANTED) {
+                        launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        return@SettingsScreenContent
+                    }
+                }
+            }
+
             viewModel.updateSettingWithCast(definition, value)
         },
         onSignInClick = viewModel::signInToGoogleDrive,
