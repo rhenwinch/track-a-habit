@@ -18,10 +18,10 @@ object ProjectConfig {
     const val APP_COMPILE_SDK = 36
     const val APP_TARGET_SDK = 35
 
-    private const val APP_VERSION_MAJOR = 0
+    private const val APP_VERSION_MAJOR = 1
     private const val APP_VERSION_MINOR = 0
     private const val APP_VERSION_PATCH = 0
-    private const val APP_VERSION_BUILD = 1
+    private const val APP_VERSION_BUILD = 0
 
     const val APP_VERSION_NAME = "$APP_VERSION_MAJOR.$APP_VERSION_MINOR.$APP_VERSION_PATCH"
     const val APP_VERSION_CODE =
