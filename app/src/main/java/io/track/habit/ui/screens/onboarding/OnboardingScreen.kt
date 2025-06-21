@@ -71,7 +71,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // TODO: Enable notifications in the app's general settings
+                viewModel.updateNotificationOnPrefs()
                 viewModel.onNext()
             } else {
                 val toastMessage =

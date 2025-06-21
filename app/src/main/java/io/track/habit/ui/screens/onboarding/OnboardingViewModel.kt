@@ -83,6 +83,15 @@ class OnboardingViewModel
         fun onUsernameChange(newUsername: String) {
             _uiState.value = _uiState.value.copy(username = newUsername)
         }
+
+        fun updateNotificationOnPrefs() {
+            ioScope.launch {
+                settingsDataStore.updateSetting(
+                    definition = GeneralSettingsRegistry.NOTIFICATIONS_ENABLED,
+                    value = true,
+                )
+            }
+        }
     }
 
 data class OnboardingUiState(
