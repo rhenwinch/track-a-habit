@@ -1,26 +1,37 @@
 # Track a Habit
 
-<div align="center">
-  <!-- You can replace this with your actual app icon -->
-  <img src="app/src/main/ic_launcher-playstore.png" alt="Track-a-Habit Logo" width="250" height="250" style="border-radius: 50%;" />
-  
-  <h3>A modern habit tracking app for Android</h3>
-  
-  <p>
-    <a href="#features">Features</a> •
-    <a href="#screenshots">Screenshots</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#architecture">Architecture</a> •
-    <a href="#installation">Installation</a> •
-    <a href="#contributing">Contributing</a>
-  </p>
+![Track a Habit logo](app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp)
+
+A modern habit tracking app for Android
+
+<div>
+  <table>
+    <tr>
+      <td>Unit tests</td>
+      <td><a href="https://github.com/rhenwinch/*Track a Habit*/actions/workflows/unit-tests.yaml"><img src="https://img.shields.io/github/actions/workflow/status/rhenwinch/*Track a Habit*/unit-tests.yaml?branch=master&style=for-the-badge&label=Unit+tests" alt="Unit tests"></a></td>
+    </tr>
+    <tr>
+      <td>Instrumented tests</td>
+      <td><a href="https://github.com/rhenwinch/*Track a Habit*/actions/workflows/instrumented-tests.yaml"><img src="https://img.shields.io/github/actions/workflow/status/rhenwinch/*Track a Habit*/instrumented-tests.yaml?branch=master&style=for-the-badge&label=Instrumented+tests" alt="Instrumented tests"></a></td>
+    </tr>
+    <tr>
+      <td>Pre-merge check</td>
+      <td><a href="https://github.com/rhenwinch/*Track a Habit*/actions/workflows/pre-merge.yaml"><img src="https://img.shields.io/github/actions/workflow/status/rhenwinch/*Track a Habit*/pre-merge.yaml?branch=master&style=for-the-badge&label=Pre-merge" alt="Pre-merge check"></a></td>
+    </tr>
+    <tr>
+      <td>Stable</td>
+      <td><a href="https://github.com/rhenwinch/*Track a Habit*/releases/latest"><img src="https://img.shields.io/github/downloads/rhenwinch/*Track a Habit*/latest/total?style=for-the-badge" alt="stable release"></a></td>
+    </tr>
+  </table>
 </div>
+
+[Features](#features) • [Screenshots](#screenshots) • [Tech Stack](#tech-stack) • [Todo List](#todo-list) • [Architecture](#architecture) • [Installation](#installation) • [Contributing](#contributing)
 
 > *This README is written by an AI!!!!*
 
 ## Overview
 
-Track-a-Habit is a minimalist yet powerful habit tracking application designed to help users build and maintain positive habits through an elegant, intuitive interface. The app combines beautiful design with powerful functionality to make habit tracking a seamless part of your daily routine.
+*Track a Habit* is a minimalist yet powerful habit tracking application designed to help users build and maintain positive habits through an elegant, intuitive interface. The app combines beautiful design with powerful functionality to make habit tracking a seamless part of your daily routine.
 
 ## Features
 
@@ -43,40 +54,23 @@ Track-a-Habit is a minimalist yet powerful habit tracking application designed t
 
 ## Tech Stack
 
-Track-a-Habit is built with modern Android development tools and practices:
+*Track a Habit* is built with modern Android development tools and practices:
 
 ### UI & Architecture
 - **Jetpack Compose**: Declarative UI toolkit for native UI
 - **Material 3**: Latest Material Design components and theming
 - **MVVM Architecture**: Clean separation of UI, business logic, and data
-- **Navigation Component**: Type-safe navigation with Compose
 
-### Core Libraries
-- **Kotlin Flows & Coroutines**: Reactive programming and asynchronous operations
-- **Kotlin Serialization**: Type-safe JSON serialization
-- **Hilt**: Dependency injection throughout the app
-- **Biometric Library**: Secure authentication for censoring habit names
+## Todo List
 
-### Data & Storage
-- **Room Database**: Local persistence for habit data
-- **DataStore**: Preferences storage with type safety
-- **WorkManager**: Background scheduling for notifications and syncing
-- **Google Drive API**: Optional cloud backup of user data
-
-### Authentication & Security
-- **Credential Manager API**: Secure authentication for Google Drive integration
-- **Encrypted Preferences**: Secure storage of sensitive information
-
-### Testing
-- **JUnit5**: Unit testing framework
-- **Turbine**: Testing of Flow-based code
-- **MockK**: Mocking library for Kotlin
-- **Strikt**: Fluent assertion library for Kotlin tests
-- **Compose UI Testing**: UI testing with Compose Test
+Current development priorities:
+- [x] Google drive backup implementation
+- [ ] Google drive auto backup using WorkManager
+- [ ] Re-design implementation of Streaks and Quotes (hardcode it)
 
 ## Architecture
 
-Track-a-Habit follows Android-recommended architecture principles with _MVVM_ presentation pattern.
+*Track a Habit* follows Android-recommended architecture principles with _MVVM_ presentation pattern.
 
 The app is structured into three main layers:
 - **Presentation Layer**: Contains UI components, ViewModels, and navigation logic. Uses Jetpack Compose for building the UI.
@@ -101,13 +95,13 @@ All modules are developed with comprehensive unit tests before moving up the sta
 ## Installation
 
 ### From GitHub Releases
-1. Download the latest APK from the [Releases](https://github.com/rhenwinch/track-a-habit/releases) page
+1. Download the latest APK from the [Releases](https://github.com/rhenwinch/*Track a Habit*/releases) page
 2. Install the APK on your Android device
 
 ### From Source
 1. Clone the repository
    ```bash
-   git clone https://github.com/rhenwinch/track-a-habit.git
+   git clone https://github.com/rhenwinch/*Track a Habit*.git
    ```
 2. Open the project in Android Studio
 3. Build and run the app on your device or emulator
