@@ -17,126 +17,133 @@
         "title": "Fortnight Fighter",
         "minDaysRequired": 14,
         "maxDaysRequired": 20,
-        "badgeIcon": "badge_fortnight",
+        "badgeIcon": "badge_shield",
         "message": "Two weeks strong! Your persistence is paying off!"
     },
     {
         "title": "21 Savage",
         "minDaysRequired": 21,
         "maxDaysRequired": 29,
-        "badgeIcon": "badge_21_club",
+        "badgeIcon": "badge_rapper",
         "message": "They say it takes 21 days to form a habit. Look at you go! You're a savage!"
     },
     {
         "title": "Monthly Master",
         "minDaysRequired": 30,
         "maxDaysRequired": 59,
-        "badgeIcon": "badge_monthly_master",
+        "badgeIcon": "badge_calendar",
         "message": "A full month! Your commitment is becoming legendary!"
     },
     {
         "title": "Habit Hacker",
         "minDaysRequired": 60,
         "maxDaysRequired": 89,
-        "badgeIcon": "badge_habit_hacker",
+        "badgeIcon": "badge_keyboard",
         "message": "Two months in and you've hacked your habits! Impressive!"
     },
     {
         "title": "Quarterly Champion",
         "minDaysRequired": 90,
-        "maxDaysRequired": 119,
-        "badgeIcon": "badge_quarterly",
+        "maxDaysRequired": 99,
+        "badgeIcon": "badge_trophy",
         "message": "Three months of awesome! You're in the habit hall of fame!"
     },
     {
-        "title": "100 Day Club",
+        "title": "Centennial Gemstone",
         "minDaysRequired": 100,
         "maxDaysRequired": 149,
-        "badgeIcon": "badge_100_days",
-        "message": "Triple digits! Your dedication is out of this world!"
+        "badgeIcon": "badge_gemstone",
+        "message": "100 days of consistent pressure has transformed your habit into a precious gemstone!"
     },
     {
-        "title": "Habit Jedi",
+        "title": "Zen Achiever",
         "minDaysRequired": 150,
         "maxDaysRequired": 179,
-        "badgeIcon": "badge_jedi",
-        "message": "The force of habit is strong with this one!"
+        "badgeIcon": "badge_lotus_flower",
+        "message": "Your dedication has reached a state of perfect balance and focus!"
     },
     {
         "title": "Half-Year Hero",
         "minDaysRequired": 180,
         "maxDaysRequired": 269,
-        "badgeIcon": "badge_half_year",
+        "badgeIcon": "badge_hero",
         "message": "Six months! You've transformed a challenge into a lifestyle!"
     },
     {
-        "title": "Marathon Runner",
+        "title": "Endurance Champion",
         "minDaysRequired": 270,
         "maxDaysRequired": 364,
-        "badgeIcon": "badge_marathon",
-        "message": "You're in this for the long haul and it shows! Keep running!"
+        "badgeIcon": "badge_stopwatch",
+        "message": "Nine months of persistence! Your endurance is truly remarkable!"
     },
     {
         "title": "One Year Legend",
         "minDaysRequired": 365,
-        "maxDaysRequired": 454,
-        "badgeIcon": "badge_one_year",
+        "maxDaysRequired": 399,
+        "badgeIcon": "badge_crown",
         "message": "A FULL YEAR! You're officially unstoppable!"
+    },
+    {
+        "title": "Nietzsche's Übermensch",
+        "minDaysRequired": 400,
+        "maxDaysRequired": 454,
+        "badgeIcon": "badge_mustache",
+        "message": "You've risen above your former self! Your habit mastery would impress even Nietzsche!"
     },
     {
         "title": "Socrates Apprentice",
         "minDaysRequired": 455,
         "maxDaysRequired": 544,
-        "badgeIcon": "badge_socrates",
+        "badgeIcon": "badge_scroll",
         "message": "Your wisdom and discipline would impress Socrates himself!"
     },
     {
         "title": "Plato's Pupil",
         "minDaysRequired": 545,
         "maxDaysRequired": 634,
-        "badgeIcon": "badge_plato",
+        "badgeIcon": "badge_book",
         "message": "Plato would be proud of your unwavering commitment!"
     },
     {
         "title": "Aristotle's Achiever",
         "minDaysRequired": 635,
         "maxDaysRequired": 729,
-        "badgeIcon": "badge_aristotle",
+        "badgeIcon": "badge_quill",
         "message": "Excellence is not an act but a habit - and you've mastered it!"
     },
     {
         "title": "Two Year Titan",
         "minDaysRequired": 730,
         "maxDaysRequired": 819,
-        "badgeIcon": "badge_two_years",
+        "badgeIcon": "badge_mountain",
         "message": "TWO YEARS! Your persistence is truly legendary!"
     },
     {
-        "title": "Gandhi's Disciple",
+        "title": "Enlightened One",
         "minDaysRequired": 820,
         "maxDaysRequired": 909,
-        "badgeIcon": "badge_gandhi",
-        "message": "Your strength and persistence would impress Gandhi himself!"
+        "badgeIcon": "badge_star",
+        "message": "Your habit has transcended routine - you've reached enlightenment!"
     },
     {
-        "title": "Enlightened One",
+        "title": "Cosmic Voyager",
         "minDaysRequired": 910,
         "maxDaysRequired": 999,
-        "badgeIcon": "badge_enlightened",
-        "message": "Your habit has transcended routine - you've reached enlightenment!"
+        "badgeIcon": "badge_meteor",
+        "message": "Your habit has transcended earthly bounds. You're journeying through the cosmos of achievement!"
     },
     {
         "title": "Divine Habit Master",
         "minDaysRequired": 1000,
         "maxDaysRequired": 1094,
-        "badgeIcon": "badge_divine",
+        "badgeIcon": "badge_angel",
         "message": "1000 DAYS! You've ascended to divine status!"
     },
     {
         "title": "The Habit Oracle",
         "minDaysRequired": 1095,
         "maxDaysRequired": 9999999,
-        "badgeIcon": "badge_oracle",
+        "badgeIcon": "badge_crystal_ball",
         "message": "THREE YEARS! You don't just have a habit, you ARE the habit! Legendary!"
     }
 ]
