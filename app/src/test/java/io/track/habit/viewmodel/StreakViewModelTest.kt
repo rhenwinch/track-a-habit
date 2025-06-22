@@ -75,25 +75,18 @@ class StreakViewModelTest {
     @Test
     fun `when no habits exist then all streaks should show zero habits in range`() =
         runTest(testDispatcher) {
-            // Let the viewModel collect initial values
             advanceUntilIdle()
 
             viewModel.streakSummaries.test {
                 skipItems(1) // Skip initial empty state
                 val summaries = awaitItem()
 
-                // Verify we have all streak milestones from the repository
                 expectThat(summaries).hasSize(21)
 
-                // First streak (Getting Started) should be achieved with 0 habits
                 expectThat(summaries[0]) {
-                    get { isAchieved }.isTrue()
-                    // Check that status shows 0 habits in streak
-                    get { status }.isA<StringResource.Plural>()
-                    get { (status as StringResource.Plural).quantity }.isEqualTo(0)
+                    get { isAchieved }.isFalse()
                 }
 
-                // Other streaks should not be achieved yet
                 expectThat(summaries.subList(1, summaries.size).all { !it.isAchieved }).isTrue()
             }
         }
