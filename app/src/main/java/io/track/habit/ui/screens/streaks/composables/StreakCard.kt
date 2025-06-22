@@ -31,13 +31,15 @@ import io.track.habit.ui.utils.painterResourceFromString
 
 @Composable
 fun StreakCard(
+    onClick: () -> Unit,
+    enabled: Boolean,
     streakSummary: StreakSummary,
     modifier: Modifier = Modifier,
 ) {
     OutlinedCard(
-        modifier =
-            modifier
-                .heightIn(min = 40.dp),
+        modifier = modifier.heightIn(min = 40.dp),
+        onClick = onClick,
+        enabled = enabled,
     ) {
         Box(
             modifier =
@@ -110,6 +112,8 @@ private fun StreakCardPreview() {
     TrackAHabitTheme {
         Surface {
             StreakCard(
+                onClick = {},
+                enabled = true,
                 streakSummary =
                     PreviewMocks.getStreakSummary(
                         streak =

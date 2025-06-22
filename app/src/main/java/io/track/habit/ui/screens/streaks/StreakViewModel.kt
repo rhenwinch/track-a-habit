@@ -153,5 +153,5 @@ data class StreakSummary(
     val status: StringResource,
     val durationText: StringResource,
     val isAchieved: Boolean,
-    val badgeIcon: String, // New property for streak badge icon
+    val badgeIcon: String,
 )

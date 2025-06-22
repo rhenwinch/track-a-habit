@@ -1,5 +1,6 @@
 package io.track.habit.ui.screens.streaks
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -17,10 +18,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +37,7 @@ import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.ui.screens.streaks.composables.HighestStreakCard
 import io.track.habit.ui.screens.streaks.composables.StatsLabel
 import io.track.habit.ui.screens.streaks.composables.StreakCard
+import io.track.habit.ui.screens.streaks.composables.StreakDetailDialog
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
@@ -60,6 +65,10 @@ private fun StreaksScreenContent(
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val context = LocalContext.current
+
+    var showDetailDialog by remember { mutableStateOf(false) }
+    var selectedStreak by remember { mutableStateOf<StreakSummary?>(null) }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -121,10 +130,49 @@ private fun StreaksScreenContent(
 
             items(streakSummaries) { summary ->
                 StreakCard(
+                    enabled = summary.isAchieved,
+                    onClick = {
+                        selectedStreak = summary
+                        showDetailDialog = true
+                    },
                     streakSummary = summary,
                     modifier = Modifier.padding(vertical = 5.dp),
                 )
             }
+        }
+
+        if (showDetailDialog && selectedStreak != null) {
+            StreakDetailDialog(
+                streakSummary = selectedStreak!!,
+                onDismiss = { showDetailDialog = false },
+                onShare = {
+                    val shareText = buildString {
+                        append(
+                            context.getString(
+                                R.string.share_streak_message,
+                                selectedStreak!!.title.asString(context),
+                            ),
+                        )
+                        append("\n\n")
+                        append(context.getString(R.string.share_streak_cta))
+                        append("\n\n")
+                        append(context.getString(R.string.app_download_url))
+                    }
+
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.streak_detail_title))
+                        putExtra(Intent.EXTRA_TEXT, shareText)
+                    }
+
+                    context.startActivity(
+                        Intent.createChooser(
+                            shareIntent,
+                            context.getString(R.string.share_streak),
+                        ),
+                    )
+                },
+            )
         }
     }
 }

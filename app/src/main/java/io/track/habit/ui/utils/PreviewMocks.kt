@@ -38,7 +38,7 @@ object PreviewMocks {
 
     fun getStreakSummary(
         streak: Streak = getStreak(),
-        status: String = "Active",
+        status: String = "5 habits are in this streak",
         durationText: String = "7 days - 15 days",
         isAchieved: Boolean = true,
     ) = StreakSummary(

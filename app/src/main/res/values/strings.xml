@@ -32,16 +32,19 @@
     <string name="habit_logs_icon_content_desc">Habit logs icon</string>
     <string name="onboarding_step_icon_content_desc">Onboarding step #%1$d icon</string>
     <string name="reset_progress_icon_content_desc">Reset progress icon</string>
+    <string name="share_streak_content_desc">Share your streak achievement</string>
     <string name="streak_icon_content_desc">Streak icon</string>
     <string name="time_icon_content_desc">Select time</string>
     <string name="visibility_icon_content_desc">Habit name visibility icon</string>
     <string name="visibility_off_icon_content_desc">Habit name visibility off icon</string>
+    <string name="add_icon_content_desc">Add icon</string>
+    <string name="delete_backup_content_desc">Delete backup</string>
 
     <string name="add_a_habit">Add a habit</string>
     <string name="add_habit">Add habit</string>
-    <string name="add_icon_content_desc">Add icon</string>
     <string name="all_time">All-time</string>
     <string name="allowed_notifications">Notifications are enabled</string>
+    <string name="app_download_url">https://github.com/rhenwinch/track-a-habit?tab=readme-ov-file#track-a-habit</string>
     <string name="back">Back</string>
     <string name="backup_now">Backup Now</string>
     <string name="biometrics_auth_failed">Authentication failed</string>
@@ -50,12 +53,14 @@
     <string name="biometrics_prompt_subtitle">Authenticate to view habit names</string>
     <string name="biometrics_prompt_title">Uncensor habits with biometrics</string>
     <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
     <string name="confirm">Confirm</string>
+    <string name="confirm_restore_message">Are you sure you want to restore from this backup? Current data will be replaced with the backup data.</string>
+    <string name="confirm_restore_title">Confirm Restoration</string>
     <string name="connected_to_google_drive">Connected to Google Drive</string>
     <string name="create_new_habit">Create new habit</string>
     <string name="date">Date</string>
     <string name="delete">Delete</string>
-    <string name="delete_backup_content_desc">Delete backup</string>
     <string name="delete_habit">Delete habit</string>
     <string name="delete_habit_confirmation">Are you sure you want to delete this habit?</string>
     <string name="disabled_notifications">Aw! Notifications can be toggled on the settings though.</string>
@@ -67,8 +72,20 @@
     <string name="empty_habits_message">Start by adding a new habit!</string>
     <string name="empty_logs_message">This is good! You haven\'t relapsed yet.</string>
     <string name="empty_title">Seems empty here…</string><string name="loading_message">Counting your streaks and motivating electrons…</string>
+    <string name="error_account_info_failed">Failed to get account information</string>
+    <string name="error_auth_denied">Authorization was denied</string>
+    <string name="error_auth_failed">Authorization failed</string>
+    <string name="error_auth_failed_with_reason">Authorization failed: %1$s</string>
+    <string name="error_backup_general">Failed to backup: %1$s</string>
     <string name="error_create_habit">Failed to create habit</string>
+    <string name="error_database_not_exists">Database file does not exist</string>
+    <string name="error_delete_general">Failed to delete backup: %1$s</string>
+    <string name="error_drive_service_unavailable">Drive service is not available</string>
     <string name="error_empty_field">This field cannot be empty</string>
+    <string name="error_invalid_credential">Invalid credential type</string>
+    <string name="error_launch_auth_failed">Failed to launch authorization: %1$s</string>
+    <string name="error_not_signed_in">Not signed in to Google Drive</string>
+    <string name="error_restore_general">Failed to restore: %1$s</string>
     <string name="general_settings">General Settings</string>
     <string name="good_afternoon">Good afternoon</string>
     <string name="good_evening">Good evening</string>
@@ -89,12 +106,18 @@
     <string name="no_notes_provided">No notes provided</string>
     <string name="no_trigger_provided">No trigger provided</string>
     <string name="notes">Notes</string>
+    <string name="notification_channel_description">This channel is used for streak tracking notifications.</string>
+    <string name="notification_channel_name">Track a Habit streak notifications</string>
     <string name="ongoing">Ongoing</string>
     <string name="placeholder_habit_name">Enter habit name</string>
     <string name="placeholder_notes">Notes (optional)</string>
     <string name="placeholder_trigger_cause">Trigger cause (optional)</string>
+    <string name="proceed">Proceed</string>
     <string name="reset_progress">Reset progress</string>
     <string name="reset_progress_confirmation">⚠️ WARNING: This action is irreversible! All progress data will be permanently deleted.</string>
+    <string name="restart">Restart</string>
+    <string name="restart_required_message">Your data has been successfully restored. Please restart the app to see the changes.</string>
+    <string name="restart_required_title">Restart Required</string>
     <string name="restore">Restore</string>
     <string name="save">Save</string>
     <string name="select_backup_to_restore">Select Backup to Restore</string>
@@ -113,6 +136,9 @@
     <string name="settings_username_desc">Your display name in the app</string>
     <string name="settings_work_time">Work time</string>
     <string name="settings_work_time_desc">Time for the work period</string>
+    <string name="share_streak">Share Achievement</string>
+    <string name="share_streak_message">🔥 I\'ve achieved a milestone in my habit journey, %1$s! I\'m building better habits every day! 💪</string>
+    <string name="share_streak_cta">👉 Join me on this journey of self-improvement and track your own habits!</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_out">Sign out</string>
     <string name="since_date_format">since %1$s</string>
@@ -122,6 +148,7 @@
     <string name="sort_by_streak">Streak</string>
     <string name="streak">Streak</string>
     <string name="streak_days_range">%1$s - %2$s days</string>
+    <string name="streak_detail_title">Streak Achievement</string>
     <string name="streak_milestone">Streak milestone</string>
     <string name="streak_milestones">Streak milestones</string>
     <string name="streak_milestones_desc">These are the streaks that you will and have achieved in the past. Keep going!</string>
@@ -131,44 +158,18 @@
     <string name="streak_unknown_days">\?? - ?? days</string>
     <string name="streak_unknown_title">Next milestone</string>
     <string name="streak_very_close">You\'re almost there!</string>
+    <string name="success_backup_created">Backup created successfully</string>
+    <string name="success_backup_deleted">Backup deleted successfully</string>
+    <string name="success_restore_completed">Restore completed successfully</string>
     <string name="time">Time</string>
     <string name="trigger">Trigger</string>
     <string name="understood">Understood</string>
     <string name="username">Username</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
 
-    <!-- Backup restoration dialogs -->
-    <string name="confirm_restore_title">Confirm Restoration</string>
-    <string name="confirm_restore_message">Are you sure you want to restore from this backup? Current data will be replaced with the backup data.</string>
-    <string name="proceed">Proceed</string>
-    <string name="restart_required_title">Restart Required</string>
-    <string name="restart_required_message">Your data has been successfully restored. Please restart the app to see the changes.</string>
-    <string name="restart">Restart</string>
-
-    <!-- Google Drive Authorization & Backup Error Messages -->
-    <string name="error_auth_failed">Authorization failed</string>
-    <string name="error_auth_denied">Authorization was denied</string>
-    <string name="error_auth_failed_with_reason">Authorization failed: %1$s</string>
-    <string name="error_launch_auth_failed">Failed to launch authorization: %1$s</string>
-    <string name="error_account_info_failed">Failed to get account information</string>
-    <string name="error_not_signed_in">Not signed in to Google Drive</string>
-    <string name="error_drive_service_unavailable">Drive service is not available</string>
-    <string name="error_invalid_credential">Invalid credential type</string>
-    <string name="error_database_not_exists">Database file does not exist</string>
-    <string name="error_backup_general">Failed to backup: %1$s</string>
-    <string name="error_restore_general">Failed to restore: %1$s</string>
-    <string name="error_delete_general">Failed to delete backup: %1$s</string>
-
-    <!-- Backup Operation Success Messages -->
-    <string name="success_backup_created">Backup created successfully</string>
-    <string name="success_restore_completed">Restore completed successfully</string>
-    <string name="success_backup_deleted">Backup deleted successfully</string>
-    <string name="notification_channel_name">Track a Habit streak notifications</string>
-    <string name="notification_channel_description">This channel is used for streak tracking notifications.</string>
-
     <plurals name="streak_achieved_habits">
-        <item quantity="one">%d habit in this streak</item>
-        <item quantity="other">%d habits in this streak</item>
+        <item quantity="one">%d habit is in this streak</item>
+        <item quantity="other">%d habits are in this streak</item>
     </plurals>
     <plurals name="streak_notification_text">
         <item quantity="one">%1$s is about to reach a new milestone, keep it up!</item>
