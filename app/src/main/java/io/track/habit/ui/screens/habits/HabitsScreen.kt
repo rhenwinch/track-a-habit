@@ -77,7 +77,6 @@ import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
 import io.track.habit.ui.utils.authenticate
 import io.track.habit.ui.utils.getBiometricsPromptInfo
-import io.track.habit.ui.utils.isBiometricAvailable
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -96,13 +95,22 @@ fun HabitsScreen(
 
     val scope = rememberCoroutineScope()
 
-    val canAuthenticate = remember { context.isBiometricAvailable() }
     val biometricsPromptInfo = remember {
         getBiometricsPromptInfo(
             title = context.getString(R.string.biometrics_prompt_title),
             subtitle = context.getString(R.string.biometrics_prompt_subtitle),
             negativeButtonText = context.getString(R.string.biometrics_prompt_fallback),
         )
+    }
+
+    fun onAuthFailure() {
+        scope.launch {
+            snackbarHostState.showSnackbar(
+                message = context.getString(R.string.biometrics_auth_failed),
+                withDismissAction = true,
+                duration = SnackbarDuration.Short,
+            )
+        }
     }
 
     AnimatedContent(
@@ -129,29 +137,14 @@ fun HabitsScreen(
                 snackbarHostState = snackbarHostState,
                 onHabitClick = viewModel::toggleShowcaseHabit,
                 onDeleteHabit = { habit ->
-                    if (canAuthenticate && !isAuthenticatedOnceForDeleteOrResetProgress) {
+                    if (!isAuthenticatedOnceForDeleteOrResetProgress) {
                         context.authenticate(
                             prompt = biometricsPromptInfo,
                             onAuthSucceed = {
                                 isAuthenticatedOnceForDeleteOrResetProgress = true
                                 viewModel.deleteHabit(habit)
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.biometrics_auth_success),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Long,
-                                    )
-                                }
                             },
-                            onAuthFailed = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.biometrics_auth_failed),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Long,
-                                    )
-                                }
-                            },
+                            onAuthFailed = ::onAuthFailure,
                         )
                     } else {
                         viewModel.deleteHabit(habit)
@@ -159,29 +152,14 @@ fun HabitsScreen(
                 },
                 onHabitLongClick = viewModel::onHabitLongClick,
                 onResetProgress = { habit ->
-                    if (canAuthenticate && !isAuthenticatedOnceForDeleteOrResetProgress) {
+                    if (!isAuthenticatedOnceForDeleteOrResetProgress) {
                         context.authenticate(
                             prompt = biometricsPromptInfo,
                             onAuthSucceed = {
                                 isAuthenticatedOnceForDeleteOrResetProgress = true
                                 viewModel.resetProgress(habit)
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.biometrics_auth_success),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Long,
-                                    )
-                                }
                             },
-                            onAuthFailed = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.biometrics_auth_failed),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Long,
-                                    )
-                                }
-                            },
+                            onAuthFailed = ::onAuthFailure,
                         )
                     } else {
                         viewModel.resetProgress(habit)
@@ -193,28 +171,11 @@ fun HabitsScreen(
                 onAddHabit = onAddHabit,
                 onToggleCensorship = {
                     val isCensored = !uiState.isCensoringHabitNames
-                    if (!isCensored && canAuthenticate) {
+                    if (!isCensored) {
                         context.authenticate(
                             prompt = biometricsPromptInfo,
-                            onAuthSucceed = {
-                                viewModel.toggleCensorshipOnNames(isCensored)
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.biometrics_auth_success),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Long,
-                                    )
-                                }
-                            },
-                            onAuthFailed = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.biometrics_auth_failed),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Long,
-                                    )
-                                }
-                            },
+                            onAuthSucceed = { viewModel.toggleCensorshipOnNames(isCensored) },
+                            onAuthFailed = ::onAuthFailure,
                         )
                     } else {
                         viewModel.toggleCensorshipOnNames(isCensored)
@@ -282,7 +243,7 @@ fun HabitsScreenContent(
                     windowInsets = WindowInsets(0.dp),
                     title = {
                         Text(
-                            text = "${getTimeOfDayGreeting()}, $username",
+                            text = "${getTimeOfDayGreeting()}, $username!",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),

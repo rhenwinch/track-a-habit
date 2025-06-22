@@ -19,9 +19,13 @@ fun Context.authenticate(
     onAuthSucceed: (BiometricPrompt.AuthenticationResult) -> Unit,
     onAuthFailed: () -> Unit,
 ) {
+    if (!isBiometricAvailable()) {
+        return
+    }
+
     val executor = ContextCompat.getMainExecutor(this)
     val biometricPrompt = BiometricPrompt(
-        this as FragmentActivity, // Might throw ClassCastException if context is not a FragmentActivity
+        this as FragmentActivity,
         executor,
         object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
@@ -35,6 +39,7 @@ fun Context.authenticate(
             ) {
                 super.onAuthenticationError(errorCode, errString)
                 Log.e(BIOMETRICS_TAG, "Error [$errorCode]: $errorCode")
+                onAuthFailed()
             }
 
             override fun onAuthenticationFailed() {
