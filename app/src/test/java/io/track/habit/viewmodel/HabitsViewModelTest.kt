@@ -21,10 +21,14 @@ import io.track.habit.repository.fake.FakeHabitRepository
 import io.track.habit.repository.fake.FakeStreakRepository
 import io.track.habit.ui.screens.habits.HabitsViewModel
 import io.track.habit.ui.screens.habits.composables.ResetDetails
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,7 +57,8 @@ class HabitsViewModelTest {
 
     @Before
     fun setUp() =
-        runTest {
+        runTest(testDispatcher) {
+            Dispatchers.setMain(testDispatcher)
             assetReader = mockk()
             coEvery { assetReader.read(QUOTES_FILE_NAME) } returns
                 """
@@ -99,11 +104,20 @@ class HabitsViewModelTest {
             advanceUntilIdle()
         }
 
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
     @Test
     fun `resetProgress should update habit and create log`() =
         runTest(testDispatcher) {
             val habitId = 1L
-            val habit = Habit(habitId = habitId, name = "Test Habit", lastResetAt = Date(1000))
+            val habit = Habit(
+                habitId = habitId,
+                name = "Test Habit",
+                lastResetAt = Date(System.currentTimeMillis() - (5 * 24 * 60 * 60 * 1000L)),
+            ) // 5 days ago
             val resetDetails = ResetDetails(habitId = habitId, trigger = "Test Trigger", notes = "Test Notes")
 
             habitRepository.insertHabit(habit)
@@ -208,12 +222,14 @@ class HabitsViewModelTest {
 
     @Test
     fun `habits flow should emit habits from repository`() =
-        runTest {
+        runTest(testDispatcher) {
             val habit1 = Habit(habitId = 1, name = "Test Habit 1")
             val habit2 = Habit(habitId = 2, name = "Test Habit 2")
 
             habitRepository.insertHabit(habit1)
             habitRepository.insertHabit(habit2)
+
+            advanceUntilIdle()
 
             viewModel.habits.test {
                 val result = awaitItem()
