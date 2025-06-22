@@ -1,11 +1,11 @@
 package io.track.habit.ui.navigation
 
 import io.track.habit.R
+import io.track.habit.domain.utils.DrawableResource
 import io.track.habit.domain.utils.StringResource
+import io.track.habit.domain.utils.drawableRes
 import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.domain.utils.stringRes
-import io.track.habit.ui.utils.DrawableResource
-import io.track.habit.ui.utils.drawableRes
 import kotlinx.serialization.Serializable
 
 /**

@@ -28,10 +28,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.track.habit.R
+import io.track.habit.domain.utils.drawableRes
+import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.ui.screens.streaks.StreakSummary
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
-import io.track.habit.ui.utils.painterResourceFromString
 
 @Composable
 fun StreakDetailDialog(
@@ -52,7 +53,7 @@ fun StreakDetailDialog(
                     .padding(24.dp),
             ) {
                 Image(
-                    painter = painterResourceFromString(streakSummary.badgeIcon),
+                    painter = streakSummary.badgeIcon.asPainter(),
                     contentDescription = streakSummary.title.asString(),
                     modifier = Modifier.size(100.dp),
                 )
@@ -114,8 +115,8 @@ private fun StreakDetailDialogPreview() {
             StreakDetailDialog(
                 streakSummary = PreviewMocks.getStreakSummary(
                     streak = PreviewMocks.getStreak().copy(
-                        title = "Monthly Master",
-                        badgeIcon = "badge_calendar",
+                        title = stringLiteral("Monthly Master"),
+                        badgeIcon = drawableRes(R.drawable.badge_calendar),
                     ),
                 ),
                 onDismiss = {},

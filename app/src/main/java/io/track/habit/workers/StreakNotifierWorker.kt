@@ -17,9 +17,9 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.data.local.datastore.entities.UserAppStateRegistry
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.datastore.SettingsDataStore
 import io.track.habit.domain.repository.HabitRepository
-import io.track.habit.domain.repository.StreakRepository
 import io.track.habit.workers.utils.StreakNotificationUtils
 import io.track.habit.workers.utils.StreakNotificationUtils.createNotification
 import io.track.habit.workers.utils.StreakNotificationUtils.createNotificationChannel

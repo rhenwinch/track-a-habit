@@ -34,6 +34,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.track.habit.R
 import io.track.habit.domain.model.AllTimeStreak
 import io.track.habit.domain.model.HabitWithStreak
+import io.track.habit.domain.utils.drawableRes
+import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.ui.screens.streaks.composables.HighestStreakCard
 import io.track.habit.ui.screens.streaks.composables.StatsLabel
 import io.track.habit.ui.screens.streaks.composables.StreakCard
@@ -193,8 +195,8 @@ private fun StreaksScreenPreview() {
             startDate = Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 420L),
             streak =
                 PreviewMocks.getStreak().copy(
-                    title = "Grinner",
-                    badgeIcon = "grin_with_sweat_emoji",
+                    title = stringLiteral("Grinner"),
+                    badgeIcon = drawableRes(R.drawable.grin_with_sweat_emoji),
                 ),
         )
 

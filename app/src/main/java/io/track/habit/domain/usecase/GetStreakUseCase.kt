@@ -1,7 +1,7 @@
 package io.track.habit.domain.usecase
 
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.model.Streak
-import io.track.habit.domain.repository.StreakRepository
 import javax.inject.Inject
 
 class GetStreakUseCase

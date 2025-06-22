@@ -33,7 +33,6 @@ import io.track.habit.ui.composables.StreakCounter
 import io.track.habit.ui.screens.logs.HabitLogWithStreak
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
-import io.track.habit.ui.utils.painterResourceFromString
 import kotlin.random.Random
 
 @Composable
@@ -81,7 +80,7 @@ fun LogCard(
                     painter = painterResource(R.drawable.edit),
                     contentDescription = stringResource(R.string.edit_log_content_desc),
                     modifier = Modifier
-                        .width(18.dp)
+                        .width(18.dp),
                 )
             }
         }
@@ -133,8 +132,8 @@ private fun LogCardStreak(streak: HabitLogWithStreak) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResourceFromString(streak.streak.badgeIcon),
-                contentDescription = streak.streak.title,
+                painter = streak.streak.badgeIcon.asPainter(),
+                contentDescription = streak.streak.title.asString(),
                 tint = Color.Unspecified,
                 modifier =
                     Modifier
@@ -142,7 +141,7 @@ private fun LogCardStreak(streak: HabitLogWithStreak) {
                         .height(14.dp),
             )
 
-            Text(text = streak.streak.title)
+            Text(text = streak.streak.title.asString())
         }
     }
 }

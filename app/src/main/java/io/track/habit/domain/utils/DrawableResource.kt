@@ -1,4 +1,4 @@
-package io.track.habit.ui.utils
+package io.track.habit.domain.utils
 
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable

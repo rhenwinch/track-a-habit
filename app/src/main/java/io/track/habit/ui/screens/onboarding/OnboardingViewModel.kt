@@ -8,10 +8,10 @@ import io.track.habit.data.local.datastore.entities.GeneralSettingsRegistry
 import io.track.habit.data.local.datastore.entities.UserAppStateRegistry
 import io.track.habit.di.IoDispatcher
 import io.track.habit.domain.datastore.SettingsDataStore
+import io.track.habit.domain.utils.DrawableResource
 import io.track.habit.domain.utils.StringResource
+import io.track.habit.domain.utils.drawableRes
 import io.track.habit.domain.utils.stringRes
-import io.track.habit.ui.utils.DrawableResource
-import io.track.habit.ui.utils.drawableRes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

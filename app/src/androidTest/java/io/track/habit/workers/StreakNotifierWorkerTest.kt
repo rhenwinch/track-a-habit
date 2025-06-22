@@ -10,9 +10,9 @@ import androidx.work.testing.TestListenableWorkerBuilder
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.datastore.SettingsDataStore
 import io.track.habit.domain.repository.HabitRepository
-import io.track.habit.domain.repository.StreakRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule

@@ -8,11 +8,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import io.track.habit.R
 import io.track.habit.data.local.database.entities.HabitLog
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.usecase.GetStreakUseCase
+import io.track.habit.domain.utils.StringResource
 import io.track.habit.repository.fake.FakeHabitLogsRepository
-import io.track.habit.repository.fake.FakeStreakRepository
 import io.track.habit.ui.navigation.SubNavRoute
 import io.track.habit.ui.screens.logs.LogsViewModel
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +82,7 @@ class LogsViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
-        val streakRepository = FakeStreakRepository()
+        val streakRepository = StreakRepository()
         getStreakUseCase = GetStreakUseCase(streakRepository)
 
         habitLogsRepository = FakeHabitLogsRepository()
@@ -117,7 +119,9 @@ class LogsViewModelTest {
                 expectThat(logWithStreak) {
                     get { log.logId }.isEqualTo(1L)
                     get { log.streakDuration }.isEqualTo(5)
-                    get { streak.title }.isEqualTo("Getting Started")
+                    get { (streak.title as StringResource.Resource).id }.isEqualTo(
+                        R.string.streak_item_first_step_title,
+                    )
                 }
 
                 cancelAndIgnoreRemainingEvents()

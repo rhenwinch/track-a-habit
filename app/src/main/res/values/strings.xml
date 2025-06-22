@@ -179,4 +179,47 @@
         <item quantity="one">Habit streak update 🔥</item>
         <item quantity="other">Habit streaks update 🔥</item>
     </plurals>
+
+    <string name="streak_item_first_step_title">First Step</string>
+    <string name="streak_item_first_step_message">Every journey begins with a single step. You\'re on your way!</string>
+    <string name="streak_item_week_warrior_title">Week Warrior</string>
+    <string name="streak_item_week_warrior_message">A full week? You\'re crushing it! The habit is taking root!</string>
+    <string name="streak_item_fortnight_fighter_title">Fortnight Fighter</string>
+    <string name="streak_item_fortnight_fighter_message">Two weeks strong! Your persistence is paying off!</string>
+    <string name="streak_item_21_savage_title">21 Savage</string>
+    <string name="streak_item_21_savage_message">They say it takes 21 days to form a habit. Look at you go! You\'re a savage!</string>
+    <string name="streak_item_monthly_master_title">Monthly Master</string>
+    <string name="streak_item_monthly_master_message">A full month! Your commitment is becoming legendary!</string>
+    <string name="streak_item_habit_hacker_title">Habit Hacker</string>
+    <string name="streak_item_habit_hacker_message">Two months in and you\'ve hacked your habits! Impressive!</string>
+    <string name="streak_item_quarterly_champion_title">Quarterly Champion</string>
+    <string name="streak_item_quarterly_champion_message">Three months of awesome! You\'re in the habit hall of fame!</string>
+    <string name="streak_item_centennial_gemstone_title">Centennial Gemstone</string>
+    <string name="streak_item_centennial_gemstone_message">100 days of consistent pressure has transformed your habit into a precious gemstone!</string>
+    <string name="streak_item_zen_achiever_title">Zen Achiever</string>
+    <string name="streak_item_zen_achiever_message">Your dedication has reached a state of perfect balance and focus!</string>
+    <string name="streak_item_half_year_hero_title">Half-Year Hero</string>
+    <string name="streak_item_half_year_hero_message">Six months! You\'ve transformed a challenge into a lifestyle!</string>
+    <string name="streak_item_endurance_champion_title">Endurance Champion</string>
+    <string name="streak_item_endurance_champion_message">Nine months of persistence! Your endurance is truly remarkable!</string>
+    <string name="streak_item_one_year_legend_title">One Year Legend</string>
+    <string name="streak_item_one_year_legend_message">A FULL YEAR! You\'re officially unstoppable!</string>
+    <string name="streak_item_nietzsche_ubermensch_title">Nietzsche\'s Übermensch</string>
+    <string name="streak_item_nietzsche_ubermensch_message">You\'ve risen above your former self! Your habit mastery would impress even Nietzsche!</string>
+    <string name="streak_item_socrates_apprentice_title">Socrates Apprentice</string>
+    <string name="streak_item_socrates_apprentice_message">Your wisdom and discipline would impress Socrates himself!</string>
+    <string name="streak_item_plato_pupil_title">Plato\'s Pupil</string>
+    <string name="streak_item_plato_pupil_message">Plato would be proud of your unwavering commitment!</string>
+    <string name="streak_item_aristotle_achiever_title">Aristotle\'s Achiever</string>
+    <string name="streak_item_aristotle_achiever_message">Excellence is not an act but a habit - and you\'ve mastered it!</string>
+    <string name="streak_item_two_year_titan_title">Two Year Titan</string>
+    <string name="streak_item_two_year_titan_message">TWO YEARS! Your persistence is truly legendary!</string>
+    <string name="streak_item_enlightened_one_title">Enlightened One</string>
+    <string name="streak_item_enlightened_one_message">Your habit has transcended routine - you\'ve reached enlightenment!</string>
+    <string name="streak_item_cosmic_voyager_title">Cosmic Voyager</string>
+    <string name="streak_item_cosmic_voyager_message">Your habit has transcended earthly bounds. You\'re journeying through the cosmos of achievement!</string>
+    <string name="streak_item_divine_habit_master_title">Divine Habit Master</string>
+    <string name="streak_item_divine_habit_master_message">1000 DAYS! You\'ve ascended to divine status!</string>
+    <string name="streak_item_habit_oracle_title">The Habit Oracle</string>
+    <string name="streak_item_habit_oracle_message">THREE YEARS! You don\'t just have a habit, you ARE the habit! Legendary!</string>
 </resources>

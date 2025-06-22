@@ -11,11 +11,9 @@ import io.track.habit.data.local.database.dao.HabitDao
 import io.track.habit.data.local.database.dao.HabitLogDao
 import io.track.habit.data.repository.HabitLogsRepositoryImpl
 import io.track.habit.data.repository.HabitRepositoryImpl
-import io.track.habit.data.repository.StreakRepositoryImpl
 import io.track.habit.domain.repository.AssetReader
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
-import io.track.habit.domain.repository.StreakRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Singleton
 
@@ -41,14 +39,5 @@ object RepositoryModule {
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ): AssetReader {
         return AndroidAssetReader(context, ioDispatcher)
-    }
-
-    @Singleton
-    @Provides
-    fun provideStreakRepository(
-        assetReader: AssetReader,
-        @IoDispatcher ioDispatcher: CoroutineDispatcher,
-    ): StreakRepository {
-        return StreakRepositoryImpl(assetReader, dispatcher = ioDispatcher)
     }
 }

@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.datastore.SettingsDataStore
 import io.track.habit.domain.repository.HabitRepository
-import io.track.habit.domain.repository.StreakRepository
 
 class TestWorkerFactory(
     private val streakRepository: StreakRepository,

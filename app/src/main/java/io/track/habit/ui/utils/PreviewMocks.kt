@@ -1,9 +1,11 @@
 package io.track.habit.ui.utils
 
+import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.data.local.database.entities.HabitLog
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.model.Streak
+import io.track.habit.domain.utils.drawableRes
 import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.ui.screens.streaks.StreakSummary
 import java.util.Date
@@ -11,11 +13,11 @@ import java.util.Date
 object PreviewMocks {
     fun getStreak(suffix: String = "") =
         Streak(
-            title = "Mock Streak${if (suffix.isNotBlank()) " $suffix" else ""}",
+            title = stringLiteral("Mock Streak${if (suffix.isNotBlank()) " $suffix" else ""}"),
             minDaysRequired = 0,
             maxDaysRequired = 7,
-            badgeIcon = "habit_logs",
-            message = "",
+            badgeIcon = drawableRes(R.drawable.you_rock_emoji),
+            message = stringLiteral(""),
         )
 
     fun getHabit(
@@ -42,7 +44,7 @@ object PreviewMocks {
         durationText: String = "7 days - 15 days",
         isAchieved: Boolean = true,
     ) = StreakSummary(
-        title = stringLiteral(streak.title),
+        title = streak.title,
         status = stringLiteral(status),
         durationText = stringLiteral(durationText),
         isAchieved = isAchieved,

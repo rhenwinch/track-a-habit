@@ -1,8 +1,7 @@
 package io.track.habit.usecase
 
-import io.track.habit.domain.repository.StreakRepository
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.usecase.GetStreakUseCase
-import io.track.habit.repository.fake.FakeStreakRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -13,7 +12,7 @@ class GetStreakUseCaseTest {
 
     @Before
     fun setUp() {
-        repository = FakeStreakRepository()
+        repository = StreakRepository()
         getStreakUseCase = GetStreakUseCase(repository)
     }
 

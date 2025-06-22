@@ -4,17 +4,15 @@ import app.cash.turbine.test
 import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.data.local.database.entities.HabitLog
-import io.track.habit.domain.model.Streak
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
-import io.track.habit.domain.repository.StreakRepository
 import io.track.habit.domain.usecase.GetAllTimeStreakUseCase
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetStreakUseCase
 import io.track.habit.domain.utils.StringResource
 import io.track.habit.repository.fake.FakeHabitLogsRepository
 import io.track.habit.repository.fake.FakeHabitRepository
-import io.track.habit.repository.fake.FakeStreakRepository
 import io.track.habit.ui.screens.streaks.StreakViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,7 +50,7 @@ class StreakViewModelTest {
         Dispatchers.setMain(testDispatcher)
         habitRepository = FakeHabitRepository()
         habitLogsRepository = FakeHabitLogsRepository()
-        streakRepository = FakeStreakRepository()
+        streakRepository = StreakRepository()
 
         val getStreakUseCase = GetStreakUseCase(streakRepository)
         getHabitsWithStreaksUseCase = GetHabitsWithStreaksUseCase(habitRepository, getStreakUseCase)
@@ -85,7 +83,7 @@ class StreakViewModelTest {
                 val summaries = awaitItem()
 
                 // Verify we have all streak milestones from the repository
-                expectThat(summaries).hasSize(6)
+                expectThat(summaries).hasSize(21)
 
                 // First streak (Getting Started) should be achieved with 0 habits
                 expectThat(summaries[0]) {
@@ -107,13 +105,12 @@ class StreakViewModelTest {
             val today = Date()
             val threeDaysAgo = Date(today.time - (3 * 24 * 60 * 60 * 1000))
             val tenDaysAgo = Date(today.time - (10 * 24 * 60 * 60 * 1000))
-            val thirtyDaysAgo = Date(today.time - (30 * 24 * 60 * 60 * 1000L))
+            val eighteenDaysAgo = Date(today.time - (18 * 24 * 60 * 60 * 1000L))
 
             // Add habits with various streak values
             habitRepository.insertHabit(Habit(name = "3-day streak habit", lastResetAt = threeDaysAgo))
             habitRepository.insertHabit(Habit(name = "10-day streak habit", lastResetAt = tenDaysAgo))
-            habitRepository.insertHabit(Habit(name = "10-day streak habit 2", lastResetAt = tenDaysAgo))
-            habitRepository.insertHabit(Habit(name = "30-day streak habit", lastResetAt = thirtyDaysAgo))
+            habitRepository.insertHabit(Habit(name = "18-day streak habit", lastResetAt = eighteenDaysAgo))
 
             advanceUntilIdle()
 
@@ -132,21 +129,14 @@ class StreakViewModelTest {
                 expectThat(summaries[1]) {
                     get { isAchieved }.isTrue()
                     get { status }.isA<StringResource.Plural>()
-                    get { (status as StringResource.Plural).quantity }.isEqualTo(2) // Two 10-day streak habits
+                    get { (status as StringResource.Plural).quantity }.isEqualTo(1) // Two 10-day streak habits
                 }
 
                 // Two Week Streak (14-20 days): Should have 0 habits
                 expectThat(summaries[2]) {
                     get { isAchieved }.isTrue()
                     get { status }.isA<StringResource.Plural>()
-                    get { (status as StringResource.Plural).quantity }.isEqualTo(0)
-                }
-
-                // One Month Streak (21-34 days): Should have 1 habit
-                expectThat(summaries[3]) {
-                    get { isAchieved }.isTrue()
-                    get { status }.isA<StringResource.Plural>()
-                    get { (status as StringResource.Plural).quantity }.isEqualTo(1) // 30-day streak habit
+                    get { (status as StringResource.Plural).quantity }.isEqualTo(1)
                 }
 
                 // Champion (35-59 days): Should have 0 habits and not be achieved
@@ -164,10 +154,9 @@ class StreakViewModelTest {
     @Test
     fun `when longest streak exceeds milestone threshold then streak is marked as achieved`() =
         runTest(testDispatcher) {
-            // Add a habit with a long streak (70 days)
-            val seventyDaysAgo = Date(Date().time - (70 * 24 * 60 * 60 * 1000L))
+            val lastResetAt = Date(Date().time - (Int.MAX_VALUE.toLong() * 24 * 60 * 60 * 1000L))
 
-            habitRepository.insertHabit(Habit(name = "70-day streak habit", lastResetAt = seventyDaysAgo))
+            habitRepository.insertHabit(Habit(name = "Habit", lastResetAt = lastResetAt))
 
             advanceUntilIdle()
 
@@ -175,12 +164,10 @@ class StreakViewModelTest {
                 skipItems(1) // Skip initial empty state
                 val summaries = awaitItem()
 
-                // All streaks should be achieved
                 summaries.forEach { summary ->
                     expectThat(summary.isAchieved).isTrue()
                 }
 
-                // Legend streak (60+ days) should have 1 habit
                 expectThat(summaries.last()) {
                     get { status }.isA<StringResource.Plural>()
                     get { (status as StringResource.Plural).quantity }.isEqualTo(1)
@@ -191,61 +178,22 @@ class StreakViewModelTest {
     @Test
     fun `when approaching a streak milestone then correct status message is shown`() =
         runTest(testDispatcher) {
-            // Create a custom streak repository with a controlled set of milestones
-            val customStreakRepository =
-                object : StreakRepository {
-                    override fun getAllStreaks(): List<Streak> {
-                        return listOf(
-                            Streak(
-                                title = "Test Milestone",
-                                minDaysRequired = 10,
-                                maxDaysRequired = 20,
-                                badgeIcon = "test_badge",
-                                message = "Test message",
-                            ),
-                        )
-                    }
-                }
-
             // Create a habit with a streak that's 95% of the way to the milestone
-            val almostThereDays = (10 * 0.95).toInt() // 9 days
+            val almostThereDays = (7 * 0.95).toInt()
             val almostThereDate = Date(Date().time - (almostThereDays * 24 * 60 * 60 * 1000))
 
             habitRepository.insertHabit(Habit(name = "Almost there habit", lastResetAt = almostThereDate))
 
-            // Create a new ViewModel with our custom streak repository
-            val getStreakUseCase = GetStreakUseCase(customStreakRepository)
-            val customGetHabitsWithStreaksUseCase =
-                GetHabitsWithStreaksUseCase(
-                    habitRepository,
-                    getStreakUseCase,
-                )
-            val customGetAllTimeStreakUseCase =
-                GetAllTimeStreakUseCase(
-                    getStreakUseCase,
-                    customGetHabitsWithStreaksUseCase,
-                    habitLogsRepository,
-                )
-
-            val customViewModel =
-                StreakViewModel(
-                    streakRepository = customStreakRepository,
-                    habitRepository = habitRepository,
-                    habitLogsRepository = habitLogsRepository,
-                    getHabitsWithStreaksUseCase = customGetHabitsWithStreaksUseCase,
-                    getAllTimeStreakUseCase = customGetAllTimeStreakUseCase,
-                )
-
             advanceUntilIdle()
 
-            customViewModel.streakSummaries.test {
+            viewModel.streakSummaries.test {
                 skipItems(1) // Skip initial empty state
                 val summaries = awaitItem()
 
-                expectThat(summaries).hasSize(1)
+                expectThat(summaries).hasSize(21)
 
                 // The streak should not be achieved yet, but showing "almost there" message
-                expectThat(summaries[0]) {
+                expectThat(summaries[1]) {
                     get { isAchieved }.isFalse()
                     get { status }.isA<StringResource.Resource>()
                     get { (status as StringResource.Resource).id }.isEqualTo(R.string.streak_very_close)
@@ -256,45 +204,17 @@ class StreakViewModelTest {
     @Test
     fun `when streak is fully achieved then duration text shows min and max days`() =
         runTest(testDispatcher) {
-            // Use a custom streak repository with a controlled set of milestones
-            val customStreakRepository =
-                object : StreakRepository {
-                    override fun getAllStreaks(): List<Streak> {
-                        return listOf(
-                            Streak(
-                                title = "Test Milestone",
-                                minDaysRequired = 0,
-                                maxDaysRequired = 20,
-                                badgeIcon = "test_badge",
-                                message = "Test message",
-                            ),
-                        )
-                    }
-                }
-
             // Create a habit with a streak that's beyond the max days
-            val beyondMaxDays = 25
+            val beyondMaxDays = Int.MAX_VALUE.toLong()
             val beyondMaxDate = Date(Date().time - (beyondMaxDays * 24 * 60 * 60 * 1000L))
 
             habitRepository.insertHabit(Habit(name = "Beyond max days habit", lastResetAt = beyondMaxDate))
 
-            // Create a new ViewModel with our custom streak repository
-            val customViewModel =
-                StreakViewModel(
-                    streakRepository = customStreakRepository,
-                    habitRepository = habitRepository,
-                    habitLogsRepository = habitLogsRepository,
-                    getHabitsWithStreaksUseCase = getHabitsWithStreaksUseCase,
-                    getAllTimeStreakUseCase = getAllTimeStreakUseCase,
-                )
-
-            advanceUntilIdle()
-
-            customViewModel.streakSummaries.test {
+            viewModel.streakSummaries.test {
                 skipItems(1)
                 val summaries = awaitItem()
 
-                expectThat(summaries).hasSize(1)
+                expectThat(summaries).hasSize(21)
 
                 // The streak should be achieved and showing full duration text
                 expectThat(summaries[0]) {
@@ -404,7 +324,7 @@ class StreakViewModelTest {
         }
 
     @Test
-    fun `when habit logs exist with longer streaks than current habits then highestAllTimeStreak should return the longest log`() =
+    fun `when logs exist with streaks than current habits then highestAllTimeStreak should return the longest log`() =
         runTest(testDispatcher) {
             // Setup current habit with modest streak
             val tenDaysAgo = Date(Date().time - (10 * 24 * 60 * 60 * 1000L))

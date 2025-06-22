@@ -47,7 +47,6 @@ import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
 import io.track.habit.ui.utils.UiConstants.MEDIUM_EMPHASIS
-import io.track.habit.ui.utils.painterResourceFromString
 import java.util.Date
 import kotlin.random.Random
 
@@ -90,7 +89,7 @@ fun HabitsScreenHeader(
 
             CommonLabel(text = stringResource(R.string.streak_milestone)) {
                 AnimatedContent(
-                    targetState = streak.title,
+                    targetState = streak.title.asString(),
                     label = "StreakTitle",
                 ) {
                     Text(
@@ -196,8 +195,8 @@ fun HabitsScreenHeader(
                 .align(Alignment.TopEnd),
         ) {
             Image(
-                painter = painterResourceFromString(it),
-                contentDescription = habitWithStreak.streak.title,
+                painter = it.asPainter(),
+                contentDescription = habitWithStreak.streak.title.asString(),
                 modifier = Modifier
                     .fillMaxWidth(1f)
                     .aspectRatio(1f),

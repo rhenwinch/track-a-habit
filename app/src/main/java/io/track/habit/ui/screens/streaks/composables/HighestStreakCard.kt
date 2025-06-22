@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -34,11 +35,12 @@ import androidx.compose.ui.unit.sp
 import io.track.habit.R
 import io.track.habit.domain.model.AllTimeStreak
 import io.track.habit.domain.model.HabitWithStreak
+import io.track.habit.domain.utils.drawableRes
 import io.track.habit.domain.utils.formatActiveSinceDate
+import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.ui.composables.StreakCounter
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
-import io.track.habit.ui.utils.painterResourceFromString
 import java.util.Date
 
 /**
@@ -67,8 +69,8 @@ fun HighestStreakCard(
                             R.string.since_date_format,
                             it.habit.lastResetAt.formatActiveSinceDate(),
                         ),
-                    streakTitle = it.streak.title,
-                    streakBadge = it.streak.badgeIcon,
+                    streakTitle = it.streak.title.asString(),
+                    streakBadge = it.streak.badgeIcon.asPainter(),
                 )
             }
         }
@@ -97,8 +99,8 @@ fun HighestStreakCard(
                     streakCount = it.streakInDays,
                     title = stringResource(R.string.all_time),
                     dateStarted = it.formattedDateDuration,
-                    streakTitle = it.streak.title,
-                    streakBadge = it.streak.badgeIcon,
+                    streakTitle = it.streak.title.asString(),
+                    streakBadge = it.streak.badgeIcon.asPainter(),
                 )
             }
         }
@@ -111,7 +113,7 @@ private fun HighestStreakCardContent(
     title: String,
     dateStarted: String,
     streakTitle: String,
-    streakBadge: String,
+    streakBadge: Painter,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -161,7 +163,7 @@ private fun NeedMoreDataCard(modifier: Modifier = Modifier) {
 private fun Headline(
     title: String,
     streakTitle: String,
-    streakBadge: String,
+    streakBadge: Painter,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -179,7 +181,7 @@ private fun Headline(
             verticalAlignment = Alignment.Top,
         ) {
             Icon(
-                painter = painterResourceFromString(streakBadge),
+                painter = streakBadge,
                 contentDescription = streakTitle,
                 tint = Color.Unspecified,
                 modifier =
@@ -236,12 +238,6 @@ private fun Footer(
 @Preview
 @Composable
 private fun HighestStreakCardPreview() {
-    val highestOngoingStreak =
-        HabitWithStreak(
-            habit = PreviewMocks.getHabit(date = Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 240L)),
-            streak = PreviewMocks.getStreak(),
-        )
-
     val allTimeStreak =
         AllTimeStreak(
             streakInDays = 240,
@@ -249,8 +245,8 @@ private fun HighestStreakCardPreview() {
             startDate = Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 420L),
             streak =
                 PreviewMocks.getStreak().copy(
-                    title = "Marathon Runner",
-                    badgeIcon = "grin_with_sweat_emoji",
+                    title = stringLiteral("Marathon Runner"),
+                    badgeIcon = drawableRes(R.drawable.grin_with_sweat_emoji),
                 ),
         )
 

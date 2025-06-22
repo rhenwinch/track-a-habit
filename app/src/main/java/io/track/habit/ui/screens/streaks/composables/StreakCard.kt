@@ -24,10 +24,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.ui.screens.streaks.StreakSummary
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
-import io.track.habit.ui.utils.painterResourceFromString
 
 @Composable
 fun StreakCard(
@@ -64,7 +64,7 @@ fun StreakCard(
                             .padding(end = 8.dp),
                 ) {
                     Icon(
-                        painter = painterResourceFromString(streakSummary.badgeIcon),
+                        painter = streakSummary.badgeIcon.asPainter(),
                         contentDescription = streakSummary.title.asString(),
                         tint = if (streakSummary.isAchieved) Color.Unspecified else LocalContentColor.current,
                         modifier =
@@ -118,7 +118,7 @@ private fun StreakCardPreview() {
                     PreviewMocks.getStreakSummary(
                         streak =
                             PreviewMocks.getStreak().copy(
-                                title = "Trailblazer",
+                                title = stringLiteral("Trailblazer"),
                             ),
                     ),
             )

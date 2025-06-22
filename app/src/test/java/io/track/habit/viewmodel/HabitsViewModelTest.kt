@@ -4,7 +4,9 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.mockk
+import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.datastore.FakeSettingsDataStore
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Streak
@@ -16,9 +18,10 @@ import io.track.habit.domain.usecase.GetRandomQuoteUseCase
 import io.track.habit.domain.usecase.GetStreakUseCase
 import io.track.habit.domain.usecase.QUOTES_FILE_NAME
 import io.track.habit.domain.utils.SortOrder
+import io.track.habit.domain.utils.drawableRes
+import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.repository.fake.FakeHabitLogsRepository
 import io.track.habit.repository.fake.FakeHabitRepository
-import io.track.habit.repository.fake.FakeStreakRepository
 import io.track.habit.ui.screens.habits.HabitsViewModel
 import io.track.habit.ui.screens.habits.composables.ResetDetails
 import kotlinx.coroutines.Dispatchers
@@ -74,7 +77,7 @@ class HabitsViewModelTest {
             habitLogsRepository = FakeHabitLogsRepository()
 
             val getRandomQuoteUseCase = GetRandomQuoteUseCase(assetReader, testDispatcher)
-            val streakRepository = FakeStreakRepository()
+            val streakRepository = StreakRepository()
 
             val getStreakUseCase = GetStreakUseCase(streakRepository)
             val getHabitsWithStreaksUseCase =
@@ -145,11 +148,11 @@ class HabitsViewModelTest {
         runTest {
             val streak =
                 Streak(
-                    title = "Test Streak",
+                    title = stringLiteral("Test Streak"),
                     minDaysRequired = 0,
                     maxDaysRequired = 10,
-                    badgeIcon = "icon",
-                    message = "Test message",
+                    badgeIcon = drawableRes(R.drawable.grin_with_sweat_emoji),
+                    message = stringLiteral("Test message"),
                 )
 
             val habitWithStreak =
@@ -197,11 +200,11 @@ class HabitsViewModelTest {
         runTest(testDispatcher) {
             val streak =
                 Streak(
-                    title = "Test Streak",
+                    title = stringLiteral("Test Streak"),
                     minDaysRequired = 0,
                     maxDaysRequired = 10,
-                    badgeIcon = "icon",
-                    message = "Test message",
+                    badgeIcon = drawableRes(R.drawable.you_rock_emoji),
+                    message = stringLiteral("Test message"),
                 )
 
             val habitWithStreak =

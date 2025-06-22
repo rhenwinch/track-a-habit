@@ -1,16 +1,18 @@
 package io.track.habit.usecase
 
 import app.cash.turbine.test
+import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.data.local.database.entities.HabitLog
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.usecase.GetAllTimeStreakUseCase
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetStreakUseCase
+import io.track.habit.domain.utils.StringResource
 import io.track.habit.repository.fake.FakeHabitLogsRepository
 import io.track.habit.repository.fake.FakeHabitRepository
-import io.track.habit.repository.fake.FakeStreakRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -32,7 +34,7 @@ class GetAllTimeStreakUseCaseTest {
 
     @Before
     fun setup() {
-        val streakRepository = FakeStreakRepository()
+        val streakRepository = StreakRepository()
         habitRepository = FakeHabitRepository()
         habitLogsRepository = FakeHabitLogsRepository()
 
@@ -73,7 +75,9 @@ class GetAllTimeStreakUseCaseTest {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
                 expectThat(result!!.streakInDays).isEqualTo(7)
-                expectThat(result.streak.title).isEqualTo("One Week Streak")
+                expectThat(
+                    (result.streak.title as StringResource.Resource).id,
+                ).isEqualTo(R.string.streak_item_week_warrior_title)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -91,7 +95,9 @@ class GetAllTimeStreakUseCaseTest {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
                 expectThat(result!!.streakInDays).isEqualTo(20)
-                expectThat(result.streak.title).isEqualTo("Two Week Streak")
+                expectThat(
+                    (result.streak.title as StringResource.Resource).id,
+                ).isEqualTo(R.string.streak_item_fortnight_fighter_title)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -109,7 +115,9 @@ class GetAllTimeStreakUseCaseTest {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
                 expectThat(result!!.streakInDays).isEqualTo(40)
-                expectThat(result.streak.title).isEqualTo("Champion")
+                expectThat(
+                    (result.streak.title as StringResource.Resource).id,
+                ).isEqualTo(R.string.streak_item_monthly_master_title)
                 expectThat(result.endDate).isNull()
                 cancelAndIgnoreRemainingEvents()
             }
@@ -128,7 +136,9 @@ class GetAllTimeStreakUseCaseTest {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
                 expectThat(result!!.streakInDays).isEqualTo(40)
-                expectThat(result.streak.title).isEqualTo("Champion")
+                expectThat(
+                    (result.streak.title as StringResource.Resource).id,
+                ).isEqualTo(R.string.streak_item_monthly_master_title)
                 expectThat(result.endDate).isNotNull()
                 cancelAndIgnoreRemainingEvents()
             }
@@ -149,7 +159,9 @@ class GetAllTimeStreakUseCaseTest {
                 val result = awaitItem()
                 expectThat(result).isNotNull()
                 expectThat(result!!.streakInDays).isEqualTo(20)
-                expectThat(result.streak.title).isEqualTo("Two Week Streak")
+                expectThat(
+                    (result.streak.title as StringResource.Resource).id,
+                ).isEqualTo(R.string.streak_item_fortnight_fighter_title)
                 cancelAndIgnoreRemainingEvents()
             }
         }

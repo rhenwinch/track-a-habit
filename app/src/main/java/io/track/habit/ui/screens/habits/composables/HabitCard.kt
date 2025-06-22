@@ -39,7 +39,6 @@ import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.ui.composables.StreakCounter
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
-import io.track.habit.ui.utils.painterResourceFromString
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -92,14 +91,14 @@ internal fun HabitCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        painter = painterResourceFromString(habitWithStreak.streak.badgeIcon),
+                        painter = habitWithStreak.streak.badgeIcon.asPainter(),
                         contentDescription = stringResource(R.string.streak_icon_content_desc),
                         tint = Color.Unspecified,
-                        modifier = Modifier.width(18.dp)
+                        modifier = Modifier.width(18.dp),
                     )
 
                     Text(
-                        text = habitWithStreak.streak.title,
+                        text = habitWithStreak.streak.title.asString(),
                         style =
                             LocalTextStyle.current.copy(
                                 fontSize = 16.sp,

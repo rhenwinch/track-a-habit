@@ -2,12 +2,11 @@ package io.track.habit.usecase
 
 import app.cash.turbine.test
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.repository.HabitRepository
-import io.track.habit.domain.repository.StreakRepository
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetStreakUseCase
 import io.track.habit.repository.fake.FakeHabitRepository
-import io.track.habit.repository.fake.FakeStreakRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +21,7 @@ class GetHabitsWithStreaksUseCaseTest {
     @Before
     fun setup() {
         habitRepository = FakeHabitRepository()
-        streakRepository = FakeStreakRepository()
+        streakRepository = StreakRepository()
         getStreakUseCase = GetStreakUseCase(streakRepository)
         getHabitsWithStreaksUseCase = GetHabitsWithStreaksUseCase(habitRepository, getStreakUseCase)
     }

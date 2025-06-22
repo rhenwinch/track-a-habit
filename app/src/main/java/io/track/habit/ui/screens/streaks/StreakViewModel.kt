@@ -8,17 +8,17 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
+import io.track.habit.data.repository.StreakRepository
 import io.track.habit.domain.model.Streak
 import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
-import io.track.habit.domain.repository.StreakRepository
 import io.track.habit.domain.usecase.GetAllTimeStreakUseCase
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
+import io.track.habit.domain.utils.DrawableResource
 import io.track.habit.domain.utils.SortOrder
 import io.track.habit.domain.utils.StringResource
 import io.track.habit.domain.utils.asStateFlow
 import io.track.habit.domain.utils.pluralStringRes
-import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.domain.utils.stringRes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -88,11 +88,11 @@ class StreakViewModel
             longestStreak: Int,
             habits: List<Habit>,
         ): StreakSummary {
-            val isAchieved = longestStreak >= streak.minDaysRequired
+            val isAchieved = longestStreak >= streak.minDaysRequired && habits.isNotEmpty()
 
             val title =
                 if (isAchieved) {
-                    stringLiteral(streak.title)
+                    streak.title
                 } else {
                     stringRes(R.string.streak_mystery_title)
                 }
@@ -153,5 +153,5 @@ data class StreakSummary(
     val status: StringResource,
     val durationText: StringResource,
     val isAchieved: Boolean,
-    val badgeIcon: String,
+    val badgeIcon: DrawableResource,
 )
