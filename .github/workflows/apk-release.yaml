@@ -122,7 +122,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fromTag: ${{ github.ref_name }}
           toTag: ${{ env.previousTag }}
-          excludeTypes: ${{ !startsWith(github.ref, 'refs/tags/PRE-') && 'build,docs,other,style' || '' }}
+          excludeTypes: ${{ !startsWith(github.ref, 'refs/tags/PRE-') && 'build,docs,other,style,test,chore' || '' }}
           writeToFile: true
           filename: 'CHANGELOG.md'
 
