@@ -64,8 +64,9 @@ positive habits through an elegant, intuitive interface. The app combines beauti
 Current development priorities:
 
 - [x] Google drive backup implementation
-- [ ] Google drive auto backup using WorkManager
-- [ ] Re-design implementation of Streaks and Quotes to support i18n in the future
+- [x] Re-design implementation of `Streaks` to support i18n in the future
+- [ ] Google drive auto backup using `WorkManager`
+- [ ] Re-design implementation of `Quotes` to support i18n in the future
 
 ## Tech stack
 
