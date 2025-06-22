@@ -1,6 +1,5 @@
 package io.track.habit.ui.screens.habits.composables
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -52,7 +51,6 @@ import io.track.habit.ui.utils.painterResourceFromString
 import java.util.Date
 import kotlin.random.Random
 
-@SuppressLint("UnusedContentLambdaTargetStateParameter") // TODO: Remove this when Compose is fixed
 @Composable
 fun HabitsScreenHeader(
     quote: Quote,
@@ -198,9 +196,7 @@ fun HabitsScreenHeader(
                 .align(Alignment.TopEnd),
         ) {
             Image(
-                // TODO: Replace with actual icon from streakBadge
-                painter = painterResourceFromString("habit_logs"),
-//                painter = painterResourceFromString(it),
+                painter = painterResourceFromString(it),
                 contentDescription = habitWithStreak.streak.title,
                 modifier = Modifier
                     .fillMaxWidth(1f)

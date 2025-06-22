@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.CardDefaults
@@ -23,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +39,7 @@ import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.ui.composables.StreakCounter
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
+import io.track.habit.ui.utils.painterResourceFromString
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -91,8 +92,10 @@ internal fun HabitCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.streak_filled),
+                        painter = painterResourceFromString(habitWithStreak.streak.badgeIcon),
                         contentDescription = stringResource(R.string.streak_icon_content_desc),
+                        tint = Color.Unspecified,
+                        modifier = Modifier.width(18.dp)
                     )
 
                     Text(

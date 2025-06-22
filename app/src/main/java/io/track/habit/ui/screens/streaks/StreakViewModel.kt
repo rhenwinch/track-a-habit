@@ -120,8 +120,7 @@ class StreakViewModel
                 status = status,
                 durationText = getDurationText(streak, longestStreak),
                 isAchieved = isAchieved,
-//                badgeIcon = streak.badgeIcon,
-                badgeIcon = "habit_logs", // TODO: Placeholder for badge icon, replace with actual icon logic
+                badgeIcon = streak.badgeIcon,
             )
         }
 

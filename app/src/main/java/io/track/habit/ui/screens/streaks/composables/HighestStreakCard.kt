@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +38,7 @@ import io.track.habit.domain.utils.formatActiveSinceDate
 import io.track.habit.ui.composables.StreakCounter
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
+import io.track.habit.ui.utils.painterResourceFromString
 import java.util.Date
 
 /**
@@ -179,9 +179,7 @@ private fun Headline(
             verticalAlignment = Alignment.Top,
         ) {
             Icon(
-                // TODO: Replace with actual icon from streakBadge
-                painter = painterResource(id = R.drawable.sad_emoji),
-//                painter = painterResourceFromString(streakBadge),
+                painter = painterResourceFromString(streakBadge),
                 contentDescription = streakTitle,
                 tint = Color.Unspecified,
                 modifier =

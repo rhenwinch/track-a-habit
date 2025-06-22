@@ -46,9 +46,6 @@ class LogsViewModel
                     list.map {
                         val streak =
                             getStreakUseCase(it.streakDuration)
-                                .copy(
-                                    badgeIcon = "habit_logs", // TODO: Replace with actual badge icon logic
-                                )
 
                         HabitLogWithStreak(
                             streak = streak,
