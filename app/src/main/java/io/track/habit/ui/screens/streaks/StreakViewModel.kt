@@ -69,6 +69,7 @@ class StreakViewModel
             getAllTimeStreakUseCase()
                 .asStateFlow(viewModelScope, initialValue = null)
 
+        @OptIn(ExperimentalCoroutinesApi::class)
         val highestOngoingStreak =
             getHabitsWithStreaksUseCase(
                 sortOrder = SortOrder.Streak(ascending = false),
