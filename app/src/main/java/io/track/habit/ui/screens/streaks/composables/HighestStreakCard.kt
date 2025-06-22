@@ -139,7 +139,7 @@ private fun HighestStreakCardContent(
 private fun NeedMoreDataCard(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.height(152.dp),
+        modifier = modifier.height(180.dp),
     ) {
         Text(
             text = stringResource(R.string.insufficient_data_for_stats),
@@ -261,17 +261,13 @@ private fun HighestStreakCardPreview() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             ) {
                 HighestStreakCard(
-                    highestOngoingStreak = highestOngoingStreak,
-                    modifier =
-                        Modifier
-                            .weight(0.5f),
+                    highestOngoingStreak = null,
+                    modifier = Modifier.weight(0.5f),
                 )
 
                 HighestStreakCard(
                     highestAllTimeStreak = allTimeStreak,
-                    modifier =
-                        Modifier
-                            .weight(0.5f),
+                    modifier = Modifier.weight(0.5f),
                 )
             }
         }
