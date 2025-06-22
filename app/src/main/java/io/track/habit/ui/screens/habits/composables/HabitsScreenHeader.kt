@@ -1,13 +1,18 @@
 package io.track.habit.ui.screens.habits.composables
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -43,9 +48,11 @@ import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
 import io.track.habit.ui.utils.UiConstants.MEDIUM_EMPHASIS
+import io.track.habit.ui.utils.painterResourceFromString
 import java.util.Date
 import kotlin.random.Random
 
+@SuppressLint("UnusedContentLambdaTargetStateParameter") // TODO: Remove this when Compose is fixed
 @Composable
 fun HabitsScreenHeader(
     quote: Quote,
@@ -67,116 +74,139 @@ fun HabitsScreenHeader(
         }
     }
 
-    Column(
+    Box(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(33.dp, Alignment.Top),
-        horizontalAlignment = Alignment.Start,
     ) {
-        CommonLabel(text = stringResource(R.string.habit_name)) {
-            HabitNameWithVisibilityToggle(
-                habitName = habitName,
-                isCensored = isCensored,
-                onToggleCensorship = onToggleCensorship,
-            )
-        }
-
-        CommonLabel(text = stringResource(R.string.streak_milestone)) {
-            AnimatedContent(
-                targetState = streak.title,
-                label = "StreakTitle",
-            ) {
-                Text(
-                    text = it,
-                    style =
-                        LocalTextStyle.current.copy(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                        ),
-                )
-            }
-        }
-
-        CommonLabel(text = stringResource(R.string.youve_been_on_track_for)) {
-            AnimatedContent(
-                targetState = habitWithStreak.habit.streakInDays,
-                label = "StreakCounter",
-            ) {
-                StreakCounter(
-                    streak = it,
-                    iconSize = DpSize(24.dp, 31.dp),
-                    style =
-                        LocalTextStyle.current.copy(
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Black,
-                            shadow =
-                                Shadow(
-                                    color = Color.Black,
-                                    offset = Offset(2f, 2f),
-                                    blurRadius = 2f,
-                                ),
-                        ),
-                )
-            }
-
-            AnimatedContent(
-                targetState = formattedActiveSinceDate,
-                label = "SinceDate",
-            ) {
-                Text(
-                    text = stringResource(R.string.since_date_format, it),
-                    style =
-                        LocalTextStyle.current.copy(
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Normal,
-                            fontStyle = FontStyle.Italic,
-                        ),
-                )
-            }
-        }
-
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        Column(
+            modifier = Modifier.align(Alignment.TopStart),
+            verticalArrangement = Arrangement.spacedBy(33.dp, Alignment.Top),
+            horizontalAlignment = Alignment.Start,
         ) {
-            CommonButton(
-                icon = painterResource(id = R.drawable.edit_colored),
-                contentDescription = stringResource(R.string.edit_icon_content_desc),
-                text = null,
-                onClick = onEditHabit,
-            )
+            CommonLabel(text = stringResource(R.string.habit_name)) {
+                HabitNameWithVisibilityToggle(
+                    habitName = habitName,
+                    isCensored = isCensored,
+                    onToggleCensorship = onToggleCensorship,
+                )
+            }
 
-            CommonButton(
-                icon = painterResource(id = R.drawable.habit_logs),
-                text = stringResource(R.string.logs),
-                contentDescription = stringResource(R.string.habit_logs_icon_content_desc),
-                onClick = onViewLogs,
-            )
+            CommonLabel(text = stringResource(R.string.streak_milestone)) {
+                AnimatedContent(
+                    targetState = streak.title,
+                    label = "StreakTitle",
+                ) {
+                    Text(
+                        text = it,
+                        style =
+                            LocalTextStyle.current.copy(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                    )
+                }
+            }
 
-            CommonButton(
-                icon = painterResource(id = R.drawable.sad_emoji),
-                text = stringResource(R.string.reset_progress),
-                contentDescription = stringResource(R.string.reset_progress_icon_content_desc),
-                onClick = onResetProgress,
-                enabled = !isResetProgressButtonLocked,
-            )
+            CommonLabel(text = stringResource(R.string.youve_been_on_track_for)) {
+                AnimatedContent(
+                    targetState = habitWithStreak.habit.streakInDays,
+                    label = "StreakCounter",
+                ) {
+                    StreakCounter(
+                        streak = it,
+                        iconSize = DpSize(24.dp, 31.dp),
+                        style =
+                            LocalTextStyle.current.copy(
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.Black,
+                                shadow =
+                                    Shadow(
+                                        color = Color.Black,
+                                        offset = Offset(2f, 2f),
+                                        blurRadius = 2f,
+                                    ),
+                            ),
+                    )
+                }
 
-            CommonButton(
-                icon = painterResource(id = R.drawable.delete_colored),
-                contentDescription = stringResource(R.string.delete_icon_content_desc),
-                text = stringResource(R.string.delete),
-                onClick = onDeleteHabit,
+                AnimatedContent(
+                    targetState = formattedActiveSinceDate,
+                    label = "SinceDate",
+                ) {
+                    Text(
+                        text = stringResource(R.string.since_date_format, it),
+                        style =
+                            LocalTextStyle.current.copy(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Normal,
+                                fontStyle = FontStyle.Italic,
+                            ),
+                    )
+                }
+            }
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                CommonButton(
+                    icon = painterResource(id = R.drawable.edit_colored),
+                    contentDescription = stringResource(R.string.edit_icon_content_desc),
+                    text = null,
+                    onClick = onEditHabit,
+                )
+
+                CommonButton(
+                    icon = painterResource(id = R.drawable.habit_logs),
+                    text = stringResource(R.string.logs),
+                    contentDescription = stringResource(R.string.habit_logs_icon_content_desc),
+                    onClick = onViewLogs,
+                )
+
+                CommonButton(
+                    icon = painterResource(id = R.drawable.sad_emoji),
+                    text = stringResource(R.string.reset_progress),
+                    contentDescription = stringResource(R.string.reset_progress_icon_content_desc),
+                    onClick = onResetProgress,
+                    enabled = !isResetProgressButtonLocked,
+                )
+
+                CommonButton(
+                    icon = painterResource(id = R.drawable.delete_colored),
+                    contentDescription = stringResource(R.string.delete_icon_content_desc),
+                    text = stringResource(R.string.delete),
+                    onClick = onDeleteHabit,
+                )
+            }
+
+            Text(
+                text = quote.toString(),
+                style =
+                    MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontStyle = FontStyle.Italic,
+                        color = LocalContentColor.current.copy(alpha = 0.8F),
+                    ),
             )
         }
 
-        Text(
-            text = quote.toString(),
-            style =
-                MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontStyle = FontStyle.Italic,
-                    color = LocalContentColor.current.copy(alpha = 0.8F),
-                ),
-        )
+        AnimatedContent(
+            targetState = habitWithStreak.streak.badgeIcon,
+            label = "Icon Animation",
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .fillMaxWidth(0.3f)
+                .align(Alignment.TopEnd),
+        ) {
+            Image(
+                // TODO: Replace with actual icon from streakBadge
+                painter = painterResourceFromString("habit_logs"),
+//                painter = painterResourceFromString(it),
+                contentDescription = habitWithStreak.streak.title,
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .aspectRatio(1f),
+            )
+        }
     }
 }
 
@@ -221,15 +251,17 @@ private fun HabitNameWithVisibilityToggle(
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier =
-            modifier.clickable {
+        verticalAlignment = Alignment.Top,
+        modifier = modifier
+            .clickable {
                 onToggleCensorship()
             },
     ) {
         AnimatedContent(
             targetState = habitName,
             label = "HabitName",
+            modifier = Modifier
+                .weight(0.4f, fill = false),
         ) {
             Text(
                 text = it,
@@ -241,14 +273,20 @@ private fun HabitNameWithVisibilityToggle(
             )
         }
 
-        Icon(
-            painter = icon,
-            contentDescription = contentDesc,
-            modifier =
-                Modifier.clickable {
-                    onToggleCensorship()
-                },
-        )
+        Box(
+            modifier = Modifier
+                .weight(0.4f, fill = false),
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = contentDesc,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .clickable {
+                        onToggleCensorship()
+                    },
+            )
+        }
     }
 }
 
@@ -285,7 +323,7 @@ private fun CommonButton(
 
 @Preview
 @Composable
-private fun HabitsScreenHeaderPreview() {
+private fun HabitsScreenHeaderPreview(name: String = "Habit Name") {
     TrackAHabitTheme {
         Surface(
             modifier =
@@ -304,18 +342,19 @@ private fun HabitsScreenHeaderPreview() {
                     habitWithStreak =
                         HabitWithStreak(
                             habit =
-                                PreviewMocks.getHabit(
-                                    date =
-                                        Date()
-                                            .apply {
-                                                val monthsToSubtract = Random.nextInt(0, 12)
-                                                val monthsInMs = 1000 * 60 * 60 * 24 * 30L
+                                PreviewMocks
+                                    .getHabit(
+                                        date =
+                                            Date()
+                                                .apply {
+                                                    val monthsToSubtract = Random.nextInt(0, 12)
+                                                    val monthsInMs = 1000 * 60 * 60 * 24 * 30L
 
-                                                time -=
-                                                    (monthsInMs * monthsToSubtract) +
-                                                    (Random.nextInt(0, 99 * 1000 * 60 * 60))
-                                            },
-                                ),
+                                                    time -=
+                                                        (monthsInMs * monthsToSubtract) +
+                                                        (Random.nextInt(0, 99 * 1000 * 60 * 60))
+                                                },
+                                    ).copy(name = name),
                             streak = PreviewMocks.getStreak(),
                         ),
                     onEditHabit = {},
@@ -327,4 +366,10 @@ private fun HabitsScreenHeaderPreview() {
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun HabitsScreenHeaderPreview2() {
+    HabitsScreenHeaderPreview(name = "Drink Water and Stay Hydrated and Healthy")
 }
