@@ -14,7 +14,7 @@ import androidx.fragment.app.FragmentActivity
 private const val BIOMETRICS_TAG = "TaH-Biometrics"
 private const val AUTHENTICATORS = BIOMETRIC_STRONG or DEVICE_CREDENTIAL
 
-fun Context.showHabitNames(
+fun Context.authenticate(
     prompt: BiometricPrompt.PromptInfo,
     onAuthSucceed: (BiometricPrompt.AuthenticationResult) -> Unit,
     onAuthFailed: () -> Unit,

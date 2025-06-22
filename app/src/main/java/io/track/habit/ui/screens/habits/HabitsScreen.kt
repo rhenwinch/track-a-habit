@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -63,7 +60,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
-import io.track.habit.data.local.database.entities.Habit.Companion.getName
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.utils.SortOrder
@@ -79,9 +75,9 @@ import io.track.habit.ui.screens.habits.composables.ResetProgressDialog
 import io.track.habit.ui.theme.TrackAHabitTheme
 import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
+import io.track.habit.ui.utils.authenticate
 import io.track.habit.ui.utils.getBiometricsPromptInfo
 import io.track.habit.ui.utils.isBiometricAvailable
-import io.track.habit.ui.utils.showHabitNames
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -96,6 +92,7 @@ fun HabitsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    var isAuthenticatedOnceForDeleteOrResetProgress by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -131,9 +128,65 @@ fun HabitsScreen(
                 isCensoringHabitNames = uiState.isCensoringHabitNames,
                 snackbarHostState = snackbarHostState,
                 onHabitClick = viewModel::toggleShowcaseHabit,
-                onDeleteHabit = viewModel::deleteHabit,
+                onDeleteHabit = { habit ->
+                    if (canAuthenticate && !isAuthenticatedOnceForDeleteOrResetProgress) {
+                        context.authenticate(
+                            prompt = biometricsPromptInfo,
+                            onAuthSucceed = {
+                                isAuthenticatedOnceForDeleteOrResetProgress = true
+                                viewModel.deleteHabit(habit)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.biometrics_auth_success),
+                                        withDismissAction = true,
+                                        duration = SnackbarDuration.Long,
+                                    )
+                                }
+                            },
+                            onAuthFailed = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.biometrics_auth_failed),
+                                        withDismissAction = true,
+                                        duration = SnackbarDuration.Long,
+                                    )
+                                }
+                            },
+                        )
+                    } else {
+                        viewModel.deleteHabit(habit)
+                    }
+                },
                 onHabitLongClick = viewModel::onHabitLongClick,
-                onResetProgress = viewModel::resetProgress,
+                onResetProgress = { habit ->
+                    if (canAuthenticate && !isAuthenticatedOnceForDeleteOrResetProgress) {
+                        context.authenticate(
+                            prompt = biometricsPromptInfo,
+                            onAuthSucceed = {
+                                isAuthenticatedOnceForDeleteOrResetProgress = true
+                                viewModel.resetProgress(habit)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.biometrics_auth_success),
+                                        withDismissAction = true,
+                                        duration = SnackbarDuration.Long,
+                                    )
+                                }
+                            },
+                            onAuthFailed = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.biometrics_auth_failed),
+                                        withDismissAction = true,
+                                        duration = SnackbarDuration.Long,
+                                    )
+                                }
+                            },
+                        )
+                    } else {
+                        viewModel.resetProgress(habit)
+                    }
+                },
                 onSortOrderSelect = viewModel::onSortOrderSelect,
                 onEditHabit = viewModel::updateHabit,
                 onViewLogs = onViewLogs,
@@ -141,7 +194,7 @@ fun HabitsScreen(
                 onToggleCensorship = {
                     val isCensored = !uiState.isCensoringHabitNames
                     if (!isCensored && canAuthenticate) {
-                        context.showHabitNames(
+                        context.authenticate(
                             prompt = biometricsPromptInfo,
                             onAuthSucceed = {
                                 viewModel.toggleCensorshipOnNames(isCensored)
@@ -221,14 +274,7 @@ fun HabitsScreenContent(
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0.dp),
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(Alignment.Bottom),
-            )
-        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             if (habits.isNotEmpty()) {
                 TopAppBar(
@@ -266,12 +312,6 @@ fun HabitsScreenContent(
                 text = {
                     Text(text = stringResource(R.string.add_a_habit))
                 },
-                modifier =
-                    if (snackbarHostState.currentSnackbarData != null) {
-                        Modifier.windowInsetsPadding(WindowInsets.safeContent)
-                    } else {
-                        Modifier
-                    },
             )
         },
     ) { innerPadding ->
@@ -352,15 +392,27 @@ fun HabitsScreenContent(
     }
 
     if (habitToShowcase != null) {
-        if (showEditDialog) {
+        if (showEditDialog && !isCensoringHabitNames) {
             EditHabitDialog(
-                initialHabitName = habitToShowcase.habit.getName(isCensoringHabitNames),
+                initialHabitName = habitToShowcase.habit.name,
                 onDismissRequest = { showEditDialog = false },
                 onSaveClick = { updatedHabit ->
                     onEditHabit(habitToShowcase.habit.copy(name = updatedHabit))
                     showEditDialog = false
                 },
             )
+        } else if (showEditDialog && isCensoringHabitNames) {
+            val context = LocalContext.current
+
+            LaunchedEffect(true) {
+                scope.launch {
+                    showEditDialog = false
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.cannot_edit_censored_habit_names),
+                        duration = SnackbarDuration.Short,
+                    )
+                }
+            }
         }
 
         if (showDeleteDialog) {

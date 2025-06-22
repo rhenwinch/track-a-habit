@@ -50,9 +50,10 @@
     <string name="biometrics_auth_failed">Authentication failed</string>
     <string name="biometrics_auth_success">Habit names are now visible</string>
     <string name="biometrics_prompt_fallback">Use your password, PIN, or pattern instead</string>
-    <string name="biometrics_prompt_subtitle">Authenticate to view habit names</string>
-    <string name="biometrics_prompt_title">Uncensor habits with biometrics</string>
+    <string name="biometrics_prompt_subtitle">Authenticate to complete the action</string>
+    <string name="biometrics_prompt_title">Habits privacy biometrics</string>
     <string name="cancel">Cancel</string>
+    <string name="cannot_edit_censored_habit_names">Oops! You must disable censorship first</string>
     <string name="close">Close</string>
     <string name="confirm">Confirm</string>
     <string name="confirm_restore_message">Are you sure you want to restore from this backup? Current data will be replaced with the backup data.</string>
@@ -137,8 +138,8 @@
     <string name="settings_work_time">Work time</string>
     <string name="settings_work_time_desc">Time for the work period</string>
     <string name="share_streak">Share Achievement</string>
-    <string name="share_streak_message">🔥 I\'ve achieved a milestone in my habit journey, %1$s! I\'m building better habits every day! 💪</string>
     <string name="share_streak_cta">👉 Join me on this journey of self-improvement and track your own habits!</string>
+    <string name="share_streak_message">🔥 I\'ve achieved a milestone in my habit journey, %1$s! I\'m building better habits every day! 💪</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_out">Sign out</string>
     <string name="since_date_format">since %1$s</string>
