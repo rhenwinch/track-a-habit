@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -16,14 +17,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.FragmentActivity
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import io.track.habit.data.remote.drive.GoogleDriveService
 import io.track.habit.ui.composables.BottomNavBar
 import io.track.habit.ui.navigation.NavRoute
 import io.track.habit.ui.navigation.SubNavRoute
@@ -37,35 +36,36 @@ import io.track.habit.ui.screens.onboarding.OnboardingScreen
 import io.track.habit.ui.screens.settings.SettingsScreen
 import io.track.habit.ui.screens.streaks.StreaksScreen
 import io.track.habit.ui.theme.TrackAHabitTheme
-import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() { // MainActivity is a FragmentActivity to support biometrics
-
-    @Inject
-    lateinit var driveService: GoogleDriveService
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        driveService.initialize(
-            this,
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                driveService.handleAuthorizationResult(result.resultCode, result.data)
-            },
-        )
+        with(viewModel.googleDriveService) {
+            initialize(
+                activity = this@MainActivity,
+                launcher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                    handleAuthorizationResult(result.resultCode, result.data)
+                },
+            )
+        }
 
         enableEdgeToEdge()
         setContent {
             TrackAHabitTheme {
-                App()
+                App(viewModel = viewModel)
             }
         }
     }
 }
 
 @Composable
-private fun App(viewModel: MainViewModel = hiltViewModel()) {
+private fun App(viewModel: MainViewModel) {
     val isFirstRun by viewModel.isFirstRun.collectAsStateWithLifecycle()
 
     AppContent(

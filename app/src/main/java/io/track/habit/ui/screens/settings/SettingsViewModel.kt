@@ -88,7 +88,6 @@ class SettingsViewModel
 
         init {
             viewModelScope.launch {
-                googleDriveService.signIn()
                 fetchAvailableBackups()
             }
         }
@@ -162,7 +161,7 @@ class SettingsViewModel
                     _backupOperationState.value = BackupOperationState.SigningIn
 
                     try {
-                        googleDriveService.signIn()
+                        googleDriveService.signIn(false)
                         _backupOperationState.value = BackupOperationState.Idle
                         fetchAvailableBackups()
                     } catch (error: Exception) {

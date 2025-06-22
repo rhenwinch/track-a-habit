@@ -18,10 +18,9 @@ object BackupModule {
     @Provides
     @Singleton
     fun provideGoogleDriveService(
-        @ApplicationContext context: Context,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ): GoogleDriveService {
-        return GoogleDriveService(context, ioDispatcher)
+        return GoogleDriveService(ioDispatcher)
     }
 
     @Provides
