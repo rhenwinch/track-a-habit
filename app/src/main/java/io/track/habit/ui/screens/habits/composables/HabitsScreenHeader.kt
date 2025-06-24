@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -21,8 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,15 +34,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit.Companion.getName
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
-import io.track.habit.ui.composables.StreakCounter
+import io.track.habit.ui.composables.GradientFireIcon
+import io.track.habit.ui.composables.GradientText
 import io.track.habit.ui.theme.TrackAHabitTheme
+import io.track.habit.ui.utils.FireGradientGenerator
 import io.track.habit.ui.utils.PreviewMocks
 import io.track.habit.ui.utils.UiConstants
 import io.track.habit.ui.utils.UiConstants.MEDIUM_EMPHASIS
@@ -63,13 +63,11 @@ fun HabitsScreenHeader(
     onToggleCensorship: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val (_, streak) = habitWithStreak
+    val (habit, streak) = habitWithStreak
     val habitName = habitWithStreak.habit.getName(isCensored = isCensored)
-    val formattedActiveSinceDate by remember {
-        derivedStateOf {
-            habitWithStreak.formattedActiveSinceDate
-        }
-    }
+    val formattedActiveSinceDate = remember(habitWithStreak.habit.habitId) { habitWithStreak.formattedActiveSinceDate }
+    val formattedDurationSinceReset =
+        remember(habitWithStreak.habit.habitId) { habitWithStreak.formattedDurationSinceReset }
 
     Box(
         modifier = modifier,
@@ -105,14 +103,26 @@ fun HabitsScreenHeader(
 
             CommonLabel(text = stringResource(R.string.youve_been_on_track_for)) {
                 AnimatedContent(
-                    targetState = habitWithStreak.habit.streakInDays,
+                    targetState = formattedDurationSinceReset,
                     label = "StreakCounter",
                 ) {
-                    StreakCounter(
-                        streak = it,
-                        iconSize = DpSize(24.dp, 31.dp),
-                        style =
-                            LocalTextStyle.current.copy(
+                    val streakGradient = FireGradientGenerator.getGradient(habit.streakInDays)
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        GradientFireIcon(
+                            painter = painterResource(R.drawable.streak_filled),
+                            contentDescription = stringResource(R.string.streak_icon_content_desc),
+                            modifier = Modifier.size(24.dp, 31.dp),
+                            gradient = streakGradient,
+                        )
+
+                        GradientText(
+                            text = it,
+                            gradient = streakGradient,
+                            style = LocalTextStyle.current.copy(
                                 fontSize = 36.sp,
                                 fontWeight = FontWeight.Black,
                                 shadow =
@@ -122,7 +132,8 @@ fun HabitsScreenHeader(
                                         blurRadius = 2f,
                                     ),
                             ),
-                    )
+                        )
+                    }
                 }
 
                 AnimatedContent(
@@ -187,7 +198,7 @@ fun HabitsScreenHeader(
         }
 
         AnimatedContent(
-            targetState = habitWithStreak.streak.badgeIcon,
+            targetState = habitWithStreak.streak.badgeIcon.asPainter(),
             label = "Icon Animation",
             modifier = Modifier
                 .padding(top = 16.dp)
@@ -195,7 +206,7 @@ fun HabitsScreenHeader(
                 .align(Alignment.TopEnd),
         ) {
             Image(
-                painter = it.asPainter(),
+                painter = it,
                 contentDescription = habitWithStreak.streak.title.asString(),
                 modifier = Modifier
                     .fillMaxWidth(1f)
