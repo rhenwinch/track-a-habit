@@ -2,9 +2,12 @@ package io.track.habit.ui.screens.streaks
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -107,17 +110,23 @@ private fun StreaksScreenContent(
 
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 ) {
                     HighestStreakCard(
                         highestOngoingStreak = highestOngoingStreak,
-                        modifier = Modifier.weight(0.5f),
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .fillMaxHeight(),
                     )
 
                     HighestStreakCard(
                         highestAllTimeStreak = highestAllTimeStreak,
-                        modifier = Modifier.weight(0.5f),
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .fillMaxHeight(),
                     )
                 }
             }

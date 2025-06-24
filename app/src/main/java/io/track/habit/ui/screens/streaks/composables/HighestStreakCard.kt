@@ -7,9 +7,13 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
@@ -28,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -70,7 +75,7 @@ fun HighestStreakCard(
                             it.habit.lastResetAt.formatActiveSinceDate(),
                         ),
                     streakTitle = it.streak.title.asString(),
-                    streakBadge = it.streak.badgeIcon.asPainter(),
+                    streakBadge = it.streak.badgeIcon.asPainter()
                 )
             }
         }
@@ -117,18 +122,18 @@ private fun HighestStreakCardContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(41.dp),
-        modifier =
-            modifier
-                .padding(14.dp)
-                .height(152.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier
+            .padding(14.dp)
+            .heightIn(152.dp),
     ) {
         Headline(
             title = title,
             streakTitle = streakTitle,
             streakBadge = streakBadge,
-            modifier = Modifier.weight(1f),
         )
+
+        Spacer(Modifier.height(16.dp))
 
         Footer(
             streakCount = streakCount,
@@ -141,7 +146,7 @@ private fun HighestStreakCardContent(
 private fun NeedMoreDataCard(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.height(180.dp),
+        modifier = modifier.fillMaxHeight(),
     ) {
         Text(
             text = stringResource(R.string.insufficient_data_for_stats),
@@ -178,7 +183,7 @@ private fun Headline(
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.Top,
+            verticalAlignment = Alignment.Top
         ) {
             Icon(
                 painter = streakBadge,
@@ -192,6 +197,7 @@ private fun Headline(
 
             Text(
                 text = streakTitle,
+                overflow = TextOverflow.Ellipsis,
                 style =
                     LocalTextStyle.current.copy(
                         fontSize = 18.sp,
@@ -245,25 +251,31 @@ private fun HighestStreakCardPreview() {
             startDate = Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 420L),
             streak =
                 PreviewMocks.getStreak().copy(
-                    title = stringLiteral("Marathon Runner"),
-                    badgeIcon = drawableRes(R.drawable.grin_with_sweat_emoji),
+                    title = stringLiteral("Centennial Gemstone AhahahaAHHAHAHAHAHAHAEAATEATEAT"),
+                    badgeIcon = drawableRes(R.drawable.badge_gemstone),
                 ),
         )
 
     TrackAHabitTheme {
         Surface {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             ) {
                 HighestStreakCard(
                     highestOngoingStreak = null,
-                    modifier = Modifier.weight(0.5f),
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .fillMaxHeight(),
                 )
 
                 HighestStreakCard(
                     highestAllTimeStreak = allTimeStreak,
-                    modifier = Modifier.weight(0.5f),
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .fillMaxHeight(),
                 )
             }
         }
