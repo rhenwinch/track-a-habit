@@ -56,7 +56,7 @@ class SettingsDataStoreTest {
             val settings = settingsDataStore.settingsFlow.first()
 
             assertEquals("", settings.general.userName)
-            assertFalse(settings.general.censorHabitNames)
+            assertTrue(settings.general.censorHabitNames)
             assertFalse(settings.general.lockResetProgressButton)
         }
 
@@ -65,7 +65,7 @@ class SettingsDataStoreTest {
         runTest {
             val initialGeneral = settingsDataStore.generalSettingsFlow.first()
             assertEquals("", initialGeneral.userName)
-            assertFalse(initialGeneral.censorHabitNames)
+            assertTrue(initialGeneral.censorHabitNames)
             assertFalse(initialGeneral.lockResetProgressButton)
         }
 
@@ -147,7 +147,7 @@ class SettingsDataStoreTest {
             // Verify everything is back to defaults
             settings = settingsDataStore.settingsFlow.first()
             assertEquals("", settings.general.userName)
-            assertFalse(settings.general.censorHabitNames)
+            assertTrue(settings.general.censorHabitNames)
             assertFalse(settings.general.lockResetProgressButton)
         }
 
