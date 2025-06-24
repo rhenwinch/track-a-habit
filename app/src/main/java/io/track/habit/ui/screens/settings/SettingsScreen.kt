@@ -348,7 +348,9 @@ private fun SettingsScreenContent(
                         Text(stringResource(id = R.string.confirm_restore_message))
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = selectedBackupForRestore!!.name,
+                            text = selectedBackupForRestore!!.name.substringBefore(
+                                RemoteBackupManager.BACKUP_FILE_EXTENSION,
+                            ),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.primary,
@@ -602,11 +604,15 @@ private fun BackupRestoreDialog(
                         .heightIn(max = 400.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(backups) { backup ->
+                    items(
+                        backups,
+                        key = { it.id },
+                    ) { backup ->
                         BackupItem(
                             backup = backup,
                             onRestore = { onRestore(backup) },
                             onDelete = { onDeleteBackup(backup.id) },
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }
@@ -633,9 +639,10 @@ private fun BackupItem(
     backup: BackupFile,
     onRestore: () -> Unit,
     onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
     ) {
@@ -645,7 +652,7 @@ private fun BackupItem(
                 .padding(start = 16.dp, top = 12.dp, end = 8.dp, bottom = 8.dp),
         ) {
             Text(
-                text = backup.name,
+                text = backup.name.substringBefore(RemoteBackupManager.BACKUP_FILE_EXTENSION),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 maxLines = 2,
@@ -662,7 +669,7 @@ private fun BackupItem(
                         val formattedTime = formattedDate.substringAfterLast(" ").replace("/", ":")
 
                         Text(
-                            text = "$formattedDate $formattedTime",
+                            text = "${formattedDate.substringBefore(" ")} $formattedTime",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(bottom = 8.dp),
