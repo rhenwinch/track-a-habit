@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -50,6 +51,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,6 +78,9 @@ import io.track.habit.domain.model.BackupFile
 import io.track.habit.domain.utils.stringLiteral
 import io.track.habit.ui.screens.settings.composables.SettingItem
 import io.track.habit.ui.theme.TrackAHabitTheme
+import io.track.habit.ui.utils.authenticate
+import io.track.habit.ui.utils.getBiometricsPromptInfo
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
@@ -86,6 +91,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val backupOperationState by viewModel.backupOperationState.collectAsStateWithLifecycle()
     val availableBackups by viewModel.availableBackups.collectAsStateWithLifecycle()
     val authorizationState by viewModel.authorizationState.collectAsStateWithLifecycle()
+
+    val scope = rememberCoroutineScope()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -152,6 +159,29 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                         return@SettingsScreenContent
                     }
                 }
+            }
+
+            if (definition == GeneralSettingsRegistry.CENSOR_HABIT_NAMES && !(value as Boolean)) {
+                val biometricsPromptInfo = getBiometricsPromptInfo(
+                    title = context.getString(R.string.biometrics_prompt_title),
+                    subtitle = context.getString(R.string.biometrics_prompt_subtitle),
+                    negativeButtonText = context.getString(R.string.biometrics_prompt_fallback),
+                )
+
+                context.authenticate(
+                    prompt = biometricsPromptInfo,
+                    onAuthSucceed = { viewModel.updateSettingWithCast(definition, value) },
+                    onAuthFailed = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = context.getString(R.string.biometrics_auth_failed),
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short,
+                            )
+                        }
+                    },
+                )
+                return@SettingsScreenContent
             }
 
             viewModel.updateSettingWithCast(definition, value)

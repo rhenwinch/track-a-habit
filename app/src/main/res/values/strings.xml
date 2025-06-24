@@ -48,7 +48,7 @@
     <string name="back">Back</string>
     <string name="backup_now">Backup Now</string>
     <string name="biometrics_auth_failed">Authentication failed</string>
-    <string name="biometrics_prompt_fallback">Use your password, PIN, or pattern instead</string>
+    <string name="biometrics_prompt_fallback">Use other alternatives?</string>
     <string name="biometrics_prompt_subtitle">Authenticate to complete the action</string>
     <string name="biometrics_prompt_title">Habits privacy biometrics</string>
     <string name="cancel">Cancel</string>
