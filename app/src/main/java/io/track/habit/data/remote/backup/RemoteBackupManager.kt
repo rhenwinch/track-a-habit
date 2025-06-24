@@ -305,13 +305,7 @@ class RemoteBackupManager
                         )
                     }
 
-                    val fileId = if (backupPath.contains("::")) {
-                        backupPath.split("::")[0]
-                    } else {
-                        backupPath
-                    }
-
-                    driveService.deleteFile(fileId)
+                    driveService.deleteFile(backupPath)
 
                     return@withContext Result.success(Unit)
                 } catch (e: Exception) {

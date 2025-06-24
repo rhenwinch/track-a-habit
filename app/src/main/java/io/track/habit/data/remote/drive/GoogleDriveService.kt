@@ -297,7 +297,7 @@ class GoogleDriveService
          * @param fileId ID of the file to delete
          * @throws IllegalStateException if Drive service is unavailable
          */
-        suspend fun deleteFile(fileId: String): Void =
+        suspend fun deleteFile(fileId: String) =
             withContext(dispatcher) {
                 requireAuthentication()
                 val drive = getDriveService() ?: throw IllegalStateException("Drive service is not available")
