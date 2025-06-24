@@ -1,6 +1,6 @@
 package io.track.habit.domain.model
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.utils.formatActiveSinceDate
 import java.util.Date
@@ -12,7 +12,7 @@ import java.util.Date
  * @property habit The habit entity containing details like name and last reset timestamp.
  * @property streak The streak associated with the habit.
  */
-@Immutable
+@Stable
 data class HabitWithStreak(
     val habit: Habit,
     val streak: Streak,

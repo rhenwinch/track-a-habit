@@ -57,14 +57,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.gson.Gson
 import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.model.HabitWithStreak
 import io.track.habit.domain.model.Quote
 import io.track.habit.domain.utils.SortOrder
+import io.track.habit.domain.utils.StringResource
 import io.track.habit.ui.composables.AlertDialog
 import io.track.habit.ui.composables.EmptyDataScreen
+import io.track.habit.ui.screens.create.CREATE_HABIT_KEY
 import io.track.habit.ui.screens.habits.composables.EditHabitDialog
 import io.track.habit.ui.screens.habits.composables.FilterBottomSheet
 import io.track.habit.ui.screens.habits.composables.HabitCard
@@ -84,16 +88,38 @@ import java.util.Calendar
 fun HabitsScreen(
     onViewLogs: (Habit) -> Unit,
     onAddHabit: () -> Unit,
+    savedStateHandle: SavedStateHandle?,
     modifier: Modifier = Modifier,
     viewModel: HabitsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     var isAuthenticatedOnceForDeleteOrResetProgress by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+
+    if (savedStateHandle != null) {
+        val gson = remember { Gson() }
+        val createdHabit by savedStateHandle
+            .getStateFlow<String?>(CREATE_HABIT_KEY, null)
+            .collectAsStateWithLifecycle()
+
+        LaunchedEffect(createdHabit) {
+            createdHabit?.let { habitJson ->
+                val habit = runCatching {
+                    gson.fromJson(habitJson, Habit::class.java)
+                }.getOrNull()
+
+                if (habit != null) {
+                    viewModel.addHabit(habit)
+                    savedStateHandle[CREATE_HABIT_KEY] = null // Clear the state after handling
+                }
+            }
+        }
+    }
 
     val biometricsPromptInfo = remember {
         getBiometricsPromptInfo(
@@ -132,10 +158,17 @@ fun HabitsScreen(
                 quote = uiState.quote,
                 longPressedHabit = uiState.longPressedHabit,
                 sortOrder = uiState.sortOrder,
+                errorMessage = uiState.errorMessage,
                 isResetProgressButtonLocked = isResetProgressButtonLocked,
                 isCensoringHabitNames = uiState.isCensoringHabitNames,
                 snackbarHostState = snackbarHostState,
                 onHabitClick = viewModel::toggleShowcaseHabit,
+                onHabitLongClick = viewModel::onHabitLongClick,
+                onSortOrderSelect = viewModel::onSortOrderSelect,
+                onEditHabit = viewModel::updateHabit,
+                clearErrorMessage = viewModel::clearErrorMessage,
+                onViewLogs = onViewLogs,
+                onAddHabit = onAddHabit,
                 onDeleteHabit = { habit ->
                     if (!isAuthenticatedOnceForDeleteOrResetProgress) {
                         context.authenticate(
@@ -150,7 +183,6 @@ fun HabitsScreen(
                         viewModel.deleteHabit(habit)
                     }
                 },
-                onHabitLongClick = viewModel::onHabitLongClick,
                 onResetProgress = { habit ->
                     if (!isAuthenticatedOnceForDeleteOrResetProgress) {
                         context.authenticate(
@@ -165,10 +197,6 @@ fun HabitsScreen(
                         viewModel.resetProgress(habit)
                     }
                 },
-                onSortOrderSelect = viewModel::onSortOrderSelect,
-                onEditHabit = viewModel::updateHabit,
-                onViewLogs = onViewLogs,
-                onAddHabit = onAddHabit,
                 onToggleCensorship = {
                     val isCensored = !uiState.isCensoringHabitNames
                     if (!isCensored) {
@@ -194,6 +222,7 @@ fun HabitsScreenContent(
     habitToShowcase: HabitWithStreak?,
     quote: Quote,
     longPressedHabit: HabitWithStreak?,
+    errorMessage: StringResource?,
     isResetProgressButtonLocked: Boolean,
     isCensoringHabitNames: Boolean,
     sortOrder: SortOrder,
@@ -206,9 +235,11 @@ fun HabitsScreenContent(
     onDeleteHabit: (Habit) -> Unit,
     onToggleCensorship: () -> Unit,
     onAddHabit: () -> Unit,
+    clearErrorMessage: () -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
 
@@ -230,6 +261,19 @@ fun HabitsScreenContent(
 
     LaunchedEffect(habitToShowcase) {
         gridState.animateScrollToItem(0)
+    }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = it.asString(context),
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Short,
+                )
+                clearErrorMessage()
+            }
+        }
     }
 
     Scaffold(
@@ -331,7 +375,7 @@ fun HabitsScreenContent(
                             habits,
                             key = { key -> key.habit.habitId },
                         ) { habitWithStreak ->
-                            if (habitWithStreak != habitToShowcase) {
+                            if (habitWithStreak.habit.habitId != habitToShowcase?.habit?.habitId) {
                                 HabitCard(
                                     habitWithStreak = habitWithStreak,
                                     isCensored = isCensoringHabitNames,
@@ -363,8 +407,6 @@ fun HabitsScreenContent(
                 },
             )
         } else if (showEditDialog && isCensoringHabitNames) {
-            val context = LocalContext.current
-
             LaunchedEffect(true) {
                 scope.launch {
                     showEditDialog = false
@@ -502,6 +544,7 @@ private fun HabitsScreenPreview() {
             HabitsScreenContent(
                 username = "Preview User",
                 habits = previewHabits,
+                errorMessage = null,
                 habitToShowcase = previewHabits[0],
                 quote = PreviewMocks.getQuote(),
                 isResetProgressButtonLocked = true,
@@ -517,6 +560,7 @@ private fun HabitsScreenPreview() {
                 onToggleCensorship = {},
                 onSortOrderSelect = {},
                 onAddHabit = {},
+                clearErrorMessage = {},
             )
         }
     }

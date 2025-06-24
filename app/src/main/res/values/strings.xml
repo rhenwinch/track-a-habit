@@ -82,6 +82,11 @@
     <string name="error_delete_general">Failed to delete backup: %1$s</string>
     <string name="error_drive_service_unavailable">Drive service is not available</string>
     <string name="error_empty_field">This field cannot be empty</string>
+    <string name="error_habit_add">Habit could not be added: %1$s</string>
+    <string name="error_habit_delete">Habit could not be deleted: %1$s</string>
+    <string name="error_habit_edit">Habit could not be edited: %1$s</string>
+    <string name="error_habit_name_already_exists">Habit name probably already exists.</string>
+    <string name="error_habit_reset">Habit could not be reset: %1$s</string>
     <string name="error_invalid_credential">Invalid credential type</string>
     <string name="error_launch_auth_failed">Failed to launch authorization: %1$s</string>
     <string name="error_not_signed_in">Not signed in to Google Drive</string>

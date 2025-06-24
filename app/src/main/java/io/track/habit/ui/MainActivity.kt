@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import io.track.habit.ui.composables.BottomNavBar
 import io.track.habit.ui.navigation.NavRoute
@@ -29,6 +30,7 @@ import io.track.habit.ui.navigation.SubNavRoute
 import io.track.habit.ui.navigation.TopNavRoute
 import io.track.habit.ui.navigation.isSelected
 import io.track.habit.ui.navigation.navigateIfResumed
+import io.track.habit.ui.screens.create.CREATE_HABIT_KEY
 import io.track.habit.ui.screens.create.CreateScreen
 import io.track.habit.ui.screens.habits.HabitsScreen
 import io.track.habit.ui.screens.logs.LogsScreen
@@ -81,6 +83,7 @@ private fun App(viewModel: MainViewModel) {
 @Composable
 private fun AppContent(startDestination: NavRoute) {
     val navController = rememberNavController()
+    val gson = remember { Gson() }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -122,6 +125,7 @@ private fun AppContent(startDestination: NavRoute) {
 
             composable<TopNavRoute.Habits> {
                 HabitsScreen(
+                    savedStateHandle = navBackStackEntry?.savedStateHandle,
                     onViewLogs = {
                         navController.navigateIfResumed(
                             SubNavRoute.HabitsViewLogs(habitId = it.habitId),
@@ -134,7 +138,18 @@ private fun AppContent(startDestination: NavRoute) {
             }
 
             composable<SubNavRoute.HabitsCreate> {
-                CreateScreen(onNavigateBack = navController::navigateUp)
+                CreateScreen(
+                    onNavigateBack = navController::navigateUp,
+                    onNavigateWithResult = {
+                        val habitJson = gson.toJson(it)
+
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(CREATE_HABIT_KEY, habitJson)
+
+                        navController.navigateUp()
+                    },
+                )
             }
 
             composable<SubNavRoute.HabitsViewLogs> {

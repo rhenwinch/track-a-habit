@@ -1,9 +1,11 @@
 package io.track.habit.ui.screens.habits
 
+import android.database.sqlite.SQLiteConstraintException
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.data.local.database.entities.HabitLog
 import io.track.habit.data.local.datastore.entities.UserAppStateRegistry
@@ -14,8 +16,10 @@ import io.track.habit.domain.repository.HabitLogsRepository
 import io.track.habit.domain.repository.HabitRepository
 import io.track.habit.domain.usecase.GetHabitsWithStreaksUseCase
 import io.track.habit.domain.usecase.GetRandomQuoteUseCase
+import io.track.habit.domain.usecase.GetStreakUseCase
 import io.track.habit.domain.utils.SortOrder
 import io.track.habit.domain.utils.asStateFlow
+import io.track.habit.domain.utils.stringRes
 import io.track.habit.ui.screens.habits.composables.ResetDetails
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +44,7 @@ class HabitsViewModel
     constructor(
         getHabitsWithStreaksUseCase: GetHabitsWithStreaksUseCase,
         getRandomQuoteUseCase: GetRandomQuoteUseCase,
+        private val getStreakUseCase: GetStreakUseCase,
         private val settingsDataStore: SettingsDataStore,
         private val habitRepository: HabitRepository,
         private val habitLogsRepository: HabitLogsRepository,
@@ -50,6 +55,7 @@ class HabitsViewModel
         private val _uiState = MutableStateFlow(HabitsUiState(quote = getRandomQuoteUseCase()))
         val uiState = _uiState.asStateFlow()
 
+        private var addJob: Job? = null
         private var updateJob: Job? = null
         private var deleteJob: Job? = null
         private var resetProgressJob: Job? = null
@@ -74,14 +80,13 @@ class HabitsViewModel
                     initialValue = false,
                 )
 
-        val habits = uiState
+        private val sortOrder = uiState
             .map { it.sortOrder }
             .distinctUntilChanged()
-            .flatMapLatest { sortOrder ->
-                getHabitsWithStreaksUseCase(sortOrder = sortOrder).map { habits ->
-                    updateShowcasedHabit(habits)
-                    habits
-                }
+
+        val habits = sortOrder
+            .flatMapLatest {
+                getHabitsWithStreaksUseCase(sortOrder = it)
             }.asStateFlow(
                 scope = viewModelScope,
                 initialValue = emptyList(),
@@ -126,21 +131,43 @@ class HabitsViewModel
                 }
 
                 launch {
-                    habits.collectLatest {
-                        toggleShowcaseHabit(it.firstOrNull())
+                    sortOrder.collectLatest {
+                        _uiState.update { currentState ->
+                            val updatedShowcaseHabit =
+                                habits.value.firstOrNull { habit ->
+                                    habit.habit.habitId == currentState.habitToShowcase?.habit?.habitId
+                                }
+
+                            currentState.copy(habitToShowcase = updatedShowcaseHabit)
+                        }
                     }
                 }
             }
         }
 
-        private fun updateShowcasedHabit(habits: List<HabitWithStreak>) {
-            _uiState.update { currentState ->
-                val updatedShowcaseHabit =
-                    habits.firstOrNull { habit ->
-                        habit.habit.habitId == currentState.habitToShowcase?.habit?.habitId
+        fun addHabit(habit: Habit) {
+            if (addJob?.isActive == true) return
+
+            addJob =
+                ioScope.launch {
+                    try {
+                        val habitId = habitRepository.insertHabit(habit)
+                        toggleShowcaseHabit(
+                            habitWithStreak = HabitWithStreak(
+                                habit = habit.copy(habitId = habitId),
+                                streak = getStreakUseCase(habit.streakInDays),
+                            ),
+                        )
+                    } catch (e: SQLiteConstraintException) {
+                        _uiState.update {
+                            it.copy(errorMessage = stringRes(R.string.error_habit_name_already_exists))
+                        }
+                    } catch (e: Exception) {
+                        _uiState.update {
+                            it.copy(errorMessage = stringRes(R.string.error_habit_add, e.message ?: ""))
+                        }
                     }
-                currentState.copy(habitToShowcase = updatedShowcaseHabit)
-            }
+                }
         }
 
         fun updateHabit(habit: Habit) {
@@ -148,7 +175,19 @@ class HabitsViewModel
 
             updateJob =
                 ioScope.launch {
-                    habitRepository.updateHabit(habit)
+                    try {
+                        habitRepository.updateHabit(habit)
+                        toggleShowcaseHabit(
+                            habitWithStreak = HabitWithStreak(
+                                habit = habit,
+                                streak = getStreakUseCase(habit.streakInDays),
+                            ),
+                        )
+                    } catch (e: Exception) {
+                        _uiState.update {
+                            it.copy(errorMessage = stringRes(R.string.error_habit_edit, e.message ?: ""))
+                        }
+                    }
                 }
         }
 
@@ -157,8 +196,20 @@ class HabitsViewModel
 
             deleteJob =
                 ioScope.launch {
-                    habitRepository.deleteHabit(habit)
-                    habits.value.firstOrNull()?.let(::toggleShowcaseHabit)
+                    try {
+                        habitRepository.deleteHabit(habit)
+
+                        habits.value.forEach {
+                            if (it.habit.habitId == habit.habitId) return@forEach
+
+                            toggleShowcaseHabit(it)
+                            return@launch
+                        }
+                    } catch (e: Exception) {
+                        _uiState.update {
+                            it.copy(errorMessage = stringRes(R.string.error_habit_delete, e.message ?: ""))
+                        }
+                    }
                 }
         }
 
@@ -167,20 +218,36 @@ class HabitsViewModel
 
             resetProgressJob =
                 ioScope.launch {
-                    val originalHabit = habitRepository.getHabitById(resetDetails.habitId)!!
-                    val updatedHabit = originalHabit.copy(lastResetAt = Date())
+                    try {
+                        val originalHabit = habitRepository.getHabitById(resetDetails.habitId)!!
+                        val updatedHabit = originalHabit.copy(lastResetAt = Date())
 
-                    val resetLog =
-                        HabitLog(
-                            habitId = resetDetails.habitId,
-                            streakDuration = originalHabit.streakInDays,
-                            trigger = resetDetails.trigger,
-                            notes = resetDetails.notes,
+                        val resetLog =
+                            HabitLog(
+                                habitId = resetDetails.habitId,
+                                streakDuration = originalHabit.streakInDays,
+                                trigger = resetDetails.trigger,
+                                notes = resetDetails.notes,
+                            )
+
+                        habitRepository.updateHabit(updatedHabit)
+                        habitLogsRepository.insertHabitLog(resetLog)
+                        toggleShowcaseHabit(
+                            habitWithStreak = HabitWithStreak(
+                                habit = updatedHabit,
+                                streak = getStreakUseCase(updatedHabit.streakInDays),
+                            ),
                         )
-
-                    habitRepository.updateHabit(updatedHabit)
-                    habitLogsRepository.insertHabitLog(resetLog)
+                    } catch (e: Exception) {
+                        _uiState.update {
+                            it.copy(errorMessage = stringRes(R.string.error_habit_reset, e.message ?: ""))
+                        }
+                    }
                 }
+        }
+
+        fun clearErrorMessage() {
+            _uiState.update { it.copy(errorMessage = null) }
         }
 
         fun onHabitLongClick(habit: HabitWithStreak?) {

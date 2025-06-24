@@ -44,42 +44,41 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.track.habit.R
+import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.ui.theme.TrackAHabitTheme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+const val CREATE_HABIT_KEY = "create_habit_key"
+
+@Suppress("ktlint:compose:lambda-param-in-effect")
 @Composable
 fun CreateScreen(
+    onNavigateWithResult: (Habit) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: CreateViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState.isCreationSuccessful) {
-        if (uiState.isCreationSuccessful) {
-            onNavigateBack()
-        }
-    }
-
     CreateScreenContent(
-        habitName = uiState.habitName,
+        habitName = { uiState.habitName },
         selectedDate = uiState.selectedDate,
-        isNameError = uiState.isNameError,
+        isNameError = { uiState.isNameError },
         onHabitNameChange = viewModel::updateHabitName,
         onDateSelect = viewModel::updateSelectedDate,
         onNavigateBack = onNavigateBack,
-        onCreateHabit = viewModel::createHabit,
+        onCreateHabit = { viewModel.getCreatedHabit()?.let(onNavigateWithResult) },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CreateScreenContent(
-    habitName: String,
     selectedDate: Date,
-    isNameError: Boolean,
+    habitName: () -> String,
+    isNameError: () -> Boolean,
     onHabitNameChange: (String) -> Unit,
     onDateSelect: (Date) -> Unit,
     onCreateHabit: () -> Unit,
@@ -119,13 +118,13 @@ private fun CreateScreenContent(
             )
 
             OutlinedTextField(
-                value = habitName,
+                value = habitName(),
                 onValueChange = onHabitNameChange,
                 label = { Text(stringResource(R.string.habit_name)) },
                 placeholder = { Text(stringResource(R.string.placeholder_habit_name)) },
-                isError = isNameError,
+                isError = isNameError(),
                 supportingText =
-                    if (isNameError) {
+                    if (isNameError()) {
                         { Text(stringResource(R.string.error_empty_field)) }
                     } else {
                         null
@@ -334,9 +333,9 @@ private fun CreateScreenPreview() {
     TrackAHabitTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             CreateScreenContent(
-                habitName = "Morning Exercise",
+                habitName = { "Morning Exercise" },
                 selectedDate = Date(),
-                isNameError = false,
+                isNameError = { false },
                 onHabitNameChange = {},
                 onDateSelect = {},
                 onCreateHabit = {},
