@@ -300,7 +300,7 @@ class SettingsViewModelTest {
                 expectThat(operationStateTurbine.awaitItem()).isA<BackupOperationState.Idle>()
 
                 // Setup success response from Google Drive service
-                coEvery { mockGoogleDriveService.signIn() } answers {
+                coEvery { mockGoogleDriveService.signIn(any<Boolean>()) } answers {
                     authStateFlow.value = AuthorizationState.Authorized
                     Result.success(Unit)
                 }
@@ -315,7 +315,7 @@ class SettingsViewModelTest {
                 expectThat(operationStateTurbine.awaitItem()).isA<BackupOperationState.Idle>()
 
                 // Verify the GoogleDriveService signIn method was called
-                coVerify { mockGoogleDriveService.signIn() }
+                coVerify { mockGoogleDriveService.signIn(any<Boolean>()) }
                 coVerify { mockBackupManager.listAvailableBackups() }
 
                 operationStateTurbine.cancelAndIgnoreRemainingEvents()
@@ -333,7 +333,7 @@ class SettingsViewModelTest {
 
                 // Setup error response from Google Drive service
                 val exception = Exception("Authentication failed")
-                coEvery { mockGoogleDriveService.signIn() } answers {
+                coEvery { mockGoogleDriveService.signIn(any<Boolean>()) } answers {
                     throw exception
                 }
 
