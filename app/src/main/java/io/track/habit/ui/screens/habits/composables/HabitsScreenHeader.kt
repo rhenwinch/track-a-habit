@@ -34,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit.Companion.getName
 import io.track.habit.domain.model.HabitWithStreak
+import io.track.habit.domain.model.HabitWithStreak.Companion.getFormattedDurationSinceReset
 import io.track.habit.domain.model.Quote
 import io.track.habit.ui.composables.GradientFireIcon
 import io.track.habit.ui.composables.GradientText
@@ -68,11 +70,13 @@ fun HabitsScreenHeader(
     onToggleCensorship: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+
     val (habit, streak) = habitWithStreak
     val habitName = habitWithStreak.habit.getName(isCensored = isCensored)
     val formattedActiveSinceDate = remember(habitWithStreak.habit.habitId) { habitWithStreak.formattedActiveSinceDate }
     val formattedDurationSinceReset =
-        remember(habitWithStreak.habit.habitId) { habitWithStreak.formattedDurationSinceReset }
+        remember(habitWithStreak.habit.habitId) { habitWithStreak.getFormattedDurationSinceReset(context) }
 
     Box(
         modifier = modifier,

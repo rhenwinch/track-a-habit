@@ -172,6 +172,35 @@
     <string name="username">Username</string>
     <string name="youve_been_on_track_for">You\'ve been on track for</string>
 
+    <!-- Duration formats -->
+    <string name="duration_decade_single">1 decade</string>
+    <string name="duration_decade_plural">%d decades</string>
+    <string name="duration_year_single">1 year</string>
+    <string name="duration_year_plural">%d years</string>
+    <string name="duration_year_month">%1$s &amp; %2$s</string>
+    <string name="duration_month_single">1 month</string>
+    <string name="duration_month_plural">%d months</string>
+    <string name="duration_month_week">%1$s &amp; %2$s</string>
+    <string name="duration_week_single">1 week</string>
+    <string name="duration_week_plural">%d weeks</string>
+    <string name="duration_week_day">%1$s &amp; %2$s</string>
+    <string name="duration_day_single">1 day</string>
+    <string name="duration_day_plural">%d days</string>
+    <string name="duration_day_hour">%1$s &amp; %2$s</string>
+    <string name="duration_hour_single">1 hour</string>
+    <string name="duration_hour_plural">%d hours</string>
+    <string name="duration_hour_minute">%1$s &amp; %2$s</string>
+    <string name="duration_a_while_ago">A while ago</string>
+    <string name="duration_zero_seconds">0 seconds</string>
+    <string name="duration_month_abbr">%d mo</string>
+    <string name="duration_month_abbr_single">1 mo</string>
+    <string name="duration_week_abbr">%d wks</string>
+    <string name="duration_week_abbr_single">1 wk</string>
+    <string name="duration_day_abbr">%d days</string>
+    <string name="duration_day_abbr_single">1 day</string>
+    <string name="duration_hour_abbr">%d hrs</string>
+    <string name="duration_hour_abbr_single">1 hr</string>
+
     <plurals name="streak_achieved_habits">
         <item quantity="one">%d habit is in this streak</item>
         <item quantity="other">%d habits are in this streak</item>

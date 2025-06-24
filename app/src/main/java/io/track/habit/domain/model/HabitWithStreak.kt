@@ -1,6 +1,8 @@
 package io.track.habit.domain.model
 
+import android.content.Context
 import androidx.compose.runtime.Stable
+import io.track.habit.R
 import io.track.habit.data.local.database.entities.Habit
 import io.track.habit.domain.utils.formatActiveSinceDate
 import java.util.Date
@@ -26,14 +28,8 @@ data class HabitWithStreak(
     val formattedActiveSinceDate: String
         get() = habit.lastResetAt.formatActiveSinceDate()
 
-    /**
-     * Calculates the duration since the habit was last reset and formats it into a human-readable string.
-     * The duration is expressed in terms of decades, years, months, weeks, days, hours, minutes, or seconds.
-     *
-     * @return A formatted string representing the duration since the last reset.
-     */
-    val formattedDurationSinceReset: String
-        get() {
+    companion object {
+        fun HabitWithStreak.getFormattedDurationSinceReset(context: Context): String {
             val currentTime = Date().time
             val resetTime = habit.lastResetAt.time
             val diffMillis = currentTime - resetTime
@@ -50,7 +46,11 @@ data class HabitWithStreak(
             return when {
                 totalDecades >= 1 -> {
                     val decades = totalDecades.toInt()
-                    if (decades == 1) "1 decade" else "$decades decades"
+                    if (decades == 1) {
+                        context.getString(R.string.duration_decade_single)
+                    } else {
+                        context.getString(R.string.duration_decade_plural, decades)
+                    }
                 }
 
                 totalYears >= 1 -> {
@@ -60,13 +60,22 @@ data class HabitWithStreak(
 
                     when {
                         remainingMonths >= 1 -> {
-                            val yearText = if (years == 1) "1 year" else "$years years"
-                            val monthText = if (remainingMonths == 1) "1 mo" else "$remainingMonths mos"
-                            "$yearText & $monthText"
+                            val yearText = if (years == 1) {
+                                context.getString(R.string.duration_year_single)
+                            } else {
+                                context.getString(R.string.duration_year_plural, years)
+                            }
+                            val monthText = if (remainingMonths == 1) {
+                                context.getString(R.string.duration_month_abbr_single)
+                            } else {
+                                context.getString(R.string.duration_month_abbr, remainingMonths)
+                            }
+
+                            context.getString(R.string.duration_year_month, yearText, monthText)
                         }
 
-                        years == 1 -> "1 year"
-                        else -> "$years years"
+                        years == 1 -> context.getString(R.string.duration_year_single)
+                        else -> context.getString(R.string.duration_year_plural, years)
                     }
                 }
 
@@ -77,13 +86,21 @@ data class HabitWithStreak(
 
                     when {
                         remainingWeeks >= 1 -> {
-                            val monthText = if (months == 1) "1 month" else "$months months"
-                            val weekText = if (remainingWeeks == 1) "1 wk" else "$remainingWeeks wks"
-                            "$monthText & $weekText"
+                            val monthText = if (months == 1) {
+                                context.getString(R.string.duration_month_single)
+                            } else {
+                                context.getString(R.string.duration_month_plural, months)
+                            }
+                            val weekText = if (remainingWeeks == 1) {
+                                context.getString(R.string.duration_week_abbr_single)
+                            } else {
+                                context.getString(R.string.duration_week_abbr, remainingWeeks)
+                            }
+                            context.getString(R.string.duration_month_week, monthText, weekText)
                         }
 
-                        months == 1 -> "1 month"
-                        else -> "$months months"
+                        months == 1 -> context.getString(R.string.duration_month_single)
+                        else -> context.getString(R.string.duration_month_plural, months)
                     }
                 }
 
@@ -93,13 +110,22 @@ data class HabitWithStreak(
 
                     when {
                         remainingDays >= 1 -> {
-                            val weekText = if (weeks == 1) "1 week" else "$weeks weeks"
-                            val dayText = if (remainingDays == 1) "1 day" else "$remainingDays days"
-                            "$weekText & $dayText"
+                            val weekText = if (weeks == 1) {
+                                context.getString(R.string.duration_week_single)
+                            } else {
+                                context.getString(R.string.duration_week_plural, weeks)
+                            }
+                            val dayText = if (remainingDays == 1) {
+                                context.getString(R.string.duration_day_abbr_single)
+                            } else {
+                                context.getString(R.string.duration_day_abbr, remainingDays)
+                            }
+
+                            context.getString(R.string.duration_week_day, weekText, dayText)
                         }
 
-                        weeks == 1 -> "1 week"
-                        else -> "$weeks weeks"
+                        weeks == 1 -> context.getString(R.string.duration_week_single)
+                        else -> context.getString(R.string.duration_week_plural, weeks)
                     }
                 }
 
@@ -109,54 +135,36 @@ data class HabitWithStreak(
 
                     when {
                         remainingHours >= 1 -> {
-                            val dayText = if (days == 1) "1 day" else "$days days"
-                            val hourText = if (remainingHours == 1) "1 hr" else "$remainingHours hrs"
-                            "$dayText & $hourText"
+                            val dayText = if (days == 1) {
+                                context.getString(R.string.duration_day_single)
+                            } else {
+                                context.getString(R.string.duration_day_plural, days)
+                            }
+                            val hourText = if (remainingHours == 1) {
+                                context.getString(R.string.duration_hour_abbr_single)
+                            } else {
+                                context.getString(R.string.duration_hour_abbr, remainingHours)
+                            }
+                            context.getString(R.string.duration_day_hour, dayText, hourText)
                         }
 
-                        days == 1 -> "1 day"
-                        else -> "$days days"
+                        days == 1 -> context.getString(R.string.duration_day_single)
+                        else -> context.getString(R.string.duration_day_plural, days)
                     }
                 }
 
                 totalHours >= 1 -> {
                     val hours = totalHours.toInt()
-                    val remainingMinutes = (totalMinutes - hours * 60).toInt()
-
-                    when {
-                        remainingMinutes >= 1 -> {
-                            val hourText = if (hours == 1) "1 hour" else "$hours hours"
-                            val minuteText = if (remainingMinutes == 1) "1 min" else "$remainingMinutes mins"
-                            "$hourText & $minuteText"
-                        }
-
-                        hours == 1 -> "1 hour"
-                        else -> "$hours hours"
+                    if (hours == 1) {
+                        context.getString(R.string.duration_hour_single)
+                    } else {
+                        context.getString(R.string.duration_hour_plural, hours)
                     }
                 }
 
-                totalMinutes >= 1 -> {
-                    val minutes = totalMinutes.toInt()
-                    val remainingSeconds = (totalSeconds - minutes * 60).toInt()
-
-                    when {
-                        remainingSeconds >= 1 -> {
-                            val minuteText = if (minutes == 1) "1 min" else "$minutes mins"
-                            val secondText = if (remainingSeconds == 1) "1 sec" else "$remainingSeconds secs"
-                            "$minuteText & $secondText"
-                        }
-
-                        minutes == 1 -> "1 minute"
-                        else -> "$minutes minutes"
-                    }
-                }
-
-                totalSeconds >= 1 -> {
-                    val seconds = totalSeconds.toInt()
-                    if (seconds == 1) "1 second" else "$seconds seconds"
-                }
-
-                else -> "0 seconds"
+                // For minutes and seconds, return "A while ago"
+                else -> context.getString(R.string.duration_a_while_ago)
             }
         }
+    }
 }
