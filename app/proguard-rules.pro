@@ -61,3 +61,12 @@
   *;
 }
 ##---------------End: proguard configuration for Credential Manager ----------##
+
+##---------------Begin: proguard configuration for Google Drive API ----------##
+-keepattributes Signature,RuntimeVisibleAnnotations,AnnotationDefault
+-keep class * extends com.google.api.client.json.GenericJson { *; }
+-keep class com.google.api.services.drive.** { *; }
+-keepclassmembers class * {
+  @com.google.api.client.util.Key <fields>;
+}
+##---------------End: proguard configuration for Google Drive API ----------##
