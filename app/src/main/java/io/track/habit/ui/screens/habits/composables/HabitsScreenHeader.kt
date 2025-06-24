@@ -1,6 +1,11 @@
 package io.track.habit.ui.screens.habits.composables
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -88,6 +93,9 @@ fun HabitsScreenHeader(
             CommonLabel(text = stringResource(R.string.streak_milestone)) {
                 AnimatedContent(
                     targetState = streak.title.asString(),
+                    transitionSpec = {
+                        slideInHorizontally { -it } + fadeIn() togetherWith fadeOut() + slideOutHorizontally { -it }
+                    },
                     label = "StreakTitle",
                 ) {
                     Text(
@@ -104,6 +112,9 @@ fun HabitsScreenHeader(
             CommonLabel(text = stringResource(R.string.youve_been_on_track_for)) {
                 AnimatedContent(
                     targetState = formattedDurationSinceReset,
+                    transitionSpec = {
+                        slideInHorizontally { -it } + fadeIn() togetherWith fadeOut() + slideOutHorizontally { -it }
+                    },
                     label = "StreakCounter",
                 ) {
                     val streakGradient = FireGradientGenerator.getGradient(habit.streakInDays)
@@ -138,6 +149,9 @@ fun HabitsScreenHeader(
 
                 AnimatedContent(
                     targetState = formattedActiveSinceDate,
+                    transitionSpec = {
+                        slideInHorizontally { -it } + fadeIn() togetherWith fadeOut() + slideOutHorizontally { -it }
+                    },
                     label = "SinceDate",
                 ) {
                     Text(
@@ -200,6 +214,9 @@ fun HabitsScreenHeader(
         AnimatedContent(
             targetState = habitWithStreak.streak.badgeIcon.asPainter(),
             label = "Icon Animation",
+            transitionSpec = {
+                slideInHorizontally { it } + fadeIn() togetherWith fadeOut() + slideOutHorizontally { it }
+            },
             modifier = Modifier
                 .padding(top = 16.dp)
                 .fillMaxWidth(0.3f)
@@ -266,6 +283,9 @@ private fun HabitNameWithVisibilityToggle(
         AnimatedContent(
             targetState = habitName,
             label = "HabitName",
+            transitionSpec = {
+                slideInHorizontally { -it } + fadeIn() togetherWith fadeOut() + slideOutHorizontally { -it }
+            },
             modifier = Modifier
                 .weight(0.4f, fill = false),
         ) {
