@@ -127,7 +127,10 @@ internal fun HabitCard(
                 )
 
                 Text(
-                    text = habitWithStreak.habit.name,
+                    text = stringResource(
+                        R.string.since_date_format,
+                        remember { habitWithStreak.formattedActiveSinceDate },
+                    ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style =
