@@ -87,7 +87,7 @@ object GeneralSettingsRegistry {
     val CENSOR_HABIT_NAMES =
         SettingDefinition(
             key = "censor_habit_names",
-            defaultValue = false,
+            defaultValue = true,
             type = SettingType.BooleanType,
             displayName = stringRes(R.string.settings_censor_habit_names),
             description = stringRes(R.string.settings_censor_habit_names_desc),
