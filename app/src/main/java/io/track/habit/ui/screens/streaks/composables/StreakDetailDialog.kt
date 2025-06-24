@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -70,12 +71,21 @@ fun StreakDetailDialog(
                     )
 
                     Text(
+                        text = streakSummary.message.asString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LocalContentColor.current.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center,
+                    )
+
+                    Text(
                         text = streakSummary.durationText.asString(),
                         style = MaterialTheme.typography.titleMedium,
                         color = LocalContentColor.current.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center,
                     )
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = streakSummary.status.asString(),

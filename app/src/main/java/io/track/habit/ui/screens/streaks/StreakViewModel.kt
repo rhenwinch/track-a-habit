@@ -121,6 +121,7 @@ class StreakViewModel
                 status = status,
                 durationText = getDurationText(streak, longestStreak),
                 isAchieved = isAchieved,
+                message = streak.message,
                 badgeIcon = streak.badgeIcon,
             )
         }
@@ -150,6 +151,7 @@ class StreakViewModel
 @Stable
 data class StreakSummary(
     val title: StringResource,
+    val message: StringResource,
     val status: StringResource,
     val durationText: StringResource,
     val isAchieved: Boolean,

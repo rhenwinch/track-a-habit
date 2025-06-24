@@ -17,7 +17,7 @@ object PreviewMocks {
             minDaysRequired = 0,
             maxDaysRequired = 7,
             badgeIcon = drawableRes(R.drawable.you_rock_emoji),
-            message = stringLiteral(""),
+            message = stringLiteral("Wow! You really did it! Keep it up and continue your streak!"),
         )
 
     fun getHabit(
@@ -49,6 +49,7 @@ object PreviewMocks {
         durationText = stringLiteral(durationText),
         isAchieved = isAchieved,
         badgeIcon = streak.badgeIcon,
+        message = streak.message,
     )
 
     fun getHabitLog(
