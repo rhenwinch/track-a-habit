@@ -67,6 +67,8 @@ Current development priorities:
 - [x] Re-design implementation of `Streaks` to support i18n in the future
 - [ ] Google drive auto backup using `WorkManager`
 - [ ] Re-design implementation of `Quotes` to support i18n in the future
+- [ ] Add more statistics and insights
+- [ ] Add widget support
 
 ## Tech stack
 
